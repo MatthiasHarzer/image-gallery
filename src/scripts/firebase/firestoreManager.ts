@@ -1,6 +1,6 @@
 import type { User } from "firebase/auth";
 import Gallery from "../gallery/gallery";
-import { addDoc, CollectionReference, DocumentReference, getDoc, getDocs, setDoc } from "firebase/firestore";
+import { addDoc, CollectionReference, DocumentReference, getDoc, getDocs, setDoc, updateDoc } from "firebase/firestore";
 import { ALBUMS_REF, IMAGES_REF, STORAGE_BUCKET_IMAGE_REF, TAGS_REF, USER_REF } from "./firebasePathConfig";
 import type { TagData } from "../gallery/tag";
 import Tag from "../gallery/tag";
@@ -13,6 +13,8 @@ import type { UploadTask } from "firebase/storage";
 
 
 export default class FirestoreManager {
+  private readonly onGalleryUpdateCallbacks: ((gallery: Gallery) => void)[];
+  // private
 
   public async createUserIfNotExists(user: User): Promise<void> {
     if (user === null) return;
@@ -40,8 +42,17 @@ export default class FirestoreManager {
     return new Gallery(user.uid, albums, images);
   }
 
-  public async uploadImages(user: User, images: File[]): Promise<void> {
+  public async uploadImages(user: User, images: File[], update: (value: number) => void): Promise<void> {
+    if (user === null) return;
+    const numberOfImages = images.length;
+    let numberOfFinishedImages = 0;
 
+
+    for (const image of images) {
+      await this.uploadImage(user, image);
+      numberOfFinishedImages++;
+      update(numberOfFinishedImages / numberOfImages);
+    }
   }
 
   private async fetchTags(tagsRef: CollectionReference): Promise<Tag[]> {
@@ -107,16 +118,19 @@ export default class FirestoreManager {
     });
   }
 
-  private async uploadImage(user: User, image: File): Promise<UploadTask> {
+  private async uploadImage(user: User, image: File): Promise<void> {
     const imageNode = await this.createImageNode(user, image);
     // const imageName = `${imageNode.id}.${image.name.split(".").pop()}`;
     const imageRef = imageNode.id;
     const storageRef = STORAGE_BUCKET_IMAGE_REF(user, imageRef);
+    const bucket = await uploadBytesResumable(storageRef, image);
 
-    return uploadBytesResumable(storageRef, image);
+    await updateDoc(imageNode, {
+      url: await getDownloadURL(bucket.ref),
+    });
   }
 
-  public async uploadImages(user: User, images: File[]): Promise<void> {
-
+  public onGalleryUpdate(callback: (gallery: Gallery) => void): void {
+    this.onGalleryUpdateCallbacks.push(callback);
   }
 }

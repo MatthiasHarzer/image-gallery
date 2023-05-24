@@ -1,6 +1,8 @@
 <script lang="ts">
 
   import { createEventDispatcher, onMount } from "svelte";
+  import { firestoreManager } from "../scripts/firebase/firebaseManager";
+  import { firebaseUser } from "../scripts/firebase/firebaseManager.js";
 
   const dispatch = createEventDispatcher();
   const close = () => {
@@ -13,14 +15,25 @@
   let dragAndDropActive = false;
   let uploading = false;
   let uploadProgress = 0;
+  let finishedUploading = false;
 
   const upload = (files: FileList) => {
     if (uploading) return;
     filesToUpload = [...filesToUpload, ...Array.from(files)]
   }
 
-  const startUpload = () => {
+  const startUpload = async () => {
     uploading = true;
+
+    await firestoreManager.uploadImages($firebaseUser, filesToUpload, (progress) => {
+      uploadProgress = progress;
+    });
+
+    finishedUploading = true;
+    uploading = false;
+    setTimeout(() => {
+      close();
+    }, 1000);
   }
 
   onMount(() => {
@@ -58,6 +71,12 @@
       </button>
     </div>
     <div bind:this={dragAndDropElement} class="dialog-content">
+      {#if finishedUploading}
+        <div class="finished-uploading">
+          <span class="material-icons">check_circle</span>
+          <h3>Finished uploading</h3>
+        </div>
+      {/if}
 
       <label class="drag-and-drop-area" for="upload">
         {#if dragAndDropActive}
@@ -96,7 +115,7 @@
       {:else if uploading}
         <div class="upload-button-area">
           <button class="material text-button" disabled>
-            Uploading {uploadProgress}%
+            Uploading {(uploadProgress * 100).toFixed(2)}%
           </button>
         </div>
       {/if}
@@ -110,7 +129,8 @@
 
   .dialog-content {
     position: relative;
-    margin: 10px 20px;
+    margin: 10px;
+    width: 80%;
   }
 
   .drag-and-drop-area {
@@ -187,6 +207,22 @@
   .upload-button-area button {
     padding: 0.5rem 1rem;
     background-color: #646cff;
+  }
+
+  .finished-uploading{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+    margin: 10px;
+    border: 1px solid #1cb230;
+    color: white;
+    border-radius: 5px;
+  }
+
+  .finished-uploading h3 {
+    margin-left: 1rem;
+    margin-top: 0;
   }
 
 </style>
