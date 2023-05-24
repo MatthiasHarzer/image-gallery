@@ -1,5 +1,5 @@
 export default interface Entry {
-  id: number;
+  id: string;
   name: string;
   description: string;
 }

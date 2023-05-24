@@ -1,14 +1,13 @@
 import type Entry from "./entry";
 import type Album from "./album";
-import type Tag from "./tag";
+import type Image from "./image";
 
 
-export default class Gallery implements Entry {
+export default class Gallery{
   constructor(
-    public id: number,
-    public name: string,
-    public description: string,
+    public id: string,
     public albums: Album[],
+    public images: Image[],
   ) {
   }
 

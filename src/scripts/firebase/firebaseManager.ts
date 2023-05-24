@@ -1,24 +1,47 @@
-import { initializeApp } from "firebase/app";
-import type { FirebaseApp } from "firebase/app";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import type { Auth, User } from "firebase/auth";
+import type { User } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 import { writable } from "svelte/store";
+import { auth } from "./firebase";
+import type Gallery from "../gallery/gallery";
+import FirestoreManager from "./firestoreManager";
 
-export const firebaseObserver = writable<User | null>(null)
+const firestoreManager = new FirestoreManager();
 
-class FirebaseManager {
-  private readonly app: FirebaseApp;
-  private readonly auth: Auth;
+const createFirebaseUser = () => {
+  const { subscribe, set } = writable<User | null>(null);
 
-  constructor(firebaseConfig) {
-    this.app = initializeApp(firebaseConfig);
-    this.auth = getAuth(this.app);
+  onAuthStateChanged(auth, async (user) => {
+    await firestoreManager.createUserIfNotExists(user);
+    set(user);
+  });
 
-    onAuthStateChanged(this.auth, this.onAuthChanged);
-  }
-
-  private onAuthChanged(user: User) {
-    firebaseObserver.set(user);
-  }
-
+  return {
+    subscribe,
+    set,
+  };
 }
+
+
+export const firebaseUser = createFirebaseUser();
+
+const createGallery = () => {
+  const { subscribe, set } = writable<Gallery | null>(null);
+
+  firebaseUser.subscribe(async (user) => {
+    if (user === null) {
+      set(null);
+      return;
+    }
+
+    const gallery = await firestoreManager.fetchGallery(user);
+
+    set(gallery);
+  });
+
+  return {
+    subscribe,
+    set,
+  };
+}
+
+export const gallery = createGallery();

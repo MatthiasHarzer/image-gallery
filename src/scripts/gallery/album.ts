@@ -3,7 +3,7 @@ import type Image from "./image";
 
 export default class Album implements Entry {
   constructor(
-    public id: number,
+    public id: string,
     public name: string,
     public description: string,
     public images: Image[],
@@ -12,4 +12,16 @@ export default class Album implements Entry {
     public cover: Image | null
   ) {
   }
+}
+
+/**
+ * Data structure for album data from Firestore.
+ */
+export interface AlbumData {
+  name: string;
+  description: string;
+  images: string[];
+  children: string[];
+  parent: string | null;
+  cover: string | null;
 }
