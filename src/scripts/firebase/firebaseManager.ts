@@ -5,7 +5,7 @@ import { auth } from "./firebase";
 import type Gallery from "../gallery/gallery";
 import FirestoreManager from "./firestoreManager";
 
-const firestoreManager = new FirestoreManager();
+export const firestoreManager = new FirestoreManager();
 
 const createFirebaseUser = () => {
   const { subscribe, set } = writable<User | null>(null);

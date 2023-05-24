@@ -1,13 +1,15 @@
 import type { User } from "firebase/auth";
 import Gallery from "../gallery/gallery";
-import { CollectionReference, getDoc, getDocs, setDoc } from "firebase/firestore";
-import { ALBUMS_REF, IMAGES_REF, TAGS_REF, USER_REF } from "./firebasePathConfig";
+import { addDoc, CollectionReference, DocumentReference, getDoc, getDocs, setDoc } from "firebase/firestore";
+import { ALBUMS_REF, IMAGES_REF, STORAGE_BUCKET_IMAGE_REF, TAGS_REF, USER_REF } from "./firebasePathConfig";
 import type { TagData } from "../gallery/tag";
 import Tag from "../gallery/tag";
 import type { ImageData } from "../gallery/image";
 import Image from "../gallery/image";
 import type { AlbumData } from "../gallery/album";
 import Album from "../gallery/album";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import type { UploadTask } from "firebase/storage";
 
 
 export default class FirestoreManager {
@@ -38,6 +40,10 @@ export default class FirestoreManager {
     return new Gallery(user.uid, albums, images);
   }
 
+  public async uploadImages(user: User, images: File[]): Promise<void> {
+
+  }
+
   private async fetchTags(tagsRef: CollectionReference): Promise<Tag[]> {
     const snapshot = await getDocs(tagsRef);
 
@@ -57,7 +63,7 @@ export default class FirestoreManager {
         .map((tagId: string) => tags.find((tag) => tag.id === tagId))
         .filter((tag) => tag !== undefined);
 
-      return new Image(doc.id, data.name, data.description, data.url, imageTags);
+      return new Image(doc.id, data.name, data.description, data.url, imageTags, data.imageState);
     });
 
   }
@@ -88,5 +94,29 @@ export default class FirestoreManager {
     });
 
     return albums;
+  }
+
+  private async createImageNode(user: User, image: File): Promise<DocumentReference> {
+    const imagesRef = IMAGES_REF(user);
+    return await addDoc(imagesRef, {
+      name: image.name,
+      description: "",
+      url: "",
+      tags: [],
+      state: "uploading",
+    });
+  }
+
+  private async uploadImage(user: User, image: File): Promise<UploadTask> {
+    const imageNode = await this.createImageNode(user, image);
+    // const imageName = `${imageNode.id}.${image.name.split(".").pop()}`;
+    const imageRef = imageNode.id;
+    const storageRef = STORAGE_BUCKET_IMAGE_REF(user, imageRef);
+
+    return uploadBytesResumable(storageRef, image);
+  }
+
+  public async uploadImages(user: User, images: File[]): Promise<void> {
+
   }
 }
