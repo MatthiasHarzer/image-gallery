@@ -5,6 +5,7 @@ import { readable, writable } from "svelte/store";
 import { auth } from "./firebase";
 import type Gallery from "../gallery/gallery";
 import FirestoreManager from "./firestoreManager";
+import type FirestoreGalleryListener from "./firestoreGalleryListener";
 
 export const firestoreManager = new FirestoreManager();
 
@@ -21,16 +22,22 @@ const createFirebaseUser = (): Readable<User | null> => {
 export const firebaseUser: Readable<User | null> = createFirebaseUser();
 
 const createGallery = () => {
+  let gallerySub;
+  let galleryListener: FirestoreGalleryListener | null = null;
   return readable(null, (set) => {
     return firebaseUser.subscribe(async (user) => {
       if (user === null) {
         set(null);
+        gallerySub && gallerySub();
+        galleryListener && galleryListener.unsubscribeAll();
         return;
       }
 
-      const gallery = await firestoreManager.fetchGallery(user);
+      galleryListener = firestoreManager.getGallery(user);
 
-      set(gallery);
+      gallerySub = galleryListener.listen((gallery) => {
+        set(gallery);
+      });
     });
   });
 }

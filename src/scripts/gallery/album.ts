@@ -18,6 +18,7 @@ export default class Album implements Entry {
  * Data structure for album data from Firestore.
  */
 export interface AlbumData {
+  id?: string;
   name: string;
   description: string;
   images: string[];

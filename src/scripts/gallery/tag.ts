@@ -12,6 +12,7 @@ export default class Tag implements Entry {
  * Data structure for tag data from Firestore.
  */
 export interface TagData {
+  id?: string;
   name: string;
   description: string;
 }

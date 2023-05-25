@@ -25,6 +25,7 @@ export default class Image implements Entry {
  * Data structure for image data from Firestore.
  */
 export interface ImageData {
+  id?: string;
   name: string;
   description: string;
   url: string;
