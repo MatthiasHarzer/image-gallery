@@ -77,7 +77,8 @@ export default class FirestoreGalleryListener {
     const images = imagesData.map((imageData) => {
       const tagsForImage = tags.filter((tag) => imageData.tags.includes(tag.id));
 
-      return new Image(imageData.id, imageData.name, imageData.description, imageData.url, tagsForImage, imageData.imageState);
+      return new Image(imageData.id, imageData.name, imageData.description, imageData.url, tagsForImage, imageData.imageState,
+        imageData.width, imageData.height);
     });
 
     const albums = albumsData.map((albumData) => {
@@ -116,6 +117,7 @@ export default class FirestoreGalleryListener {
       return;
     }
 
+    this.lastBroadcast = now;
     this.callbacks.forEach((callback) => callback(gallery));
   }
 

@@ -6,7 +6,7 @@
   import UploadDialog from "./UploadDialog.svelte";
 
   $: signedId = $firebaseUser != null;
-  $: uploadDialog = false;
+  let uploadDialog = false;
 
   const signInOut = () => {
     if (signedId) {

@@ -19,6 +19,7 @@
     "vite": "^4.1.0"
   },
   "dependencies": {
-    "firebase": "^9.22.0"
+    "firebase": "^9.22.0",
+    "svelte-gallery-view": "^0.0.16"
   }
 }

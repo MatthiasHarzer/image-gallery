@@ -17,6 +17,8 @@ export default class Image implements Entry {
     public url: string,
     public tags: Tag[],
     public state: ImageState = ImageState.ready,
+    public width: number,
+    public height: number,
   ) {
   }
 }
@@ -31,4 +33,6 @@ export interface ImageData {
   url: string;
   tags: string[];
   imageState: ImageState;
+  width: number;
+  height: number;
 }
