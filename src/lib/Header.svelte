@@ -4,6 +4,7 @@
   import { auth, authProvider } from "../scripts/firebase/firebase";
   import { signInWithPopup, signOut } from "firebase/auth";
   import UploadDialog from "./UploadDialog.svelte";
+  import { localConfig } from "../scripts/localConfig";
 
   $: signedId = $firebaseUser != null;
   let uploadDialog = false;
@@ -19,9 +20,18 @@
   const upload = () => {
     uploadDialog = true;
   }
+
+  const toggleNav = () =>{
+    $localConfig.navOpen = !$localConfig.navOpen;
+  }
 </script>
 
 <div class="main">
+  <button class="material toggle-nav" on:click={toggleNav}>
+    <span class="material-icons" >
+      menu
+    </span>
+  </button>
   {#if signedId}
     <div class="manage-section">
       <button class="text-button material upload-btn" on:click={upload}>
@@ -57,13 +67,16 @@
     margin-left: auto;
   }
 
-  button {
-
+  button.text-button {
     color: #fff;
     padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
     margin: 5px;
+  }
+
+  button.toggle-nav{
+    margin-left: 15px;
   }
 
   button.sign-in-out-btn {

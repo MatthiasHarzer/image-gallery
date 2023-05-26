@@ -2,6 +2,7 @@
 
 import ImagesView from "./ImagesView.svelte";
 import { gallery } from "../scripts/firebase/firebaseManager";
+import LoadingSpinner from "./util/LoadingSpinner.svelte";
 </script>
 
 <div class="main">

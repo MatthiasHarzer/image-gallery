@@ -2,17 +2,21 @@
 
   import type Image from "../scripts/gallery/image";
   import GalleryView from 'svelte-gallery-view'
+  import { fullscreenDialog } from "../scripts/fullscreenDialog";
 
   export let images: Image[] = [];
 
   $: photosFormatted = images.map((img) => {
     return {
+      original: img,
       title: img.name,
-      width: 1,
-      height: 2,
       ...img
     }
   });
+
+  const openFullscreenDialog = (image) => {
+    fullscreenDialog.show(images, image.original);
+  }
 </script>
 
 <div class="main">
@@ -21,9 +25,7 @@
     <GalleryView
         baseHeight={300}
         gutter={2}
-        onPhotoClick={(photo) => {
-            console.log(photo.id);
-        }}
+        onPhotoClick={openFullscreenDialog}
         photoClass="photo"
         photos={photosFormatted}
     />

@@ -2,7 +2,7 @@ import type Entry from "./entry";
 import type Tag from "./tag";
 
 
-enum ImageState {
+export enum ImageState {
   uploading = "uploading",
   ready = "ready",
   error = "error",
@@ -32,7 +32,7 @@ export interface ImageData {
   description: string;
   url: string;
   tags: string[];
-  imageState: ImageState;
+  state: ImageState;
   width: number;
   height: number;
 }

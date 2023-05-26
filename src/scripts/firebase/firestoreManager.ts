@@ -4,6 +4,7 @@ import { IMAGES_REF, STORAGE_BUCKET_IMAGE_REF, USER_REF } from "./firebasePathCo
 
 import { getDownloadURL, uploadBytesResumable } from "firebase/storage";
 import FirestoreGalleryListener from "./firestoreGalleryListener";
+import { ImageState } from "../gallery/image";
 
 
 export default class FirestoreManager {
@@ -73,6 +74,7 @@ export default class FirestoreManager {
 
     await updateDoc(imageNode, {
       url: await getDownloadURL(bucket.ref),
+      state: ImageState.ready,
     });
   }
 }

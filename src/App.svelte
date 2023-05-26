@@ -1,10 +1,12 @@
 <script lang="ts">
-  import svelteLogo from './assets/svelte.svg'
   import Header from "./lib/Header.svelte";
   import { gallery } from "./scripts/firebase/firebaseManager";
   import GalleryApp from "./lib/GalleryApp.svelte";
+  import { fullscreenDialog } from "./scripts/fullscreenDialog";
+  import FullscreenView from "./lib/fullscreen/FullscreenView.svelte";
 
   $: console.log($gallery);
+  $: console.log($fullscreenDialog);
 </script>
 
 <main>
@@ -15,6 +17,13 @@
     <GalleryApp/>
   </div>
 </main>
+
+{#if $fullscreenDialog.shown}
+  <FullscreenView
+    images={$fullscreenDialog.images}
+    currentImage={$fullscreenDialog.currentImage}
+  />
+{/if}
 
 <style>
   main {
