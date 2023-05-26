@@ -9,12 +9,15 @@
 
   export let image: Image;
 
+  export let zoomEnabled = false;
+
   let tagsScrollElement: HTMLElement;
 
   let tagInput = "";
 
   onMount(()=>{
     tagsScrollElement.onwheel = (event) => {
+      event.stopPropagation();
       tagsScrollElement.scrollBy({
         left: event.deltaY < 0 ? -30 : 30,
       })
@@ -39,6 +42,10 @@
 
   const onFavorite = () => {
     firestoreManager.updateImageProps($firebaseUser, image, { favorite: !image.favorite });
+  }
+
+  const onToggleZoom = () =>{
+    dispatch("toggle-zoom");
   }
 
   const onTagEnter = async () =>{
@@ -80,6 +87,11 @@
     </div>
 
     <div class="right">
+      <button class="material" on:click={onToggleZoom}>
+        <span class="material-icons-outlined">
+          {zoomEnabled ? "zoom_out_map" : "zoom_in"}
+        </span>
+      </button>
       <button class="material favorite" class:is-favorite={image.favorite} on:click={onFavorite}>
         <span class="material-icons-outlined">{image.favorite ? "star" : "star_outline"}</span>
       </button>

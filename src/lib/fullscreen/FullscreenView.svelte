@@ -8,12 +8,13 @@
   import { firebaseUser, firestoreManager } from "../../scripts/firebase/firebaseManager";
   import type { ReadWritable } from "../../scripts/util/helperTypes";
   import { writable } from "svelte/store";
+  import Zoom from "svelte-zoom";
   import { fade } from 'svelte/transition';
-  import Zoom from 'svelte-zoom'
 
   export let images: ReadWritable<CustomImage[]> = writable([]);
   export let initialImageIdx: number = 0;
 
+  let zoomEnabled = false
   let index = null;
   let upcomingImageIndex = null;
   let previousImageIndex = null;
@@ -167,17 +168,26 @@
 
   }
 
+  let lastToggle = 0;
   const toggleNav = () => {
+    const now = Date.now();
+    if (now - lastToggle < 200) return;
+    lastToggle = now;
     navShown = !navShown;
   }
 
+  const toggleZoom = () => {
+    zoomEnabled = !zoomEnabled;
+  }
 </script>
 
 
 <div class="main">
 
 
-  <div bind:this={scrollElement} class="scrollable-image-wrapper" on:click|stopPropagation={toggleNav}>
+  <div bind:this={scrollElement} class="scrollable-image-wrapper"
+       on:click|stopPropagation={toggleNav}
+  >
     {#if loaded}
       {#each renderedImages as imagePromise}
         <div class="image-container container-{renderedImages.indexOf(imagePromise)}" bind:clientWidth={pageWidth}>
@@ -186,8 +196,11 @@
               <LoadingSpinner/>
             </div>
           {:then image}
-            <Zoom src={image.src} alt={image.name} />
-<!--            <img src={image.src} alt={image.name}/>-->
+            {#if zoomEnabled}
+              <Zoom src={image.src} alt={image.name}/>
+            {:else}
+              <img src={image.src} alt={image.name}/>
+            {/if}
           {:catch error}
             <div class="error">
               <p>Failed to load image</p>
@@ -201,8 +214,8 @@
 
   {#if navShown && currentImage}
     <div transition:fade="{{duration: 150}}">
-    <FullscreenViewNav on:next={onNext} on:prev={onPrevious} image={currentImage} on:close={onClose}
-                       on:delete={onDelete}/>
+      <FullscreenViewNav on:next={onNext} on:prev={onPrevious} image={currentImage} on:close={onClose}
+                         on:delete={onDelete} {zoomEnabled} on:toggle-zoom={toggleZoom}/>
     </div>
   {/if}
 
