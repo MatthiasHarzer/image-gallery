@@ -22,6 +22,18 @@ export default class Image implements Entry {
     public favorite: boolean = false,
   ) {
   }
+
+  public modifyWith(image: Image): Image {
+    this.name = image.name;
+    this.description = image.description;
+    this.url = image.url;
+    this.tags = image.tags;
+    this.state = image.state;
+    this.width = image.width;
+    this.height = image.height;
+    this.favorite = image.favorite;
+    return this;
+  }
 }
 
 /**

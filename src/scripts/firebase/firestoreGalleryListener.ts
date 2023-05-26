@@ -38,14 +38,14 @@ enum GallerySkeletonKey {
 
 export default class FirestoreGalleryListener {
   private user: User;
-  private gallery: Gallery;
+  private gallery: Gallery = new Gallery([], [], []);
   private callbacks: ((gallery: Gallery) => void)[] = [];
   private subscriptions: (() => void)[];
 
   private skeleton: GallerySkeleton = new GallerySkeleton([], [], []);
-  private lastBroadcast = 0;
-  private broadcastDelay = 1000;
-  private broadcastTimeout: NodeJS.Timeout | null = null;
+  private cachedImages: Image[] = [];
+  private cachedAlbums: Album[] = [];
+  private cachedTags: Tag[] = [];
 
   constructor(user: User) {
     this.user = user;
@@ -61,10 +61,66 @@ export default class FirestoreGalleryListener {
     ];
   }
 
+  public get galleryImageStore(): Readable<Image[]> {
+    return readable([], (set) => {
+      return this.listen((gallery) => {
+        set(gallery.images);
+      });
+    });
+  }
+
+  /**
+   * Listen for realtime updates to the gallery.
+   * Gets called immediately with the current gallery.
+   * @param callback The callback to call when the gallery changes.
+   */
+  public listen(callback: (gallery: Gallery) => void): Unsubscriber {
+    this.callbacks.push(callback);
+    callback(this.gallery);
+    return () => {
+      this.callbacks = this.callbacks.filter((cb) => cb !== callback);
+    }
+  }
+
+  public unsubscribeAll(): void {
+    this.subscriptions.forEach((unsubscribe) => unsubscribe());
+    this.subscriptions = [];
+  }
+
   private createSnapshotResolver(key: GallerySkeletonKey): (snapshot: QuerySnapshot) => Promise<void> {
     return async (snapshot: QuerySnapshot) => {
       this.skeleton[key] = snapshot.docs.map((doc) => dataWithId(doc) as any);
       await this.syncGallery();
+    }
+  }
+
+  private getCachedOrInitImage(image: Image): Image {
+    let existing = this.cachedImages.find((i) => i.id === image.id);
+    if (existing === undefined) {
+      this.cachedImages.push(image);
+      return image;
+    } else {
+      return existing.modifyWith(image);
+    }
+  }
+
+  private getCachedOrInitAlbum(album: Album): Album {
+    let existing = this.cachedAlbums.find((a) => a.id === album.id);
+    if (existing === undefined) {
+      this.cachedAlbums.push(album);
+      return album;
+    } else {
+      return existing.modifyWith(album);
+    }
+  }
+
+  private getCachedOrInitTag(tag: Tag): Tag {
+    let existing = this.cachedTags.find((t) => t.id === tag.id);
+    if (existing === undefined) {
+      this.cachedTags.push(tag);
+      return tag;
+    }else{
+      return existing.modifyWith(tag);
     }
   }
 
@@ -74,20 +130,20 @@ export default class FirestoreGalleryListener {
   private async syncGallery(): Promise<void> {
     const { tags: tagsData, images: imagesData, albums: albumsData } = this.skeleton;
 
-    const tags = tagsData.map((tagData) => new Tag(tagData.id, tagData.name, tagData.description));
+    const tags = tagsData.map((tagData) => this.getCachedOrInitTag(new Tag(tagData.id, tagData.name, tagData.description)));
 
     const images = imagesData.map((imageData) => {
       const tagsForImage = tags.filter((tag) => imageData.tags.includes(tag.id));
 
-      return new Image(imageData.id, imageData.name, imageData.description, imageData.url, tagsForImage, imageData.state,
-        imageData.width, imageData.height, imageData.favorite ?? false);
+      return this.getCachedOrInitImage(new Image(imageData.id, imageData.name, imageData.description, imageData.url, tagsForImage, imageData.state,
+        imageData.width, imageData.height, imageData.favorite ?? false));
     });
 
     const albums = albumsData.map((albumData) => {
       const imagesForAlbum = images.filter((image) => albumData.images.includes(image.id));
       const cover = images.find((image) => image.id === albumData.cover);
 
-      return new Album(albumData.id, albumData.name, albumData.description, imagesForAlbum, [], null, cover);
+      return this.getCachedOrInitAlbum(new Album(albumData.id, albumData.name, albumData.description, imagesForAlbum, [], null, cover));
     });
 
     // Add children and parent
@@ -105,31 +161,5 @@ export default class FirestoreGalleryListener {
 
   private broadcast(gallery: Gallery): void {
     this.callbacks.forEach((callback) => callback(gallery));
-  }
-
-  /**
-   * Listen for realtime updates to the gallery.
-   * Gets called immediately with the current gallery.
-   * @param callback The callback to call when the gallery changes.
-   */
-  public listen(callback: (gallery: Gallery) => void): Unsubscriber {
-    this.callbacks.push(callback);
-    callback(this.gallery);
-    return () => {
-      this.callbacks = this.callbacks.filter((cb) => cb !== callback);
-    }
-  }
-
-  public get galleryImageStore(): Readable<Image[]> {
-    return readable([], (set) => {
-      return this.listen((gallery) => {
-        set(gallery.images);
-      });
-    });
-  }
-
-  public unsubscribeAll(): void {
-    this.subscriptions.forEach((unsubscribe) => unsubscribe());
-    this.subscriptions = [];
   }
 }

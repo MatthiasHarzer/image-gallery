@@ -1,12 +1,13 @@
 import type { User } from "firebase/auth";
 import { addDoc, deleteDoc, doc, DocumentReference, getDoc, setDoc, updateDoc } from "firebase/firestore";
-import { IMAGE_REF, IMAGES_REF, STORAGE_BUCKET_IMAGE_REF, TAGS_REF, USER_REF } from "./firebasePathConfig";
+import { ALBUMS_REF, IMAGE_REF, IMAGES_REF, STORAGE_BUCKET_IMAGE_REF, TAGS_REF, USER_REF } from "./firebasePathConfig";
 
 import { deleteObject, getDownloadURL, uploadBytesResumable } from "firebase/storage";
 import FirestoreGalleryListener from "./firestoreGalleryListener";
 import { default as CustomImage, ImageState } from "../gallery/image";
 import type Tag from "../gallery/tag";
 import type { TagData } from "../gallery/tag";
+import type Album from "../gallery/album";
 
 
 export default class FirestoreManager {
@@ -100,6 +101,33 @@ export default class FirestoreManager {
     await updateDoc(imageRef, {
       tags: imageTagsId.filter(t => t !== tag.id),
     });
+  }
+
+  public async createAlbum(user: User, album: { name: string, description: string }): Promise<DocumentReference> {
+    const albumsRef = ALBUMS_REF(user);
+
+    return await addDoc(albumsRef, {
+      name: album.name,
+      description: album.description ?? "",
+      images: [],
+      children: [],
+      parent: null,
+      cover: null,
+    });
+  }
+
+  public async updateAlbum(user: User, album: Album): Promise<void> {
+    const albumRef = doc(ALBUMS_REF(user), album.id);
+
+    await updateDoc(albumRef, {
+      name: album.name,
+      description: album.description,
+      images: album.images.map(i => i.id),
+      children: album.children.map(a => a.id),
+      parent: album.parent?.id ?? null,
+      cover: album.cover?.id ?? null,
+    });
+
   }
 
   private async createImageNode(user: User, image: File): Promise<DocumentReference> {

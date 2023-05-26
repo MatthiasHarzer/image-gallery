@@ -25,13 +25,20 @@ interface AdvancedGallery extends Gallery {
   listener: FirestoreGalleryListener;
 }
 
+const emptyAdvancedGallery: AdvancedGallery = {
+  albums: [],
+  images: [],
+  tags: [],
+  listener: null,
+}
+
 const createGallery = () => {
   let gallerySub;
   let galleryListener: FirestoreGalleryListener | null = null;
-  return readable<AdvancedGallery>(null, (set) => {
+  return readable<AdvancedGallery>(emptyAdvancedGallery, (set) => {
     return firebaseUser.subscribe(async (user) => {
       if (user === null) {
-        set(null);
+        set(emptyAdvancedGallery);
         gallerySub && gallerySub();
         galleryListener && galleryListener.unsubscribeAll();
         return;
@@ -49,4 +56,4 @@ const createGallery = () => {
   });
 }
 
-export const gallery: Readable<AdvancedGallery | null> = createGallery();
+export const gallery: Readable<AdvancedGallery> = createGallery();

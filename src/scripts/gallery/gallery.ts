@@ -12,4 +12,11 @@ export default class Gallery{
   ) {
   }
 
+  public modifyWith(gallery: Gallery): Gallery {
+    this.images = gallery.images;
+    this.albums = gallery.albums;
+    this.tags = gallery.tags;
+    return this;
+  }
+
 }
