@@ -19,6 +19,7 @@ export default class Image implements Entry {
     public state: ImageState = ImageState.ready,
     public width: number,
     public height: number,
+    public favorite: boolean = false,
   ) {
   }
 }
@@ -35,4 +36,5 @@ export interface ImageData {
   state: ImageState;
   width: number;
   height: number;
+  favorite?: boolean;
 }

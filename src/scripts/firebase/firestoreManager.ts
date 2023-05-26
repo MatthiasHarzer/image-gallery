@@ -1,10 +1,10 @@
 import type { User } from "firebase/auth";
-import { addDoc, DocumentReference, getDoc, setDoc, updateDoc } from "firebase/firestore";
-import { IMAGES_REF, STORAGE_BUCKET_IMAGE_REF, USER_REF } from "./firebasePathConfig";
+import { addDoc, DocumentReference, getDoc, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
+import { IMAGE_REF, IMAGES_REF, STORAGE_BUCKET_IMAGE_REF, USER_REF } from "./firebasePathConfig";
 
-import { getDownloadURL, uploadBytesResumable } from "firebase/storage";
+import { getDownloadURL, uploadBytesResumable, deleteObject } from "firebase/storage";
 import FirestoreGalleryListener from "./firestoreGalleryListener";
-import { ImageState } from "../gallery/image";
+import {default as CustomImage, ImageState } from "../gallery/image";
 
 
 export default class FirestoreManager {
@@ -76,5 +76,25 @@ export default class FirestoreManager {
       url: await getDownloadURL(bucket.ref),
       state: ImageState.ready,
     });
+  }
+
+  public async deleteImage(user: User, image: CustomImage): Promise<void> {
+    const imageRef = IMAGE_REF(user, image);
+    const storageRef = STORAGE_BUCKET_IMAGE_REF(user, image.id);
+
+    await Promise.all([
+      deleteDoc(imageRef),
+      deleteObject(storageRef),
+    ]);
+  }
+
+  public updateImageProps(user: User, image: CustomImage, updateData: {[key: string]: any}): Promise<void> {
+    const imageRef = IMAGE_REF(user, image);
+
+    for (const key in updateData) {
+      image[key] = updateData[key];
+    }
+
+    return updateDoc(imageRef, updateData);
   }
 }

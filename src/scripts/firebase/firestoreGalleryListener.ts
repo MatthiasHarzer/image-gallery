@@ -78,7 +78,7 @@ export default class FirestoreGalleryListener {
       const tagsForImage = tags.filter((tag) => imageData.tags.includes(tag.id));
 
       return new Image(imageData.id, imageData.name, imageData.description, imageData.url, tagsForImage, imageData.state,
-        imageData.width, imageData.height);
+        imageData.width, imageData.height, imageData.favorite ?? false);
     });
 
     const albums = albumsData.map((albumData) => {
