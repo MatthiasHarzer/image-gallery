@@ -2,11 +2,16 @@
 
   import { createEventDispatcher } from "svelte";
   import type Image from "../../scripts/gallery/image";
-  import { firebaseUser, firestoreManager } from "../../scripts/firebase/firebaseManager";
+  import { firebaseUser, firestoreManager, gallery } from "../../scripts/firebase/firebaseManager";
+  import Tag from "../../scripts/gallery/tag";
 
   const dispatch = createEventDispatcher();
 
   export let image: Image;
+
+  $: console.log(image);
+
+  let tagInput = "";
 
   const onNext = () => {
     dispatch("next");
@@ -26,7 +31,31 @@
 
   const onFavorite = () => {
     firestoreManager.updateImageProps($firebaseUser, image, { favorite: !image.favorite });
-    image = image;
+  }
+
+  const onTagEnter = async () =>{
+    tagInput = tagInput.trim();
+
+    const existingTag = $gallery.tags.find(tag => tag.name.toLowerCase() === tagInput.toLowerCase());
+
+    let tag: Tag;
+
+    if (existingTag){
+      if(image.tags.some(tag => tag.id === existingTag.id)) return;
+      tag = existingTag;
+    }else{
+      const doc = await firestoreManager.createTag($firebaseUser, {
+        name: tagInput,
+        description: ""
+      })
+      tag = new Tag(doc.id, tagInput, "");
+    }
+
+    await firestoreManager.addTagToImage($firebaseUser, image, tag);
+
+
+    tagInput = "";
+
   }
 </script>
 
@@ -57,11 +86,30 @@
     </button>
   </div>
 
+  <div class="tags-nav">
+
+    <div class="tags-list">
+
+    </div>
+    <div class="input-field">
+      <input id="tag" type="text"
+             bind:value={tagInput}
+             placeholder="Enter tag..."
+             on:keyup={e => {if(e.key === "Enter") onTagEnter()}}
+      />
+      <label for="tag">
+        <button class="material no-effect" on:click={onTagEnter}>
+          <span class="material-icons">add</span>
+        </button>
+      </label>
+    </div>
+  </div>
+
 </div>
 
 <style>
 
-  button{
+  button, input{
     pointer-events: all;
   }
 
@@ -133,5 +181,48 @@
 
   .top-nav-bar .favorite.is-favorite span{
     color: #f1c40f;
+  }
+
+  .input-field{
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    /*height: 3em;*/
+    margin: 0.5em;
+
+    background-color: #313131;
+    border-radius: 0.5em;
+  }
+
+  .input-field input{
+    width: 100%;
+    height: 100%;
+    border: none;
+    outline: none;
+    background-color: #00000000;
+    color: white;
+    font-size: 1.1rem;
+    padding: 0.5em;
+    margin: 0;
+    border-bottom: 1px solid #ffffff;
+    border-radius: inherit;
+  }
+
+  .input-field label{
+    border-radius: inherit;
+  }
+
+  .input-field button{
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    background-color: #646cff;
+    border-radius: inherit;
+  }
+  .input-field button:hover{
+    background-color: #4c4cff;
   }
 </style>

@@ -3,19 +3,21 @@
   import type Image from "../scripts/gallery/image";
   import GalleryView from 'svelte-gallery-view'
   import { fullscreenDialog } from "../scripts/fullscreenDialog";
+  import { gallery } from "../scripts/firebase/firebaseManager";
+  import { get } from "svelte/store";
 
   export let images: Image[] = [];
 
   $: photosFormatted = images.map((img) => {
     return {
-      original: img,
       title: img.name,
       ...img
     }
   });
 
   const openFullscreenDialog = (image) => {
-    fullscreenDialog.show(images, image.original);
+    const index = photosFormatted.indexOf(image);
+    fullscreenDialog.show($gallery.listener.galleryImageStore, Math.max(index, 0));
   }
 </script>
 

@@ -1,16 +1,16 @@
 import { writable } from "svelte/store";
-import type { Writable } from "svelte/store";
 import type Image from "./gallery/image";
+import type { ReadWritable } from "./util/helperTypes";
 
 interface FullscreenDialogConfig {
-  images: Image[];
-  currentImage: Image;
+  images: ReadWritable<Image[]>;
+  initialImageIdx: number;
   shown: boolean;
 }
 
 const emptyFullscreenDialogConfig: FullscreenDialogConfig = {
-  images: [],
-  currentImage: null,
+  images: writable([]),
+  initialImageIdx: 0,
   shown: false,
 }
 
@@ -20,10 +20,10 @@ const createFullscreenDialog = () => {
 
   return {
     subscribe,
-    show: (images: Image[], currentImage: Image) => {
+    show: (images: ReadWritable<Image[]>, initialImageIdx: number) => {
       set({
         images,
-        currentImage,
+        initialImageIdx,
         shown: true,
       });
     },

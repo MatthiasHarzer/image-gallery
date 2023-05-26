@@ -21,10 +21,14 @@ const createFirebaseUser = (): Readable<User | null> => {
 
 export const firebaseUser: Readable<User | null> = createFirebaseUser();
 
+interface AdvancedGallery extends Gallery {
+  listener: FirestoreGalleryListener;
+}
+
 const createGallery = () => {
   let gallerySub;
   let galleryListener: FirestoreGalleryListener | null = null;
-  return readable(null, (set) => {
+  return readable<AdvancedGallery>(null, (set) => {
     return firebaseUser.subscribe(async (user) => {
       if (user === null) {
         set(null);
@@ -36,10 +40,13 @@ const createGallery = () => {
       galleryListener = firestoreManager.getGallery(user);
 
       gallerySub = galleryListener.listen((gallery) => {
-        set(gallery);
+        set({
+          ...gallery,
+          listener: galleryListener,
+        });
       });
     });
   });
 }
 
-export const gallery: Readable<Gallery | null> = createGallery();
+export const gallery: Readable<AdvancedGallery | null> = createGallery();

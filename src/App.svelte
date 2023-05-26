@@ -6,7 +6,6 @@
   import FullscreenView from "./lib/fullscreen/FullscreenView.svelte";
 
   $: console.log($gallery);
-  $: console.log($fullscreenDialog);
 </script>
 
 <main>
@@ -21,7 +20,7 @@
 {#if $fullscreenDialog.shown}
   <FullscreenView
     images={$fullscreenDialog.images}
-    currentImage={$fullscreenDialog.currentImage}
+    initialImageIdx={$fullscreenDialog.initialImageIdx}
   />
 {/if}
 

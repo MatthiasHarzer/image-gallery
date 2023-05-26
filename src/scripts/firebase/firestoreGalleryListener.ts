@@ -9,6 +9,8 @@ import type { ImageData } from "../gallery/image";
 import Image from "../gallery/image";
 import type { TagData } from "../gallery/tag";
 import Tag from "../gallery/tag";
+import type { Readable } from "svelte/store";
+import { readable } from "svelte/store";
 
 type Unsubscriber = () => void;
 
@@ -132,6 +134,14 @@ export default class FirestoreGalleryListener {
     return () => {
       this.callbacks = this.callbacks.filter((cb) => cb !== callback);
     }
+  }
+
+  public get galleryImageStore(): Readable<Image[]> {
+    return readable([], (set) => {
+      return this.listen((gallery) => {
+        set(gallery.images);
+      });
+    });
   }
 
   public unsubscribeAll(): void {

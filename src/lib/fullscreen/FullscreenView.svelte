@@ -6,13 +6,21 @@
   import FullscreenViewNav from "./FullscreenViewNav.svelte";
   import { fullscreenDialog } from "../../scripts/fullscreenDialog";
   import { firebaseUser, firestoreManager } from "../../scripts/firebase/firebaseManager";
+  import type { ReadWritable } from "../../scripts/util/helperTypes";
+  import { writable } from "svelte/store";
 
-  export let images: CustomImage[] = [];
-  export let currentImage: CustomImage = null;
+  export let images: ReadWritable<CustomImage[]> = writable([]);
+  export let initialImageIdx: number = 0;
 
-  $: index = images.indexOf(currentImage);
-  $: upcomingImage = index + 1 >= images.length ? images[0] : images[index + 1];
-  $: previousImage = index - 1 < 0 ? images[images.length - 1] : images[index - 1];
+  let index = null;
+  let upcomingImageIndex = null;
+  let previousImageIndex = null;
+
+  // $: console.log($images, currentImage);
+
+  $: currentImage = $images[index];
+  $: if (index != null) upcomingImageIndex = index + 1 % $images.length;
+  $: if (index != null) previousImageIndex = index - 1 % $images.length;
 
   interface PromisedImage {
     src: string;
@@ -27,8 +35,8 @@
   let scrollElement: HTMLElement;
   let pageWidth: number;
 
-  const getOrCache = (image: CustomImage) => {
-    const idx = images.indexOf(image);
+  const getOrCache = (idx: number) => {
+    const image = $images[idx];
     if (imageCache.has(idx)) {
       return imageCache.get(idx);
     } else {
@@ -50,33 +58,30 @@
     }
   }
 
-  $: if (currentImage) {
-    imagePromise = getOrCache(currentImage);
+  $:if (index != null) {
+    imagePromise = getOrCache(index);
 
     scrollElement && scrollElement.scrollTo({
       left: pageWidth,
     });
   }
-  $: if (upcomingImage) {
-    upcomingImagePromise = getOrCache(upcomingImage);
-  }
-  $: if (previousImage) {
-    previousImagePromise = getOrCache(previousImage);
-  }
+  $: if (upcomingImageIndex != null) upcomingImagePromise = getOrCache(upcomingImageIndex);
+  $: if (previousImageIndex != null) previousImagePromise = getOrCache(previousImageIndex);
 
   $: renderedImages = [previousImagePromise, imagePromise, upcomingImagePromise]
+  $: loaded = renderedImages && renderedImages.every(promise => promise != null);
 
 
   onMount(() => {
-    if (currentImage == null && images.length > 0) {
-      currentImage = images[0];
+    if (initialImageIdx < 0 || initialImageIdx >= $images.length) {
+      index = 0;
+    } else {
+      index = initialImageIdx;
     }
-    setImage(index);
 
     scrollElement.onscroll = (_: Event) => {
       const offset = scrollElement.scrollLeft;
       const width = scrollElement.clientWidth;
-      const scrollWidth = scrollElement.scrollWidth;
 
       const page = Math.floor(offset / width);
       const pageOffset = offset % width;
@@ -84,9 +89,9 @@
 
       if (pageProgress !== 0) return;
 
-      if(page === 0){
+      if (page === 0) {
         onPreviousSkip()
-      }else if(page === 2){
+      } else if (page === 2) {
         onNextSkip()
       }
     }
@@ -94,15 +99,15 @@
   })
 
   const setImage = (idx: number) => {
-    if (idx < 0 && images.length > 0) {
-      idx = images.length - 1;
-    } else if (images.length == 0) {
+    if (idx < 0 && $images.length > 0) {
+      index = $images.length - 1;
+    } else if ($images.length == 0) {
       return;
-    } else if (idx >= images.length) {
-      idx = 0;
+    } else if (idx >= $images.length) {
+      index = 0;
+    } else {
+      index = idx;
     }
-
-    currentImage = images[idx];
   }
 
   const onNextSkip = () => {
@@ -143,17 +148,17 @@
 
     const oldIndex = index;
 
-    images = images.filter(image => image != currentImage);
+    $images = $images.filter(image => image != currentImage);
 
-    if (images.length == 0) {
+    if ($images.length == 0) {
       onClose();
       return;
     }
 
     invalidateCache();
 
-    if (oldIndex >= images.length) {
-      setImage(images.length - 1);
+    if (oldIndex >= $images.length) {
+      setImage($images.length - 1);
     } else {
       setImage(oldIndex);
     }
@@ -165,9 +170,10 @@
 
 
 <div class="main">
-  {#if imagePromise != null}
 
-    <div class="scrollable-image-wrapper" bind:this={scrollElement}>
+
+  <div bind:this={scrollElement} class="scrollable-image-wrapper">
+    {#if loaded}
       {#each renderedImages as imagePromise}
         <div class="image-container" bind:clientWidth={pageWidth}>
           {#await imagePromise}
@@ -183,13 +189,11 @@
           {/await}
         </div>
       {/each}
-    </div>
-  {:else}
+    {/if}
+  </div>
 
 
-  {/if}
-
-  {#if navShown}
+  {#if navShown && currentImage}
     <FullscreenViewNav on:next={onNext} on:prev={onPrevious} image={currentImage} on:close={onClose}
                        on:delete={onDelete}/>
   {/if}
@@ -211,7 +215,7 @@
     /*align-items: center;*/
   }
 
-  .scrollable-image-wrapper{
+  .scrollable-image-wrapper {
     position: relative;
     display: flex;
 
