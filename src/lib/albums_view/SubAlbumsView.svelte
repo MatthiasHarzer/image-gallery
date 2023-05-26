@@ -16,9 +16,6 @@
   const onOpen = (album: Album) => {
     dispatch("open", album);
   }
-
-  $: console.log("update on", album.name);
-
 </script>
 
 <div class="main">

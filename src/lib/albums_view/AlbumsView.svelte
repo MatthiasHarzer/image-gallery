@@ -12,11 +12,25 @@
   let selectedAlbum: Album | null = null;
   let albumTree: Album[] = [];
   const onNewOrEditAlbum = ({ detail: album }) => {
+    if (! (album instanceof Album)) {
+      album = Album.dummy();
+      album.parent = selectedAlbum;
+    }
+
     albumToEdit = album;
     createOrEditAlbumDialogShown = true;
   }
 
-  $: rootAlbum = Album.root($gallery.images, $gallery.albums.filter(a => a.parent == null))
+  const isSelfParent = (parent: Album, self: Album) => {
+    if (parent == null) return false;
+    return parent.id === self.id || isSelfParent(parent.parent, self);
+  }
+
+  const getRootAlbums = (albums: Album[]) => {
+    return albums.filter(a => a.parent == null || isSelfParent(a.parent, a));
+  }
+
+  $: rootAlbum = Album.root($gallery.images, getRootAlbums($gallery.albums));
   $: openedAlbum = selectedAlbum || rootAlbum;
 
   const submitAlbum = async ({ detail: album }: CustomEvent<Album>) => {
@@ -65,7 +79,7 @@
   <div class="header-nav-bar">
     <div class="album-nav">
 
-      {#if albumTree.length > -1}
+      {#if albumTree.length > 0}
         <button class="material" on:click={moveBackOne}>
           <span class="material-icons">arrow_back</span>
         </button>
@@ -112,16 +126,35 @@
 
   .header-nav-bar {
     height: 50px;
-    display: flex;
+    flex-direction: row;
     align-items: center;
     justify-content: space-between;
     margin: 5px 15px;
+    display: flex;
+    /*width: 500px;*/
+    position: relative;
+    overflow: hidden;
   }
 
   .album-nav{
+    position: relative;
     display: flex;
     align-items: center;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
   }
+
+  .add-album{
+    position: relative;
+    flex: 0;
+  }
+
+  .add-album span{
+    white-space: nowrap;
+  }
+
+
 
 
 </style>

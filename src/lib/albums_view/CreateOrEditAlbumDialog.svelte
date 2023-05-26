@@ -2,12 +2,13 @@
 
   import Album from "../../scripts/gallery/album";
   import { createEventDispatcher, onMount } from "svelte";
+  import { gallery } from "../../scripts/firebase/firebaseManager";
 
   const dispatch = createEventDispatcher();
 
   export let album: Album | null = null;
 
-  $: isEdit = album !== null;
+  $: isEdit = album !== null && album?.id !== null;
 
   let dummyAlbum: Album;
 
@@ -23,6 +24,7 @@
     dispatch("submit", dummyAlbum);
   }
 
+  $: availableParents = $gallery.albums.filter(a => a.id !== dummyAlbum?.id);
 
 </script>
 
@@ -37,6 +39,17 @@
     <div class="dialog-content">
       {#if dummyAlbum}
         <input type="text" class="album-name" placeholder="Enter album name..." bind:value={dummyAlbum.name}/>
+
+        <div>
+          <label for="parent-select">Parent Album</label>
+          <select id="parent-select" bind:value={dummyAlbum.parent}>
+            <option value={null}>None</option>
+            {#each availableParents as parent}
+              <option value={parent}>{parent.name}</option>
+            {/each}
+          </select>
+
+        </div>
       {/if}
 
       <button class="material text-button submit-btn" on:click={submit}>

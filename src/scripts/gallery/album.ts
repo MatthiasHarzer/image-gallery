@@ -34,4 +34,5 @@ export interface AlbumData {
   images: string[];
   children: string[];
   cover: string | null;
+  parent: string | null;
 }

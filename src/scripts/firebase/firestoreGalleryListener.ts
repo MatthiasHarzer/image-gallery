@@ -150,9 +150,12 @@ export default class FirestoreGalleryListener {
     albumsData.forEach((albumData) => {
       const album = albums.find((album) => album.id === albumData.id);
 
-      const children = albums.filter((album) => albumData.children.includes(album.id));
-      children.forEach((child) => child.parent = album);
-      album.children = children;
+      const parent = albums.find((album) => album.id === albumData.parent);
+      album.parent = parent;
+
+      if (parent !== undefined) {
+        parent.children.push(album);
+      }
     });
 
     this.gallery = new Gallery(images, albums, tags);

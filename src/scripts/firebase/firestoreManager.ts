@@ -103,7 +103,7 @@ export default class FirestoreManager {
     });
   }
 
-  public async createAlbum(user: User, album: { name: string, description: string }): Promise<DocumentReference> {
+  public async createAlbum(user: User, album: Album): Promise<DocumentReference> {
     const albumsRef = ALBUMS_REF(user);
 
     return await addDoc(albumsRef, {
@@ -111,7 +111,7 @@ export default class FirestoreManager {
       description: album.description ?? "",
       images: [],
       children: [],
-      parent: null,
+      parent: album.parent?.id ?? null,
       cover: null,
     });
   }
