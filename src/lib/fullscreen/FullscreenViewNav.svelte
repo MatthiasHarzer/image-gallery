@@ -1,6 +1,6 @@
 <script lang="ts">
 
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher, onMount } from "svelte";
   import type Image from "../../scripts/gallery/image";
   import { firebaseUser, firestoreManager, gallery } from "../../scripts/firebase/firebaseManager";
   import Tag from "../../scripts/gallery/tag";
@@ -9,9 +9,17 @@
 
   export let image: Image;
 
-  $: console.log(image);
+  let tagsScrollElement: HTMLElement;
 
   let tagInput = "";
+
+  onMount(()=>{
+    tagsScrollElement.onwheel = (event) => {
+      tagsScrollElement.scrollBy({
+        left: event.deltaY < 0 ? -30 : 30,
+      })
+    }
+  })
 
   const onNext = () => {
     dispatch("next");
@@ -36,6 +44,8 @@
   const onTagEnter = async () =>{
     tagInput = tagInput.trim();
 
+    if(tagInput.length === 0) return;
+
     const existingTag = $gallery.tags.find(tag => tag.name.toLowerCase() === tagInput.toLowerCase());
 
     let tag: Tag;
@@ -53,9 +63,11 @@
 
     await firestoreManager.addTagToImage($firebaseUser, image, tag);
 
-
     tagInput = "";
+  }
 
+  const removeTag = (tag: Tag) =>{
+    firestoreManager.removeTagFromImage($firebaseUser, image, tag);
   }
 </script>
 
@@ -88,8 +100,15 @@
 
   <div class="tags-nav">
 
-    <div class="tags-list">
-
+    <div class="tags-list" bind:this={tagsScrollElement}>
+      {#each image.tags as tag (tag.id)}
+        <div class="tag">
+          <span class="name">{tag.name}</span>
+          <button class="remove-tag material" on:click={()=>removeTag(tag)}>
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+      {/each}
     </div>
     <div class="input-field">
       <input id="tag" type="text"
@@ -128,6 +147,10 @@
   }
 
   .main .page-nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -188,9 +211,10 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100%;
+    /*width: 100%;*/
+    width: 350px;
     /*height: 3em;*/
-    margin: 0.5em;
+    margin: 0.5em auto;
 
     background-color: #313131;
     border-radius: 0.5em;
@@ -219,10 +243,55 @@
     right: 0;
     top: 0;
     height: 100%;
-    background-color: #646cff;
+    background-color: var(--primary-color);
     border-radius: inherit;
   }
   .input-field button:hover{
-    background-color: #4c4cff;
+    background-color: var(--primary-color-accent);
+  }
+
+  .tags-nav{
+    position: relative;
+    width: 100%;
+
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.7) 100%);
+  }
+
+  .tags-list{
+    display: flex;
+    width: 100%;
+    margin: 0;
+    overflow-x: auto;
+
+    pointer-events: all;
+  }
+
+  .tags-list::-webkit-scrollbar {
+    height: 0.5em;
+  }
+
+  .tags-list .tag{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0.5em;
+    padding: 0 0 0 0.5rem;
+    background-color: var(--primary-color);
+    border-radius: 0.5em;
+  }
+
+  .tags-list .tag button span{
+    font-size: 1.1rem;
+    transition: all 0.2s ease-in-out;
+  }
+  .tags-list .tag button:hover span{
+    color: #ffcdc9;
+  }
+
+  .tags-list .tag .name{
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 </style>

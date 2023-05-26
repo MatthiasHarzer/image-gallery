@@ -104,22 +104,6 @@ export default class FirestoreGalleryListener {
   }
 
   private broadcast(gallery: Gallery): void {
-
-    if (this.broadcastTimeout) {
-      return;
-    }
-
-    const now = Date.now();
-    const timeSinceLastBroadcast = now - this.lastBroadcast;
-    if (timeSinceLastBroadcast < this.broadcastDelay) {
-      this.broadcastTimeout = setTimeout(() => {
-        this.broadcastTimeout = null;
-        this.broadcast(gallery);
-      }, this.broadcastDelay - timeSinceLastBroadcast);
-      return;
-    }
-
-    this.lastBroadcast = now;
     this.callbacks.forEach((callback) => callback(gallery));
   }
 

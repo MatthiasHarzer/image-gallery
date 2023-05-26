@@ -8,6 +8,8 @@
   import { firebaseUser, firestoreManager } from "../../scripts/firebase/firebaseManager";
   import type { ReadWritable } from "../../scripts/util/helperTypes";
   import { writable } from "svelte/store";
+  import { fade } from 'svelte/transition';
+  import Zoom from 'svelte-zoom'
 
   export let images: ReadWritable<CustomImage[]> = writable([]);
   export let initialImageIdx: number = 0;
@@ -165,6 +167,9 @@
 
   }
 
+  const toggleNav = () => {
+    navShown = !navShown;
+  }
 
 </script>
 
@@ -172,16 +177,17 @@
 <div class="main">
 
 
-  <div bind:this={scrollElement} class="scrollable-image-wrapper">
+  <div bind:this={scrollElement} class="scrollable-image-wrapper" on:click|stopPropagation={toggleNav}>
     {#if loaded}
       {#each renderedImages as imagePromise}
-        <div class="image-container" bind:clientWidth={pageWidth}>
+        <div class="image-container container-{renderedImages.indexOf(imagePromise)}" bind:clientWidth={pageWidth}>
           {#await imagePromise}
             <div class="loading">
               <LoadingSpinner/>
             </div>
           {:then image}
-            <img src={image.src} alt={image.name}/>
+            <Zoom src={image.src} alt={image.name} />
+<!--            <img src={image.src} alt={image.name}/>-->
           {:catch error}
             <div class="error">
               <p>Failed to load image</p>
@@ -194,8 +200,10 @@
 
 
   {#if navShown && currentImage}
+    <div transition:fade="{{duration: 150}}">
     <FullscreenViewNav on:next={onNext} on:prev={onPrevious} image={currentImage} on:close={onClose}
                        on:delete={onDelete}/>
+    </div>
   {/if}
 
 </div>
@@ -244,11 +252,17 @@
     display: flex;
     justify-content: center;
     align-items: center;
+
+    background-color: #2c2c2c;
   }
 
   .image-container img {
     max-width: 100%;
     max-height: 100%;
+  }
+
+  .container-0, .container-2 {
+    z-index: -1;
   }
 
 </style>

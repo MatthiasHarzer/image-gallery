@@ -1,10 +1,10 @@
 import type { User } from "firebase/auth";
-import { addDoc, DocumentReference, getDoc, setDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
+import { addDoc, deleteDoc, doc, DocumentReference, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { IMAGE_REF, IMAGES_REF, STORAGE_BUCKET_IMAGE_REF, TAGS_REF, USER_REF } from "./firebasePathConfig";
 
-import { getDownloadURL, uploadBytesResumable, deleteObject } from "firebase/storage";
+import { deleteObject, getDownloadURL, uploadBytesResumable } from "firebase/storage";
 import FirestoreGalleryListener from "./firestoreGalleryListener";
-import {default as CustomImage, ImageState } from "../gallery/image";
+import { default as CustomImage, ImageState } from "../gallery/image";
 import type Tag from "../gallery/tag";
 import type { TagData } from "../gallery/tag";
 
@@ -44,6 +44,63 @@ export default class FirestoreManager {
     }
   }
 
+  public async deleteImage(user: User, image: CustomImage): Promise<void> {
+    const imageRef = IMAGE_REF(user, image);
+    const storageRef = STORAGE_BUCKET_IMAGE_REF(user, image.id);
+
+    await Promise.all([
+      deleteDoc(imageRef),
+      deleteObject(storageRef),
+    ]);
+  }
+
+  public updateImageProps(user: User, image: CustomImage, updateData: { [key: string]: any }): Promise<void> {
+    const imageRef = IMAGE_REF(user, image);
+    return updateDoc(imageRef, updateData);
+  }
+
+  public async createTag(user: User, tag: TagData): Promise<DocumentReference> {
+    if (tag.name === "") return Promise.reject("Tag name is empty");
+
+    const tagsRef = TAGS_REF(user);
+
+    return await addDoc(tagsRef, tag);
+  }
+
+  public async deleteTag(user: User, tag: Tag): Promise<void> {
+    const tagRef = doc(TAGS_REF(user), tag.id);
+    await deleteDoc(tagRef);
+  }
+
+  public async updateTag(user: User, tag: Tag, updateData: { [key: string]: any }): Promise<void> {
+    const tagRef = doc(TAGS_REF(user), tag.id);
+
+    await updateDoc(tagRef, updateData);
+  }
+
+  public async addTagToImage(user: User, image: CustomImage, tag: Tag): Promise<void> {
+    const imageRef = IMAGE_REF(user, image);
+
+    if (tag.id == null) return;
+    const imageTagsId = image.tags.map(t => t.id);
+    if (imageTagsId.includes(tag.id)) return;
+
+    await updateDoc(imageRef, {
+      tags: [...imageTagsId, tag.id],
+    });
+  }
+
+  public async removeTagFromImage(user: User, image: CustomImage, tag: Tag): Promise<void> {
+    const imageRef = IMAGE_REF(user, image);
+
+    if (tag.id == null) return;
+    const imageTagsId = image.tags.map(t => t.id);
+    if (!imageTagsId.includes(tag.id)) return;
+
+    await updateDoc(imageRef, {
+      tags: imageTagsId.filter(t => t !== tag.id),
+    });
+  }
 
   private async createImageNode(user: User, image: File): Promise<DocumentReference> {
     const imagesRef = IMAGES_REF(user);
@@ -77,50 +134,6 @@ export default class FirestoreManager {
     await updateDoc(imageNode, {
       url: await getDownloadURL(bucket.ref),
       state: ImageState.ready,
-    });
-  }
-
-  public async deleteImage(user: User, image: CustomImage): Promise<void> {
-    const imageRef = IMAGE_REF(user, image);
-    const storageRef = STORAGE_BUCKET_IMAGE_REF(user, image.id);
-
-    await Promise.all([
-      deleteDoc(imageRef),
-      deleteObject(storageRef),
-    ]);
-  }
-
-  public updateImageProps(user: User, image: CustomImage, updateData: {[key: string]: any}): Promise<void> {
-    const imageRef = IMAGE_REF(user, image);
-    return updateDoc(imageRef, updateData);
-  }
-
-  public async createTag(user: User, tag: TagData): Promise<DocumentReference> {
-    const tagsRef = TAGS_REF(user);
-
-    return await addDoc(tagsRef, tag);
-  }
-
-  public async deleteTag(user: User, tag: Tag): Promise<void> {
-    const tagRef = doc(TAGS_REF(user), tag.id);
-    await deleteDoc(tagRef);
-  }
-
-  public async updateTag(user: User, tag: Tag, updateData: {[key: string]: any}): Promise<void> {
-    const tagRef = doc(TAGS_REF(user), tag.id);
-
-    await updateDoc(tagRef, updateData);
-  }
-
-  public async addTagToImage(user: User, image: CustomImage, tag: Tag): Promise<void> {
-    const imageRef = IMAGE_REF(user, image);
-
-    if (tag.id == null) return ;
-    const imageTagsId = image.tags.map(t=>t.id);
-    if (imageTagsId.includes(tag.id)) return;
-
-    await updateDoc(imageRef, {
-      tags: [...imageTagsId, tag.id],
     });
   }
 }

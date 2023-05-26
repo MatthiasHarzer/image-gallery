@@ -91,6 +91,10 @@
     -moz-osx-font-smoothing: grayscale;
     -webkit-text-size-adjust: 100%;
 
+    --primary-color: #646cff;
+    --primary-color-accent: #4c4cff;
+    --dark-primary: #083f72;
+
     --click-color: #535bf2;
     --greyed: rgb(179, 179, 179);
     --dark-greyed: rgb(83, 83, 83);
@@ -115,7 +119,7 @@
     --theme-color: #0479a6;
     --selected-color: #00a4ff;
 
-    --dark-primary: #083f72;
+
 }
 
 a {
