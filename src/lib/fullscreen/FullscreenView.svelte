@@ -10,20 +10,10 @@
   import { writable } from "svelte/store";
   import Zoom from "svelte-zoom";
   import { fade } from 'svelte/transition';
+  import { route } from "../../scripts/routeManager";
 
   export let images: ReadWritable<CustomImage[]> = writable([]);
   export let initialImageIdx: number = 0;
-
-  let zoomEnabled = false
-  let index = null;
-  let upcomingImageIndex = null;
-  let previousImageIndex = null;
-
-  // $: console.log($images, currentImage);
-
-  $: currentImage = $images[index];
-  $: if (index != null) upcomingImageIndex = index + 1 % $images.length;
-  $: if (index != null) previousImageIndex = index - 1 % $images.length;
 
   interface PromisedImage {
     src: string;
@@ -38,7 +28,36 @@
   let scrollElement: HTMLElement;
   let pageWidth: number;
 
-  const getOrCache = (idx: number) => {
+  let zoomEnabled = false
+  let index = null;
+  let upcomingImageIndex = null;
+  let previousImageIndex = null;
+
+  // $: console.log($images, currentImage);
+
+  $: currentImage = $images[index];
+  $: if (index != null) upcomingImageIndex = index + 1 % $images.length;
+  $: if (index != null) previousImageIndex = index - 1 % $images.length;
+
+  $:if (index != null) {
+    imagePromise = getOrCache(index);
+
+    scrollElement && scrollElement.scrollTo({
+      left: pageWidth,
+    });
+  }
+  $: if (upcomingImageIndex != null) upcomingImagePromise = getOrCache(upcomingImageIndex);
+  $: if (previousImageIndex != null) previousImagePromise = getOrCache(previousImageIndex);
+
+  $: renderedImages = [previousImagePromise, imagePromise, upcomingImagePromise]
+  $: loaded = renderedImages && renderedImages.every(promise => promise != null);
+
+
+  $: if(currentImage) {
+    route.setFullscreenImage(currentImage, true);
+  }
+
+  function getOrCache(idx: number) {
     const image = $images[idx];
     if (imageCache.has(idx)) {
       return imageCache.get(idx);
@@ -60,19 +79,6 @@
       return promise;
     }
   }
-
-  $:if (index != null) {
-    imagePromise = getOrCache(index);
-
-    scrollElement && scrollElement.scrollTo({
-      left: pageWidth,
-    });
-  }
-  $: if (upcomingImageIndex != null) upcomingImagePromise = getOrCache(upcomingImageIndex);
-  $: if (previousImageIndex != null) previousImagePromise = getOrCache(previousImageIndex);
-
-  $: renderedImages = [previousImagePromise, imagePromise, upcomingImagePromise]
-  $: loaded = renderedImages && renderedImages.every(promise => promise != null);
 
 
   onMount(() => {
@@ -136,7 +142,7 @@
   }
 
   const onClose = () => {
-    fullscreenDialog.hide();
+    route.setFullscreenImage(null);
   }
 
   const invalidateCache = () => {

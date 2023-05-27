@@ -7,6 +7,7 @@
   import { localConfig } from "../scripts/localConfig";
   import { Screen } from "../scripts/screen";
   import { createEventDispatcher } from "svelte";
+  import { route } from "../scripts/routeManager";
 
 
   $: signedId = $firebaseUser != null;
@@ -32,7 +33,8 @@
   }
 
   const enterScreen = (screen: Screen) => {
-    $localConfig.currentScreen = screen;
+    // $localConfig.currentScreen = screen;
+    route.setScreen(screen);
   }
 
   const screens = [
@@ -60,7 +62,7 @@
 
       {#each screens as {screen, name}}
         <button class="material text-button drop-down-item"
-                class:active={screen === $localConfig.currentScreen}
+                class:active={screen === $route.screen}
                 on:click={_=>enterScreen(screen)}>
           <span class="name">
             {name}

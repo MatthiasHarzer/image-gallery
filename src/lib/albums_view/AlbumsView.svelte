@@ -5,14 +5,19 @@
   import { firebaseUser, firestoreManager, gallery } from "../../scripts/firebase/firebaseManager";
   import SubAlbumsView from "./SubAlbumsView.svelte";
   import AlbumTreeBar from "./AlbumTreeBar.svelte";
+  import { route } from "../../scripts/routeManager";
+  import { rootAlbum } from "../../scripts/rootAlbum";
 
 
   let createOrEditAlbumDialogShown = false;
   let albumToEdit: Album | null = null;
-  let selectedAlbum: Album | null = null;
-  let albumTree: Album[] = [];
+  // let albumTree: Album[] = [];
+
+  $: selectedAlbum = $route.albums.length > 0 ? $route.albums[$route.albums.length - 1] : null;
+  $: openedAlbum = selectedAlbum || $rootAlbum;
+
   const onNewOrEditAlbum = ({ detail: album }) => {
-    if (! (album instanceof Album)) {
+    if (!(album instanceof Album)) {
       album = Album.dummy();
       album.parent = selectedAlbum;
     }
@@ -21,17 +26,7 @@
     createOrEditAlbumDialogShown = true;
   }
 
-  const isSelfParent = (parent: Album, self: Album) => {
-    if (parent == null) return false;
-    return parent.id === self.id || isSelfParent(parent.parent, self);
-  }
 
-  const getRootAlbums = (albums: Album[]) => {
-    return albums.filter(a => a.parent == null || isSelfParent(a.parent, a));
-  }
-
-  $: rootAlbum = Album.root($gallery.images, getRootAlbums($gallery.albums));
-  $: openedAlbum = selectedAlbum || rootAlbum;
 
   const submitAlbum = async ({ detail: album }: CustomEvent<Album>) => {
 
@@ -45,7 +40,7 @@
     createOrEditAlbumDialogShown = false;
   }
 
-  const deleteAlbum = async ({detail: album}: CustomEvent<Album>): Promise<void> => {
+  const deleteAlbum = async ({ detail: album }: CustomEvent<Album>): Promise<void> => {
     if (album.id == null) return;
 
     const conf = confirm(`Are you sure you want to delete album "${album.name}"?`);
@@ -57,42 +52,39 @@
   }
 
   const openAlbum = ({ detail: album }) => {
-    selectedAlbum = album;
-    albumTree = [...albumTree, album];
+    route.addAlbum(album)
   }
 
   const moveBackOne = () => {
-    if (albumTree.length > 0) {
-      albumTree = albumTree.slice(0, albumTree.length - 1);
-      selectedAlbum = albumTree[albumTree.length - 1];
-    }
+    route.popAlbum();
   }
 
   const albumSkip = ({ detail: index }) => {
-    if (index == null || index >= albumTree.length) return;
+    if (index == null || index >= $route.albums.length) return;
 
-    albumTree = albumTree.slice(0, index + 1);
-    selectedAlbum = albumTree[albumTree.length - 1];
+    const albums = $route.albums.slice(0, index + 1);
+
+    route.setAlbums(albums);
   }
 
   $: {
     $gallery;
-    albumTree = albumTree;
+    // albumTree = albumTree;
   }
 
-  // $: console.log(openedAlbum);
+  // $: console.log(selectedAlbum, openedAlbum);
 </script>
 
 <div class="main">
   <div class="header-nav-bar">
     <div class="album-nav">
 
-      {#if albumTree.length > 0}
-        <button class="material" on:click={moveBackOne}>
+      {#if $route.albums.length > 0}
+        <button class="material move-back-btn" on:click={moveBackOne}>
           <span class="material-icons">arrow_back</span>
         </button>
 
-        <AlbumTreeBar albums={albumTree}
+        <AlbumTreeBar albums={$route.albums}
                       on:albumSkip={albumSkip}
                       on:albumEdit={onNewOrEditAlbum}
         />
@@ -148,7 +140,7 @@
     overflow: hidden;
   }
 
-  .album-nav{
+  .album-nav {
     position: relative;
     display: flex;
     align-items: center;
@@ -157,16 +149,18 @@
     overflow: hidden;
   }
 
-  .add-album{
+  .album-nav .move-back-btn{
+    margin-left: 5px;
+  }
+
+  .add-album {
     position: relative;
     flex: 0;
   }
 
-  .add-album span{
+  .add-album span {
     white-space: nowrap;
   }
-
-
 
 
 </style>

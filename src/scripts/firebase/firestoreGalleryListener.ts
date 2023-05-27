@@ -47,6 +47,8 @@ export default class FirestoreGalleryListener {
   private cachedAlbums: Album[] = [];
   private cachedTags: Tag[] = [];
 
+  private fetched: Set<GallerySkeletonKey> = new Set<GallerySkeletonKey>();
+
   constructor(user: User) {
     this.user = user;
 
@@ -71,6 +73,10 @@ export default class FirestoreGalleryListener {
     });
   }
 
+  public get ready(): boolean {
+    return Object.values(GallerySkeletonKey).every((key) => this.fetched.has(key));
+  }
+
   public getAlbumImageStore(album: Album, includeSubAlbum: boolean = false): Readable<Image[]> {
 
     const albumIds = [
@@ -87,7 +93,7 @@ export default class FirestoreGalleryListener {
     });
   }
 
-  public getAlbumStore(album: Album): Readable<Album[]> {
+  public getAlbumStore(album: Album): Readable<Album> {
     return readable(null, (set) => {
       return this.listen((gallery) => {
         set(gallery.albums.find(a => a.id === album.id));
@@ -102,7 +108,7 @@ export default class FirestoreGalleryListener {
    */
   public listen(callback: (gallery: Gallery) => void): Unsubscriber {
     this.callbacks.push(callback);
-    callback(this.gallery);
+    this.ready && callback(this.gallery);
     return () => {
       this.callbacks = this.callbacks.filter((cb) => cb !== callback);
     }
@@ -136,6 +142,7 @@ export default class FirestoreGalleryListener {
 
   private createSnapshotResolver(key: GallerySkeletonKey): (snapshot: QuerySnapshot) => Promise<void> {
     return async (snapshot: QuerySnapshot) => {
+      this.fetched.add(key);
       this.skeleton[key] = snapshot.docs.map((doc) => dataWithId(doc) as any);
       await this.syncGallery();
     }
@@ -210,6 +217,7 @@ export default class FirestoreGalleryListener {
   }
 
   private broadcast(gallery: Gallery): void {
+    if (!this.ready) return;
     this.callbacks.forEach((callback) => callback(gallery));
   }
 }

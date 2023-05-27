@@ -6,6 +6,7 @@
   import { writable } from "svelte/store";
   import type { ReadWritable } from "../scripts/util/helperTypes";
   import type Album from "../scripts/gallery/album";
+  import { route } from "../scripts/routeManager";
 
   export let images: ReadWritable<Image[]> = writable([]);
   export let album: ReadWritable<Album> = null;
@@ -19,7 +20,10 @@
 
   const openFullscreenDialog = (image) => {
     const index = photosFormatted.indexOf(image);
-    fullscreenDialog.show(images, Math.max(index, 0), album);
+
+    route.setFullscreenImage($images[index])
+
+    // fullscreenDialog.show(images, Math.max(index, 0), album);
   }
 </script>
 

@@ -20,7 +20,6 @@
   $: indexedAlbums = albums.map((album, index) => [album, index]);
 
   const handleScroll = (event: WheelEvent) => {
-    console.log("handleScroll", event.deltaY);
     pathElement && pathElement.scrollBy({
       left: event.deltaY < 0 ? -30 : 30,
     });

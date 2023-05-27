@@ -6,15 +6,16 @@
   import { localConfig } from "../scripts/localConfig";
   import { fly } from "svelte/transition";
   import AlbumsView from "./albums_view/AlbumsView.svelte";
+  import { route } from "../scripts/routeManager";
 </script>
 
 <div class="main">
   {#if $gallery?.listener?.galleryImageStore !== undefined}
-    {#if $localConfig.currentScreen === Screen.GALLERY}
+    {#if $route.screen === Screen.GALLERY}
       <div class="all-images view" transition:fly={{duration: 200, x: 200}}>
         <ImagesView images={$gallery.listener.galleryImageStore}/>
       </div>
-    {:else if $localConfig.currentScreen === Screen.ALBUMS}
+    {:else if $route.screen === Screen.ALBUMS}
       <div class="albums view" transition:fly={{duration: 200, x: -200}}>
         <AlbumsView/>
       </div>
