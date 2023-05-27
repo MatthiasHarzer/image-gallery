@@ -6,12 +6,14 @@ interface LocalConfig {
   currentScreen: Screen;
   navPined: boolean;
   navOpen: boolean;
+  includeSubAlbum: boolean;
 }
 
 const defaultLocalConfig: LocalConfig = {
   currentScreen: Screen.GALLERY,
   navPined: false,
   navOpen: false,
+  includeSubAlbum: false,
 }
 
 const noCache = ["navOpen"];
@@ -22,6 +24,14 @@ const createLocalConfig = () => {
 
   const localConfigString = localStorage.getItem(localConfigKey);
   const localConfig = localConfigString ? JSON.parse(localConfigString ?? null) : defaultLocalConfig;
+
+  for (const key of Object.keys(defaultLocalConfig)) {
+    if (!localConfig[key]) {
+      localConfig[key] = defaultLocalConfig[key];
+    }
+  }
+
+  console.log("localConfig", localConfig);
 
   const { set, subscribe, update } = writable<LocalConfig>(localConfig);
 

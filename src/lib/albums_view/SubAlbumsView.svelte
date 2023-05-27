@@ -1,9 +1,12 @@
 <script lang="ts">
 
   import type Album from "../../scripts/gallery/album";
-  import { gallery } from "../../scripts/firebase/firebaseManager";
   import AlbumCard from "./AlbumCard.svelte";
   import { createEventDispatcher } from "svelte";
+  import ImagesView from "../ImagesView.svelte";
+  import { gallery } from "../../scripts/firebase/firebaseManager";
+  import FlipSlider from "../util/FlipSlider.svelte";
+  import { localConfig } from "../../scripts/localConfig";
 
   export let album: Album;
 
@@ -16,6 +19,7 @@
   const onOpen = (album: Album) => {
     dispatch("open", album);
   }
+
 </script>
 
 <div class="main">
@@ -28,17 +32,52 @@
       />
     {/each}
   </div>
+  <div class="album-images">
+    <div class="options-bar">
+      {#if album.id !== null && album.children.length !== 0}
+        <div class="include-sub-albums">
+          <FlipSlider bind:active={$localConfig.includeSubAlbum} id="include-sub-albums"/>
+          <label for="include-sub-albums">Include Sub Albums</label>
+        </div>
+      {/if}
+    </div>
+    <ImagesView
+        images={$gallery.listener.getAlbumImageStore(album, $localConfig.includeSubAlbum)}
+    />
+  </div>
 
 </div>
 
 <style>
 
-  .album-list{
+  .album-list {
     /*padding-top: 3rem;*/
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     /*gap: 0;*/
+  }
+
+  .options-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem;
+    /*border-bottom: 1px solid var(--border-color);*/
+  }
+
+  .include-sub-albums {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+  }
+
+  .include-sub-albums label {
+    margin: 0;
+    font-size: 1.2rem;
+    cursor: pointer;
+    user-select: none;
   }
 
 </style>

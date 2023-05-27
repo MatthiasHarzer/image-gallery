@@ -4,12 +4,15 @@
   import type Image from "../../scripts/gallery/image";
   import { firebaseUser, firestoreManager, gallery } from "../../scripts/firebase/firebaseManager";
   import Tag from "../../scripts/gallery/tag";
+  import AddToAlbumScreen from "../AddToAlbumScreen.svelte";
 
   const dispatch = createEventDispatcher();
 
   export let image: Image;
 
   export let zoomEnabled = false;
+
+  let addToGalleryOpen = false;
 
   let tagsScrollElement: HTMLElement;
 
@@ -95,6 +98,9 @@
       <button class="material favorite" class:is-favorite={image.favorite} on:click={onFavorite}>
         <span class="material-icons-outlined">{image.favorite ? "star" : "star_outline"}</span>
       </button>
+      <button class="material add-to-album" on:click={()=>addToGalleryOpen = true}>
+        <span class="material-icons-outlined">add_to_photos</span>
+      </button>
       <button class="material delete" on:click={onDelete}>
         <span class="material-icons-outlined">delete</span>
       </button>
@@ -137,6 +143,10 @@
   </div>
 
 </div>
+
+{#if addToGalleryOpen}
+  <AddToAlbumScreen {image} on:close={()=>addToGalleryOpen = false}/>
+{/if}
 
 <style>
 

@@ -69,6 +69,21 @@ export default class FirestoreGalleryListener {
     });
   }
 
+  public getAlbumImageStore(album: Album, includeSubAlbum: boolean = false): Readable<Image[]> {
+
+    const albumIds = [
+      album.id,
+      ...(includeSubAlbum ? this.getAllSubAlbums(album).map((a) => a.id) : [])
+    ];
+
+
+    return readable([], (set) => {
+      return this.listen((gallery) => {
+        set(gallery.albums.filter((i) => albumIds.includes(i.id)).flatMap((a) => a.images));
+      });
+    });
+  }
+
   /**
    * Listen for realtime updates to the gallery.
    * Gets called immediately with the current gallery.
@@ -85,6 +100,27 @@ export default class FirestoreGalleryListener {
   public unsubscribeAll(): void {
     this.subscriptions.forEach((unsubscribe) => unsubscribe());
     this.subscriptions = [];
+  }
+
+  private getAllSubAlbums(parent: Album): Album[] {
+    let albums: Album[] = [];
+
+    let children = [...parent.children];
+    let known = new Set<string>();
+    known.add(parent.id);
+
+    while (children.length > 0) {
+      let child = children.pop();
+
+      if (child === undefined || known.has(child.id)) continue;
+
+      known.add(child.id);
+
+      albums.push(child);
+      children = children.concat(child.children);
+    }
+
+    return albums;
   }
 
   private createSnapshotResolver(key: GallerySkeletonKey): (snapshot: QuerySnapshot) => Promise<void> {
@@ -119,7 +155,7 @@ export default class FirestoreGalleryListener {
     if (existing === undefined) {
       this.cachedTags.push(tag);
       return tag;
-    }else{
+    } else {
       return existing.modifyWith(tag);
     }
   }

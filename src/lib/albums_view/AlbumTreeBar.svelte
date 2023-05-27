@@ -10,7 +10,6 @@
   const dispatch = createEventDispatcher();
 
   const handleAlbumSkip = (index: number) => {
-    console.log("handleAlbumSkip", index);
     dispatch("albumSkip", index);
   }
 
