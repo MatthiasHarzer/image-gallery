@@ -67,6 +67,7 @@ type Router = Writable<Route> & {
   popAlbum: () => Album;
   setScreen: (screen: Screen) => void;
   setFullscreenImage: (image: Image, replace?: boolean) => void;
+  clear: () => void;
 }
 
 const albumRouteRegex = /^album@(.+$)/;
@@ -134,7 +135,10 @@ const createRoute = (): Router => {
     },
     subscribe,
     set,
-    update
+    update,
+    clear: () => {
+      push(defaultRoute)
+    }
   }
 }
 

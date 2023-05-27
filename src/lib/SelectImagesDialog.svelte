@@ -13,10 +13,13 @@
 
   const dispatch = createEventDispatcher();
 
-  $: availableImages = $images ?? $gallery.listener.galleryImageStore;
+  let lastIndex = 0;
+  let availableImages: ReadWritable<Image[]>;
 
-  onMount(()=>{
-    if(!multiple && selectedImages.length > 1){
+  $: availableImages = $images == null ? $gallery.listener.galleryImageStore : images;
+
+  onMount(() => {
+    if (!multiple && selectedImages.length > 1) {
       selectedImages = [selectedImages[0]];
     }
   })
@@ -29,17 +32,27 @@
     dispatch("submit", selectedImages);
   }
 
-  const toggle = (image: Image) => {
+  const toggle = (image: Image, shift: boolean) => {
 
-    if(!multiple){
+    if (!multiple) {
       selectedImages = [image];
       return;
     }
-
+    const index = $availableImages.indexOf(image);
     if (selectedImages.includes(image)) {
       selectedImages = selectedImages.filter(i => i !== image);
     } else {
-      selectedImages = [...selectedImages, image];
+
+      if (shift) {
+        const start = Math.min(index, lastIndex);
+        const end = Math.max(index, lastIndex);
+        console.log(index, start, end);
+        selectedImages = [...selectedImages, ...$availableImages.slice(start, end + 1)];
+      } else {
+        selectedImages = [...selectedImages, image];
+      }
+      selectedImages = [...new Set(selectedImages)];
+      lastIndex = selectedImages.length - 1;
     }
   }
 
@@ -61,8 +74,8 @@
         {#each $availableImages as image (image.id)}
 
           <button class="image-container clear" class:selected={selectedImages.includes(image)}
-                  on:click={()=>toggle(image)}>
-            <img src={image.url} alt={image.name}/>
+                  on:click={e=>toggle(image, e.shiftKey)}>
+            <img loading="lazy" src={image.url} alt={image.name}/>
             <div class="image-overlay">
             <span class="material-icons">
               check
@@ -87,7 +100,7 @@
 
 <style>
 
-  .dialog-content{
+  .dialog-content {
     margin-top: 1rem;
     width: 90vw;
 
@@ -95,6 +108,7 @@
     flex-direction: column;
     align-items: center;
   }
+
   .images {
     width: 90%;
     /*margin: 100px;*/
@@ -162,7 +176,7 @@
     top: 10px;
   }
 
-  .submit-btn{
+  .submit-btn {
     margin: 1rem;
     width: 100%;
     max-width: 300px;

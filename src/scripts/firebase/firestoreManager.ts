@@ -148,7 +148,6 @@ export default class FirestoreManager {
   }
 
   public async updateAlbumProps(user: User, album: Album, updateData: { [key: string]: any }): Promise<void> {
-    console.log(album, updateData);
     const albumRef = doc(ALBUMS_REF(user), album.id);
 
 

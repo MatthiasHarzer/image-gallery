@@ -92,7 +92,7 @@
         <div class="preview">
           {#each filesToUpload as file}
             <div class="preview-item">
-              <img src={URL.createObjectURL(file)} alt=""/>
+              <img loading="lazy" src={URL.createObjectURL(file)} alt=""/>
               <div class="preview-item-actions">
                 <button class="clear" on:click={() => filesToUpload = filesToUpload.filter(f => f !== file)}>
                   <span class="material-icons">delete</span>

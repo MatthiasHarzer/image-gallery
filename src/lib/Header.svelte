@@ -16,11 +16,13 @@
 
   const dispatch = createEventDispatcher();
 
-  const signInOut = () => {
+  const signInOut = async() => {
     if (signedId) {
-      signOut(auth);
+      await signOut(auth);
+      route.clear();
+      window.location.reload();
     } else {
-      signInWithPopup(auth, authProvider)
+      await signInWithPopup(auth, authProvider)
     }
   }
 

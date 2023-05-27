@@ -22,8 +22,8 @@
 
 <div class="main" on:click|stopPropagation={openAlbum}>
   {#if cover}
-    <img src="{cover.url}" alt="{cover.name}"/>
-    <img class="blur" src="{cover.url}" alt="{cover.name}" style="--titleHeight: {titleHeight}px"/>
+    <img loading="lazy" src="{cover.url}" alt="{cover.name}"/>
+    <img loading="lazy" class="blur" src="{cover.url}" alt="{cover.name}" style="--titleHeight: {titleHeight}px"/>
   {/if}
   <h1 bind:clientHeight={titleHeight}>{album.name}</h1>
 

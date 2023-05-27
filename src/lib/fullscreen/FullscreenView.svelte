@@ -159,11 +159,14 @@
 
     invalidateCache();
 
+    setTimeout(()=>{
+
     if (oldIndex >= $images.length) {
       setImage($images.length - 1);
     } else {
       setImage(oldIndex);
     }
+    }, 100);
 
   }
 
@@ -198,7 +201,7 @@
             {#if zoomEnabled}
               <Zoom src={image.src} alt={image.name}/>
             {:else}
-              <img src={image.src} alt={image.name}/>
+              <img loading="lazy" src={image.src} alt={image.name}/>
             {/if}
           {:catch error}
             <div class="error">
