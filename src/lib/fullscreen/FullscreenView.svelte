@@ -4,13 +4,14 @@
   import { onMount } from "svelte";
   import LoadingSpinner from "../util/LoadingSpinner.svelte";
   import FullscreenViewNav from "./FullscreenViewNav.svelte";
-  import { fullscreenDialog } from "../../scripts/fullscreenDialog";
+  import { swipe } from 'svelte-gestures';
   import { firebaseUser, firestoreManager } from "../../scripts/firebase/firebaseManager";
   import type { ReadWritable } from "../../scripts/util/helperTypes";
   import { writable } from "svelte/store";
   import Zoom from "svelte-zoom";
   import { fade } from 'svelte/transition';
   import { route } from "../../scripts/routeManager";
+  import ImageCarrousel from "./ImageCarrousel.svelte";
 
   export let images: ReadWritable<CustomImage[]> = writable([]);
   export let initialImageIdx: number = 0;
@@ -20,7 +21,7 @@
     name: string;
   }
 
-  let navShown = true;
+  let navShown = false;
   const imageCache = new Map<number, Promise<PromisedImage>>();
   let imagePromise: Promise<PromisedImage> = null;
   let upcomingImagePromise: Promise<PromisedImage> = null;
@@ -33,21 +34,7 @@
   let upcomingImageIndex = null;
   let previousImageIndex = null;
 
-  // $: console.log($images, currentImage);
-
-  $: currentImage = $images[index];
-  $: if (index != null) upcomingImageIndex = index + 1 % $images.length;
-  $: if (index != null) previousImageIndex = index - 1 % $images.length;
-
-  $:if (index != null) {
-    imagePromise = getOrCache(index);
-
-    scrollElement && scrollElement.scrollTo({
-      left: pageWidth,
-    });
-  }
-  $: if (upcomingImageIndex != null) upcomingImagePromise = getOrCache(upcomingImageIndex);
-  $: if (previousImageIndex != null) previousImagePromise = getOrCache(previousImageIndex);
+  let currentImage: CustomImage = null;
 
   $: renderedImages = [previousImagePromise, imagePromise, upcomingImagePromise]
   $: loaded = renderedImages && renderedImages.every(promise => promise != null);
@@ -57,29 +44,6 @@
     route.setFullscreenImage(currentImage, true);
   }
 
-  function getOrCache(idx: number) {
-    const image = $images[idx];
-    if (imageCache.has(idx)) {
-      return imageCache.get(idx);
-    } else {
-      const promise = new Promise<PromisedImage>((resolve, reject) => {
-        const img = new Image();
-        img.src = image.url;
-        img.onload = () => {
-          resolve({
-            src: image.url,
-            name: image.name
-          });
-        }
-        img.onerror = () => {
-          reject();
-        }
-      });
-      imageCache.set(idx, promise);
-      return promise;
-    }
-  }
-
 
   onMount(() => {
     if (initialImageIdx < 0 || initialImageIdx >= $images.length) {
@@ -87,58 +51,15 @@
     } else {
       index = initialImageIdx;
     }
-
-    scrollElement.onscroll = (_: Event) => {
-      const offset = scrollElement.scrollLeft;
-      const width = scrollElement.clientWidth;
-
-      const page = Math.floor(offset / width);
-      const pageOffset = offset % width;
-      const pageProgress = pageOffset / width;
-
-      if (pageProgress !== 0) return;
-
-      if (page === 0) {
-        onPreviousSkip()
-      } else if (page === 2) {
-        onNextSkip()
-      }
-    }
-
   })
 
-  const setImage = (idx: number) => {
-    if (idx < 0 && $images.length > 0) {
-      index = $images.length - 1;
-    } else if ($images.length == 0) {
-      return;
-    } else if (idx >= $images.length) {
-      index = 0;
-    } else {
-      index = idx;
-    }
-  }
-
-  const onNextSkip = () => {
-    setImage(index + 1);
-  }
 
   const onNext = () => {
-    scrollElement && scrollElement.scrollTo({
-      left: pageWidth * 2,
-      behavior: "smooth"
-    });
+    index = Math.min(index + 1, $images.length - 1);
   }
 
   const onPrevious = () => {
-    scrollElement && scrollElement.scrollTo({
-      left: 0,
-      behavior: "smooth"
-    });
-  }
-
-  const onPreviousSkip = () => {
-    setImage(index - 1);
+    index = Math.max(index - 1, 0);
   }
 
   const onClose = () => {
@@ -150,24 +71,12 @@
   }
 
   const onDelete = async () => {
-    if (!$firebaseUser || !currentImage) return;
+     if (!$firebaseUser || !currentImage) return;
     const confirm = window.confirm("Are you sure you want to delete this image?");
     if (!confirm) return;
     await firestoreManager.deleteImage($firebaseUser, currentImage);
 
-    const oldIndex = index;
-
     invalidateCache();
-
-    setTimeout(()=>{
-
-    if (oldIndex >= $images.length) {
-      setImage($images.length - 1);
-    } else {
-      setImage(oldIndex);
-    }
-    }, 100);
-
   }
 
   let lastToggle = 0;
@@ -178,8 +87,11 @@
     navShown = !navShown;
   }
 
-  const toggleZoom = () => {
-    zoomEnabled = !zoomEnabled;
+
+  const handleSwipe = (event) =>{
+    if (event.detail.direction === "bottom"){
+      toggleNav();
+    }
   }
 </script>
 
@@ -188,38 +100,18 @@
 
 
   <div bind:this={scrollElement} class="scrollable-image-wrapper"
-       on:dblclick|stopPropagation={toggleNav}
+       use:swipe={{ timeframe: 300, minSwipeDistance: 100 }}
+       on:swipe={handleSwipe}
   >
-    {#if loaded}
-      {#each renderedImages as imagePromise}
-        <div class="image-container container-{renderedImages.indexOf(imagePromise)}" bind:clientWidth={pageWidth}>
-          {#await imagePromise}
-            <div class="loading">
-              <LoadingSpinner/>
-            </div>
-          {:then image}
-            {#if zoomEnabled}
-              <Zoom src={image.src} alt={image.name}/>
-            {:else}
-              <img loading="lazy" src={image.src} alt={image.name}/>
-            {/if}
-          {:catch error}
-            <div class="error">
-              <p>Failed to load image</p>
-            </div>
-          {/await}
-        </div>
-      {/each}
-    {/if}
+      <ImageCarrousel
+          images={images}
+          bind:currentImage
+          bind:currentImageIndex={index} />
   </div>
 
-
-  {#if navShown && currentImage}
-    <div transition:fade="{{duration: 150}}">
-      <FullscreenViewNav on:next={onNext} on:prev={onPrevious} image={currentImage} on:close={onClose}
-                         on:delete={onDelete} {zoomEnabled} on:toggle-zoom={toggleZoom}/>
-    </div>
-  {/if}
+  <FullscreenViewNav on:next={onNext} on:prev={onPrevious} image={currentImage} on:close={onClose}
+                     {navShown} on:delete={onDelete} {zoomEnabled} on:toggle-nav={toggleNav}
+  />
 
 </div>
 
@@ -236,6 +128,7 @@
     /*display: flex;*/
     /*justify-content: center;*/
     /*align-items: center;*/
+    overflow: hidden;
   }
 
   .scrollable-image-wrapper {
@@ -274,10 +167,6 @@
   .image-container img {
     max-width: 100%;
     max-height: 100%;
-  }
-
-  .container-0, .container-2 {
-    z-index: -1;
   }
 
 </style>

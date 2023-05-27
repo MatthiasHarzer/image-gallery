@@ -8,6 +8,7 @@
   // $: console.log($route)
   // $: console.log($gallery)
 
+  $: console.log($fullscreenDialog)
 </script>
 
 <main>

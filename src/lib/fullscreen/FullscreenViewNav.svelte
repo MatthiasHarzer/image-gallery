@@ -11,7 +11,7 @@
 
   export let image: Image;
 
-  export let zoomEnabled = false;
+  export let navShown = false;
 
   $: album = $fullscreenDialog.album;
 
@@ -46,12 +46,12 @@
     dispatch("delete");
   }
 
-  const onFavorite = () => {
-    firestoreManager.updateImageProps($firebaseUser, image, { favorite: !image.favorite });
+  const toggleNav = () => {
+    dispatch("toggle-nav");
   }
 
-  const onToggleZoom = () => {
-    dispatch("toggle-zoom");
+  const onFavorite = () => {
+    firestoreManager.updateImageProps($firebaseUser, image, { favorite: !image.favorite });
   }
 
   const onTagEnter = async () => {
@@ -90,7 +90,11 @@
   }
 </script>
 
-<div class="main">
+<button class="material toggle-nav-btn" on:click={toggleNav}>
+  <span class="material-icons-outlined">{navShown ? "visibility_off" : "info"}</span>
+</button>
+
+<div class="main" class:visible={navShown}>
   <div class="top-nav-bar">
     <div class="left">
       <button class="material" on:click={onClose}>
@@ -98,44 +102,44 @@
       </button>
     </div>
 
-    <div class="right">
-      <button class="material" on:click={onToggleZoom}>
-        <span class="material-icons-outlined">
-          {zoomEnabled ? "zoom_out_map" : "zoom_in"}
-        </span>
-      </button>
-      <button class="material favorite" class:is-favorite={image.favorite} on:click={onFavorite}>
-        <span class="material-icons-outlined">{image.favorite ? "star" : "star_outline"}</span>
-      </button>
-      <button class="material add-to-album" on:click={()=>addToAlbumOpen = true}>
-        <span class="material-icons-outlined">add_to_photos</span>
-      </button>
-      <div class="context-menu">
-
-        <button class="material toggle-nav">
-          <span class="material-icons">
-            more_vert
-          </span>
+      <div class="right">
+        <button class="material favorite" class:is-favorite={image?.favorite} on:click={onFavorite}>
+          <span class="material-icons-outlined">{image?.favorite ? "star" : "star_outline"}</span>
         </button>
-        <div class="drop-down box-shadow">
-          <button class="material text-button drop-down-item"
-                  on:click={onDelete}>
+        <button class="material add-to-album" on:click={()=>addToAlbumOpen = true}>
+          <span class="material-icons-outlined">add_to_photos</span>
+        </button>
+        <div class="context-menu">
+
+          <button class="material toggle-nav">
+            <span class="material-icons">
+              more_vert
+            </span>
+          </button>
+          <div class="drop-down box-shadow">
+            <button class="material text-button drop-down-item"
+                    on:click={onDelete}>
             <span class="name">
               Delete
             </span>
-          </button>
-          {#if $album != null}
-            <button class="material text-button drop-down-item"
-                    on:click={makeAlbumCover}>
+            </button>
+            {#if $album != null}
+              <button class="material text-button drop-down-item"
+                      on:click={makeAlbumCover}>
             <span class="name">
               Make album cover
             </span>
-            </button>
-          {/if}
+              </button>
+            {/if}
+          </div>
         </div>
+
+        <button class="material toggle-nav-btn-fake">
+          <span class="material-icons-outlined">{navShown ? "visibility_off" : "visibility"}</span>
+        </button>
+
       </div>
 
-    </div>
   </div>
 
   <div class="page-nav">
@@ -150,7 +154,7 @@
   <div class="tags-nav">
 
     <div bind:this={tagsScrollElement} class="tags-list">
-      {#each image.tags as tag (tag.id)}
+      {#each image?.tags ?? [] as tag (tag.id)}
         <div class="tag">
           <span class="name">{tag.name}</span>
           <button class="remove-tag material" on:click={()=>removeTag(tag)}>
@@ -181,6 +185,18 @@
 
 <style>
 
+  .toggle-nav-btn{
+    position: absolute;
+    top: -1px;
+    right: 16px;
+    margin: 0.5rem;
+    z-index: 100;
+  }
+
+  .toggle-nav-btn-fake{
+    visibility: hidden;
+  }
+
   button, input {
     pointer-events: all;
   }
@@ -197,6 +213,16 @@
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
+
+    opacity: 0;
+    visibility: hidden;
+
+    transition: visibility 0.2s, opacity 0.2s ease-in-out;
+  }
+
+  .main.visible{
+    opacity: 1;
+    visibility: visible;
   }
 
   .main .page-nav {
