@@ -52,7 +52,7 @@
         selectedImages = [...selectedImages, image];
       }
       selectedImages = [...new Set(selectedImages)];
-      lastIndex = selectedImages.length - 1;
+      lastIndex = $availableImages.indexOf(image);
     }
   }
 
