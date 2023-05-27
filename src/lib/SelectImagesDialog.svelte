@@ -100,7 +100,7 @@
     /*margin: 100px;*/
     display: grid;
     grid-gap: 10px;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, min(150px, 25%)), 1fr));
     grid-auto-rows: 1fr;
   }
 
@@ -150,7 +150,7 @@
   }
 
   .image-overlay span {
-    font-size: 3rem;
+    font-size: 2rem;
     color: white;
     text-align: center;
     background: rgba(1, 135, 218, 0.8);
