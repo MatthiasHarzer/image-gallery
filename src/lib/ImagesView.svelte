@@ -31,7 +31,7 @@
 
   <div class="gallery">
     <GalleryView
-        baseHeight={300}
+        baseHeight={180}
         gutter={2}
         onPhotoClick={openFullscreenDialog}
         photoClass="photo"
