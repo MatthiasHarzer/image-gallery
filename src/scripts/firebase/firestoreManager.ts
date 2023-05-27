@@ -1,5 +1,5 @@
 import type { User } from "firebase/auth";
-import { addDoc, deleteDoc, doc, DocumentReference, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { addDoc, deleteDoc, doc, DocumentReference, getDoc, setDoc, updateDoc, serverTimestamp  } from "firebase/firestore";
 import { ALBUMS_REF, IMAGE_REF, IMAGES_REF, STORAGE_BUCKET_IMAGE_REF, TAGS_REF, USER_REF } from "./firebasePathConfig";
 
 import { deleteObject, getDownloadURL, uploadBytesResumable } from "firebase/storage";
@@ -103,20 +103,31 @@ export default class FirestoreManager {
     });
   }
 
-  public async createAlbum(user: User, album: Album): Promise<DocumentReference> {
+  private async createAlbum(user: User, album: Album): Promise<DocumentReference> {
     const albumsRef = ALBUMS_REF(user);
 
     return await addDoc(albumsRef, {
       name: album.name,
       description: album.description ?? "",
-      images: [],
-      children: [],
+      images: album.images.map(i => i.id),
       parent: album.parent?.id ?? null,
       cover: null,
+      timestamp: serverTimestamp(),
     });
   }
 
-  public async updateAlbum(user: User, album: Album): Promise<void> {
+  public async createOrUpdateAlbum(user: User, album: Album): Promise<void> {
+    const isNew = album.id == null;
+
+    if (isNew) {
+      const albumRef = await this.createAlbum(user, album);
+      album.id = albumRef.id;
+    }else{
+      await this.updateAlbum(user, album);
+    }
+  }
+
+  private async updateAlbum(user: User, album: Album): Promise<void> {
     const albumRef = doc(ALBUMS_REF(user), album.id);
 
     await updateDoc(albumRef, {
@@ -128,6 +139,20 @@ export default class FirestoreManager {
       cover: album.cover?.id ?? null,
     });
 
+  }
+
+  public async deleteAlbum(user: User, album: Album): Promise<void> {
+    const albumRef = doc(ALBUMS_REF(user), album.id);
+
+    await deleteDoc(albumRef);
+  }
+
+  public async updateAlbumProps(user: User, album: Album, updateData: { [key: string]: any }): Promise<void> {
+    console.log(album, updateData);
+    const albumRef = doc(ALBUMS_REF(user), album.id);
+
+
+    await updateDoc(albumRef, updateData);
   }
 
   private async createImageNode(user: User, image: File): Promise<DocumentReference> {
@@ -149,6 +174,7 @@ export default class FirestoreManager {
       state: "uploading",
       width: imageDimensions.width,
       height: imageDimensions.height,
+      timestamp: serverTimestamp(),
     });
   }
 

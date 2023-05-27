@@ -11,12 +11,4 @@ export default class Gallery{
     public tags: Tag[],
   ) {
   }
-
-  public modifyWith(gallery: Gallery): Gallery {
-    this.images = gallery.images;
-    this.albums = gallery.albums;
-    this.tags = gallery.tags;
-    return this;
-  }
-
 }

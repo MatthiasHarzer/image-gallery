@@ -20,6 +20,10 @@
     dispatch("open", album);
   }
 
+  $: albumStore = album?.id != null ? $gallery.listener.getAlbumStore(album) : null;
+  $: images = album?.id != null ? $gallery.listener.getAlbumImageStore(album, $localConfig.includeSubAlbum)
+      : $gallery.listener.galleryImageStore;
+
 </script>
 
 <div class="main">
@@ -42,7 +46,8 @@
       {/if}
     </div>
     <ImagesView
-        images={$gallery.listener.getAlbumImageStore(album, $localConfig.includeSubAlbum)}
+        images={images}
+        album={albumStore}
     />
   </div>
 

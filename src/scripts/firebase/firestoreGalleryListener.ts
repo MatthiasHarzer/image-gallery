@@ -1,6 +1,6 @@
 import type { User } from "firebase/auth";
 import Gallery from "../gallery/gallery";
-import { onSnapshot, QuerySnapshot } from "firebase/firestore";
+import { onSnapshot, orderBy, query, QuerySnapshot } from "firebase/firestore";
 
 import { ALBUMS_REF, IMAGES_REF, TAGS_REF } from "./firebasePathConfig";
 import type { AlbumData } from "../gallery/album";
@@ -54,8 +54,10 @@ export default class FirestoreGalleryListener {
     const albumsRef = ALBUMS_REF(user);
     const tagsRef = TAGS_REF(user);
 
+    const imageQuery = query(imagesRef, orderBy("timestamp", "desc"));
+
     this.subscriptions = [
-      onSnapshot(imagesRef, this.createSnapshotResolver(GallerySkeletonKey.IMAGES)),
+      onSnapshot(imageQuery, this.createSnapshotResolver(GallerySkeletonKey.IMAGES)),
       onSnapshot(albumsRef, this.createSnapshotResolver(GallerySkeletonKey.ALBUMS)),
       onSnapshot(tagsRef, this.createSnapshotResolver(GallerySkeletonKey.TAGS)),
     ];
@@ -79,7 +81,16 @@ export default class FirestoreGalleryListener {
 
     return readable([], (set) => {
       return this.listen((gallery) => {
-        set(gallery.albums.filter((i) => albumIds.includes(i.id)).flatMap((a) => a.images));
+        const images = gallery.albums.filter((i) => albumIds.includes(i.id)).flatMap((a) => a.images);
+        set([...new Set(images)]);
+      });
+    });
+  }
+
+  public getAlbumStore(album: Album): Readable<Album[]> {
+    return readable(null, (set) => {
+      return this.listen((gallery) => {
+        set(gallery.albums.find(a => a.id === album.id));
       });
     });
   }

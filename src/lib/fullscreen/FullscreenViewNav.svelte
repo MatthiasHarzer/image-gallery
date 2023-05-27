@@ -5,6 +5,7 @@
   import { firebaseUser, firestoreManager, gallery } from "../../scripts/firebase/firebaseManager";
   import Tag from "../../scripts/gallery/tag";
   import AddToAlbumScreen from "../AddToAlbumScreen.svelte";
+  import { fullscreenDialog } from "../../scripts/fullscreenDialog";
 
   const dispatch = createEventDispatcher();
 
@@ -12,13 +13,15 @@
 
   export let zoomEnabled = false;
 
-  let addToGalleryOpen = false;
+  $: album = $fullscreenDialog.album;
+
+  let addToAlbumOpen = false;
 
   let tagsScrollElement: HTMLElement;
 
   let tagInput = "";
 
-  onMount(()=>{
+  onMount(() => {
     tagsScrollElement.onwheel = (event) => {
       event.stopPropagation();
       tagsScrollElement.scrollBy({
@@ -47,23 +50,23 @@
     firestoreManager.updateImageProps($firebaseUser, image, { favorite: !image.favorite });
   }
 
-  const onToggleZoom = () =>{
+  const onToggleZoom = () => {
     dispatch("toggle-zoom");
   }
 
-  const onTagEnter = async () =>{
+  const onTagEnter = async () => {
     tagInput = tagInput.trim();
 
-    if(tagInput.length === 0) return;
+    if (tagInput.length === 0) return;
 
     const existingTag = $gallery.tags.find(tag => tag.name.toLowerCase() === tagInput.toLowerCase());
 
     let tag: Tag;
 
-    if (existingTag){
-      if(image.tags.some(tag => tag.id === existingTag.id)) return;
+    if (existingTag) {
+      if (image.tags.some(tag => tag.id === existingTag.id)) return;
       tag = existingTag;
-    }else{
+    } else {
       const doc = await firestoreManager.createTag($firebaseUser, {
         name: tagInput,
         description: ""
@@ -76,8 +79,14 @@
     tagInput = "";
   }
 
-  const removeTag = (tag: Tag) =>{
+  const removeTag = (tag: Tag) => {
     firestoreManager.removeTagFromImage($firebaseUser, image, tag);
+  }
+
+  const makeAlbumCover = () => {
+    if ($album == null) return;
+
+    firestoreManager.updateAlbumProps($firebaseUser, $album, { cover: image.id });
   }
 </script>
 
@@ -98,12 +107,34 @@
       <button class="material favorite" class:is-favorite={image.favorite} on:click={onFavorite}>
         <span class="material-icons-outlined">{image.favorite ? "star" : "star_outline"}</span>
       </button>
-      <button class="material add-to-album" on:click={()=>addToGalleryOpen = true}>
+      <button class="material add-to-album" on:click={()=>addToAlbumOpen = true}>
         <span class="material-icons-outlined">add_to_photos</span>
       </button>
-      <button class="material delete" on:click={onDelete}>
-        <span class="material-icons-outlined">delete</span>
-      </button>
+      <div class="context-menu">
+
+        <button class="material toggle-nav">
+          <span class="material-icons">
+            more_vert
+          </span>
+        </button>
+        <div class="drop-down box-shadow">
+          <button class="material text-button drop-down-item"
+                  on:click={onDelete}>
+            <span class="name">
+              Delete
+            </span>
+          </button>
+          {#if $album != null}
+            <button class="material text-button drop-down-item"
+                    on:click={makeAlbumCover}>
+            <span class="name">
+              Make album cover
+            </span>
+            </button>
+          {/if}
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -118,7 +149,7 @@
 
   <div class="tags-nav">
 
-    <div class="tags-list" bind:this={tagsScrollElement}>
+    <div bind:this={tagsScrollElement} class="tags-list">
       {#each image.tags as tag (tag.id)}
         <div class="tag">
           <span class="name">{tag.name}</span>
@@ -129,10 +160,10 @@
       {/each}
     </div>
     <div class="input-field">
-      <input id="tag" type="text"
-             bind:value={tagInput}
-             placeholder="Enter tag..."
+      <input bind:value={tagInput} id="tag"
              on:keyup={e => {if(e.key === "Enter") onTagEnter()}}
+             placeholder="Enter tag..."
+             type="text"
       />
       <label for="tag">
         <button class="material no-effect" on:click={onTagEnter}>
@@ -144,13 +175,13 @@
 
 </div>
 
-{#if addToGalleryOpen}
-  <AddToAlbumScreen {image} on:close={()=>addToGalleryOpen = false}/>
+{#if addToAlbumOpen}
+  <AddToAlbumScreen {image} on:close={()=>addToAlbumOpen = false}/>
 {/if}
 
 <style>
 
-  button, input{
+  button, input {
     pointer-events: all;
   }
 
@@ -224,11 +255,11 @@
     margin: 0.5em;
   }
 
-  .top-nav-bar .favorite.is-favorite span{
+  .top-nav-bar .favorite.is-favorite span {
     color: #f1c40f;
   }
 
-  .input-field{
+  .input-field {
     position: relative;
     display: flex;
     justify-content: center;
@@ -242,7 +273,7 @@
     border-radius: 0.5em;
   }
 
-  .input-field input{
+  .input-field input {
     width: 100%;
     height: 100%;
     border: none;
@@ -256,11 +287,11 @@
     border-radius: inherit;
   }
 
-  .input-field label{
+  .input-field label {
     border-radius: inherit;
   }
 
-  .input-field button{
+  .input-field button {
     position: absolute;
     right: 0;
     top: 0;
@@ -268,18 +299,19 @@
     background-color: var(--primary-color);
     border-radius: inherit;
   }
-  .input-field button:hover{
+
+  .input-field button:hover {
     background-color: var(--primary-color-accent);
   }
 
-  .tags-nav{
+  .tags-nav {
     position: relative;
     width: 100%;
 
     background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.7) 100%);
   }
 
-  .tags-list{
+  .tags-list {
     display: flex;
     width: 100%;
     margin: 0;
@@ -292,7 +324,7 @@
     height: 0.5em;
   }
 
-  .tags-list .tag{
+  .tags-list .tag {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -302,18 +334,68 @@
     border-radius: 0.5em;
   }
 
-  .tags-list .tag button span{
+  .tags-list .tag button span {
     font-size: 1.1rem;
     transition: all 0.2s ease-in-out;
   }
-  .tags-list .tag button:hover span{
+
+  .tags-list .tag button:hover span {
     color: #ffcdc9;
   }
 
-  .tags-list .tag .name{
+  .tags-list .tag .name {
     max-width: 250px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .context-menu {
+    position: relative;
+  }
+
+  .context-menu button {
+    pointer-events: all;
+  }
+
+  .context-menu:not(:focus-within) .drop-down {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .context-menu .drop-down {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    /*width: 100%;*/
+    border-radius: 0.2em;
+    /*padding: 0.5em;*/
+    background-color: #424242;
+    opacity: 1;
+    pointer-events: all;
+    transition: all 0.2s ease-in-out;
+    width: auto;
+  }
+
+  .context-menu .drop-down button {
+    width: 100%;
+    padding: 0.5em 1.5em;
+    /*background-color: var(--primary-color);*/
+    border-radius: 0.5em;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    white-space: nowrap;
+  }
+
+  .context-menu .drop-down button:not(:last-child) {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .context-menu .drop-down button:not(:first-child) {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
   }
 </style>

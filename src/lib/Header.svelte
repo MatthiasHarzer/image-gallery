@@ -123,7 +123,6 @@
 
   .navigation{
     position: relative;
-
   }
 
   .navigation button {

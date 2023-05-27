@@ -13,6 +13,10 @@
     dispatch("albumSkip", index);
   }
 
+  const handleAlbumEdit = (album: Album) => {
+    dispatch("albumEdit", album);
+  }
+
   $: indexedAlbums = albums.map((album, index) => [album, index]);
 
   const handleScroll = (event: WheelEvent) => {
@@ -41,7 +45,14 @@
     {#each indexedAlbums as [album, index] }
 
       <div class="album" on:click={() => handleAlbumSkip(index)}>
-        <button class="clear album-title material text-button">{album.name}</button>
+        <button class="clear album-title material text-button">
+          {album.name}
+          <button class="edit-album material" on:click|stopPropagation={()=>handleAlbumEdit(album)}>
+          <span class="material-icons">
+            edit
+          </span>
+          </button>
+        </button>
       </div>
 
       {#if index < indexedAlbums.length - 1}
@@ -78,6 +89,24 @@
 
   .main .album {
     margin: 0 10px;
+  }
+
+  .edit-album{
+    margin-left: 10px;
+    padding: 5px;
+    /*width: 30px;*/
+    /*width: auto;*/
+    height: 100%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1px;
+  }
+  .edit-album span{
+    font-size: 1rem;
   }
 
   .album-title {

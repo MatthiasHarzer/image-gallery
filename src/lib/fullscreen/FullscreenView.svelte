@@ -151,13 +151,6 @@
 
     const oldIndex = index;
 
-    $images = $images.filter(image => image != currentImage);
-
-    if ($images.length == 0) {
-      onClose();
-      return;
-    }
-
     invalidateCache();
 
     if (oldIndex >= $images.length) {
@@ -186,7 +179,7 @@
 
 
   <div bind:this={scrollElement} class="scrollable-image-wrapper"
-       on:click|stopPropagation={toggleNav}
+       on:dblclick|stopPropagation={toggleNav}
   >
     {#if loaded}
       {#each renderedImages as imagePromise}

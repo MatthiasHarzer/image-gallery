@@ -1,0 +1,172 @@
+<script lang="ts">
+
+  import type { ReadWritable } from "../scripts/util/helperTypes";
+  import type Image from "../scripts/gallery/image";
+  import { writable } from "svelte/store";
+  import { gallery } from "../scripts/firebase/firebaseManager";
+  import { createEventDispatcher, onMount } from "svelte";
+
+  export let images: ReadWritable<Image[]> = writable(null);
+  export let selectedImages: Image[] = [];
+
+  export let multiple: boolean = true;
+
+  const dispatch = createEventDispatcher();
+
+  $: availableImages = $images ?? $gallery.listener.galleryImageStore;
+
+  onMount(()=>{
+    if(multiple && selectedImages.length > 1){
+      selectedImages = [selectedImages[0]];
+    }
+  })
+
+  const close = () => {
+    dispatch("close")
+  }
+
+  const submit = () => {
+    dispatch("submit", selectedImages);
+  }
+
+  const toggle = (image: Image) => {
+
+    if(!multiple){
+      selectedImages = [image];
+      return;
+    }
+
+    if (selectedImages.includes(image)) {
+      selectedImages = selectedImages.filter(i => i !== image);
+    } else {
+      selectedImages = [...selectedImages, image];
+    }
+  }
+
+</script>
+
+<div class="blur-background">
+  <div class="dialog no-scroll-bar">
+    <div class="dialog-header">
+      <h3>
+        Select Images
+      </h3>
+      <button class="material close-btn" on:click={close}>
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+    <div class="dialog-content">
+      <div class="images">
+
+        {#each $availableImages as image (image.id)}
+
+          <button class="image-container clear" class:selected={selectedImages.includes(image)}
+                  on:click={()=>toggle(image)}>
+            <img src={image.url} alt={image.name}/>
+            <div class="image-overlay">
+            <span class="material-icons">
+              check
+            </span>
+            </div>
+          </button>
+
+        {/each}
+      </div>
+
+
+      <button class="material text-button submit-btn" on:click={submit}>
+
+        <span class="material-icons">
+          check
+        </span>
+        Submit
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+
+  .dialog-content{
+    margin-top: 1rem;
+    width: 90vw;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .images {
+    width: 90%;
+    /*margin: 100px;*/
+    display: grid;
+    grid-gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+    grid-auto-rows: 1fr;
+  }
+
+  .image-container {
+    padding: 0;
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    /*height: 200px;*/
+    border-radius: 0.5rem;
+    /*margin: 0.5rem;*/
+    /*overflow: hidden;*/
+  }
+
+  .image-container img {
+    position: relative;
+    /*width: 250px;*/
+    /*height: auto;*/
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+
+
+    opacity: 0;
+
+    transition: all 0.2s ease-in-out;
+
+  }
+
+  .image-container.selected .image-overlay {
+    opacity: 1;
+  }
+
+  .image-container.selected img {
+    filter: brightness(0.5);
+  }
+
+  .image-overlay span {
+    font-size: 3rem;
+    color: white;
+    text-align: center;
+    background: rgba(1, 135, 218, 0.8);
+    border-radius: 50%;
+    padding: 0.5rem;
+
+    position: absolute;
+    right: 10px;
+    top: 10px;
+  }
+
+  .submit-btn{
+    margin: 1rem;
+    width: 100%;
+    max-width: 300px;
+    background-color: var(--primary-color);
+  }
+
+</style>

@@ -3,12 +3,16 @@
   import Album from "../../scripts/gallery/album";
   import { createEventDispatcher, onMount } from "svelte";
   import { gallery } from "../../scripts/firebase/firebaseManager";
+  import type Image from "../../scripts/gallery/image";
+  import SelectImagesDialog from "../SelectImagesDialog.svelte";
 
   const dispatch = createEventDispatcher();
 
   export let album: Album | null = null;
 
   $: isEdit = album !== null && album?.id !== null;
+
+  let selectImagesDialogOpen = false;
 
   let dummyAlbum: Album;
 
@@ -24,6 +28,15 @@
     dispatch("submit", dummyAlbum);
   }
 
+  const deleteAlbum = () => {
+    dispatch("delete", dummyAlbum);
+  }
+
+  const submitSelectedImages = ({ detail: images }: CustomEvent<Image[]>) => {
+    dummyAlbum.images = images;
+    selectImagesDialogOpen = false;
+  }
+
   $: availableParents = $gallery.albums.filter(a => a.id !== dummyAlbum?.id);
 
 </script>
@@ -31,6 +44,11 @@
 <div class="blur-background">
   <div class="dialog">
     <div class="dialog-header">
+      <button class="material delete" on:click={deleteAlbum}>
+        <span class="material-icons">
+          delete
+        </span>
+      </button>
       <h3 class="dialog-title">{isEdit ? "Edit Album" : "Create Album"}</h3>
       <button class="material close-btn" on:click={close}>
         <span class="material-icons">close</span>
@@ -40,7 +58,7 @@
       {#if dummyAlbum}
         <input type="text" class="album-name" placeholder="Enter album name..." bind:value={dummyAlbum.name}/>
 
-        <div>
+        <div class="parent-select">
           <label for="parent-select">Parent Album</label>
           <select id="parent-select" bind:value={dummyAlbum.parent}>
             <option value={null}>None</option>
@@ -52,6 +70,17 @@
         </div>
       {/if}
 
+      <button class="material text-button select-images" on:click={()=>selectImagesDialogOpen = true}>
+
+        <span class="material-icons">add</span>
+        <span>Select Images</span>
+
+        <span class="number-selected-images">
+          ({dummyAlbum?.images.length} selected)
+        </span>
+
+      </button>
+
       <button class="material text-button submit-btn" on:click={submit}>
         <span class="material-icons">done</span>
         <span>Submit</span>
@@ -59,6 +88,14 @@
     </div>
   </div>
 </div>
+
+{#if selectImagesDialogOpen}
+  <SelectImagesDialog
+      selectedImages={dummyAlbum?.images ?? []}
+      on:submit={submitSelectedImages}
+      on:close={()=>selectImagesDialogOpen = false}
+  />
+{/if}
 
 <style>
   .dialog-content {
@@ -73,11 +110,12 @@
 
   }
 
-  .submit-btn{
-    margin-top: auto;
+  .submit-btn {
+    margin-top: 20px;
+    background-color: #4CAF50;
   }
 
-  .album-name{
+  .album-name {
     width: 100%;
     height: 30px;
     border: none;
@@ -85,6 +123,44 @@
     font-size: 20px;
     padding: 5px;
     margin-bottom: 20px;
+  }
+
+  .delete {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 10px;
+    background: none;
+    border: none;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .parent-select {
+    width: 100%;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .parent-select label {
+    margin-right: 10px;
+    font-size: 1.2em;
+  }
+
+  .parent-select select {
+    flex: 1;
+    height: 30px;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    font-size: 1em;
+    padding: 5px;
+    background-color: #2c2c2c;
+    margin-bottom: 0;
+  }
+
+  .number-selected-images{
+    margin-left: 10px;
   }
 
 </style>

@@ -5,7 +5,7 @@
   import { fullscreenDialog } from "./scripts/fullscreenDialog";
   import FullscreenView from "./lib/fullscreen/FullscreenView.svelte";
 
-  $: console.log($gallery);
+  // $: console.log($gallery);
 </script>
 
 <main>

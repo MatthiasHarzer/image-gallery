@@ -34,14 +34,14 @@
       Promise.all(selectedAlbums.map(album => {
         if (!album.images.includes(image)) {
           album.images = [...album.images, image];
-          return firestoreManager.updateAlbum($firebaseUser, album);
+          return firestoreManager.createOrUpdateAlbum($firebaseUser, album);
         }
       }).filter(p => p !== undefined)),
 
       Promise.all(albumsToRemove.map(album => {
         if (album.images.includes(image)) {
           album.images = album.images.filter(i => i !== image);
-          return firestoreManager.updateAlbum($firebaseUser, album);
+          return firestoreManager.createOrUpdateAlbum($firebaseUser, album);
         }
       }).filter(p => p !== undefined))
     ])

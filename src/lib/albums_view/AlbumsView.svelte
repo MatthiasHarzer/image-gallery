@@ -34,17 +34,25 @@
   $: openedAlbum = selectedAlbum || rootAlbum;
 
   const submitAlbum = async ({ detail: album }: CustomEvent<Album>) => {
-    const isEdit = album.id != null;
 
     const isValid = album.name != null && album.name.length > 0;
     if (!isValid) return;
 
-    if (isEdit) {
-      await firestoreManager.updateAlbum($firebaseUser, album);
-    } else {
-      await firestoreManager.createAlbum($firebaseUser, album);
-    }
 
+    await firestoreManager.createOrUpdateAlbum($firebaseUser, album);
+
+
+    createOrEditAlbumDialogShown = false;
+  }
+
+  const deleteAlbum = async ({detail: album}: CustomEvent<Album>): Promise<void> => {
+    if (album.id == null) return;
+
+    const conf = confirm(`Are you sure you want to delete album "${album.name}"?`);
+
+    if (!conf) return;
+
+    await firestoreManager.deleteAlbum($firebaseUser, album);
     createOrEditAlbumDialogShown = false;
   }
 
@@ -84,7 +92,10 @@
           <span class="material-icons">arrow_back</span>
         </button>
 
-        <AlbumTreeBar albums={albumTree} on:albumSkip={albumSkip}/>
+        <AlbumTreeBar albums={albumTree}
+                      on:albumSkip={albumSkip}
+                      on:albumEdit={onNewOrEditAlbum}
+        />
       {/if}
     </div>
 
@@ -108,6 +119,7 @@
       album={albumToEdit}
       on:close={() => createOrEditAlbumDialogShown = false}
       on:submit={submitAlbum}
+      on:delete={deleteAlbum}
   />
 {/if}
 

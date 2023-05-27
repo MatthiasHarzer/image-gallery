@@ -275,6 +275,10 @@ button:focus {
     border-radius: 100px;
 }
 
+.no-scroll-bar::-webkit-scrollbar {
+    display: none;
+}
+
 .discrete-scrollbar::-webkit-scrollbar-thumb {
     background: grey;
     border-radius: 100px;
@@ -333,7 +337,8 @@ button:focus {
     display: flex;
     background-color: #3b3b3b;
     flex-flow: column;
-    min-width: 500px;
+    min-width: min(90vw, 500px);
+    /*width: auto;*/
     max-width: 90vw;
     min-height: 200px;
     max-height: 90vh;

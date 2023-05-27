@@ -31,8 +31,6 @@ const createLocalConfig = () => {
     }
   }
 
-  console.log("localConfig", localConfig);
-
   const { set, subscribe, update } = writable<LocalConfig>(localConfig);
 
   subscribe((value) => {
