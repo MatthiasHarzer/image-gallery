@@ -16,7 +16,7 @@
   $: availableImages = $images ?? $gallery.listener.galleryImageStore;
 
   onMount(()=>{
-    if(multiple && selectedImages.length > 1){
+    if(!multiple && selectedImages.length > 1){
       selectedImages = [selectedImages[0]];
     }
   })
