@@ -63,7 +63,7 @@
 
     <div class="page-selection">
       {#each pages as page}
-        <button class="material text-button" on:click={() => enterPage(page.screen)}
+        <button class="material text-button no-effect" on:click={() => enterPage(page.screen)}
                 class:active={$route.screen === page.screen}>
           <span class="material-icons">{page.icon}</span>
           <span>{page.name}</span>
