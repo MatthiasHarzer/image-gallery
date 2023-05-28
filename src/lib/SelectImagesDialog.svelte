@@ -5,6 +5,7 @@
   import { writable } from "svelte/store";
   import { gallery } from "../scripts/firebase/firebaseManager";
   import { createEventDispatcher, onMount } from "svelte";
+  import { getSrc } from "../scripts/util/cacheHelper";
 
   export let images: ReadWritable<Image[]> = writable(null);
   export let selectedImages: Image[] = [];
@@ -75,7 +76,7 @@
 
           <button class="image-container clear" class:selected={selectedImages.includes(image)}
                   on:click={e=>toggle(image, e.shiftKey)}>
-            <img loading="lazy" src={image.url} alt={image.name}/>
+            <img loading="lazy" src={image.src} alt={image.name}/>
             <div class="image-overlay">
             <span class="material-icons">
               check

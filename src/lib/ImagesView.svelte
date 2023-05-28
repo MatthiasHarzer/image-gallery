@@ -14,7 +14,8 @@
   $: photosFormatted = $images.map((img) => {
     return {
       title: img.name,
-      ...img
+      ...img,
+      url: img.src,
     }
   });
 

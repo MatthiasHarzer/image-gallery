@@ -2,6 +2,7 @@
 
   import type Album from "../../scripts/gallery/album";
   import { createEventDispatcher } from "svelte";
+  import { getSrc } from "../../scripts/util/cacheHelper";
 
   const dispatch = createEventDispatcher();
 
@@ -22,8 +23,8 @@
 
 <div class="main" on:click|stopPropagation={openAlbum}>
   {#if cover}
-    <img loading="lazy" src="{cover.url}" alt="{cover.name}"/>
-    <img loading="lazy" class="blur" src="{cover.url}" alt="{cover.name}" style="--titleHeight: {titleHeight}px"/>
+    <img loading="lazy" src="{cover.src}" alt="{cover.name}"/>
+    <img loading="lazy" class="blur" src="{cover.src}" alt="{cover.name}" style="--titleHeight: {titleHeight}px"/>
   {/if}
   <h1 bind:clientHeight={titleHeight}>{album.name}</h1>
 

@@ -7,6 +7,7 @@
   import { onMount } from "svelte";
   import type { ScrollObserver } from "../../scripts/util/scrollObserver";
   import { createScrollObserver } from "../../scripts/util/scrollObserver";
+  import { getSrc } from "../../scripts/util/cacheHelper";
 
   export let images: ReadWritable<Image[]> = writable([]);
 
@@ -89,7 +90,7 @@
   <div class="image-list">
     {#each $images as image, index}
       <div class="image-container" class:active={index === currentImageIndex}>
-        <Zoom loading="lazy" src={image.url} alt={image.alt}/>
+        <Zoom loading="lazy" src={image.src} alt={image.alt}/>
       </div>
     {/each}
   </div>
