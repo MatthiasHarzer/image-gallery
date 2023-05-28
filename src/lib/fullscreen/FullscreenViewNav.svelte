@@ -6,6 +6,7 @@
   import Tag from "../../scripts/gallery/tag";
   import AddToAlbumScreen from "../AddToAlbumScreen.svelte";
   import { fullscreenDialog } from "../../scripts/fullscreenDialog";
+  import TagSelectInput from "./TagSelectInput.svelte";
 
   const dispatch = createEventDispatcher();
 
@@ -54,29 +55,9 @@
     firestoreManager.updateImageProps($firebaseUser, image, { favorite: !image.favorite });
   }
 
-  const onTagEnter = async () => {
-    tagInput = tagInput.trim();
 
-    if (tagInput.length === 0) return;
-
-    const existingTag = $gallery.tags.find(tag => tag.name.toLowerCase() === tagInput.toLowerCase());
-
-    let tag: Tag;
-
-    if (existingTag) {
-      if (image.tags.some(tag => tag.id === existingTag.id)) return;
-      tag = existingTag;
-    } else {
-      const doc = await firestoreManager.createTag($firebaseUser, {
-        name: tagInput,
-        description: ""
-      })
-      tag = new Tag(doc.id, tagInput, "");
-    }
-
+  const addTag = async({detail: tag}: CustomEvent<Tag>) => {
     await firestoreManager.addTagToImage($firebaseUser, image, tag);
-
-    tagInput = "";
   }
 
   const removeTag = (tag: Tag) => {
@@ -167,16 +148,7 @@
       {/each}
     </div>
     <div class="input-field">
-      <input bind:value={tagInput} id="tag"
-             on:keyup={e => {if(e.key === "Enter") onTagEnter()}}
-             placeholder="Enter tag..."
-             type="text"
-      />
-      <label for="tag">
-        <button class="material no-effect" on:click={onTagEnter}>
-          <span class="material-icons">add</span>
-        </button>
-      </label>
+      <TagSelectInput on:addTag={addTag} {image} />
     </div>
   </div>
 
@@ -296,50 +268,6 @@
     color: #f1c40f;
   }
 
-  .input-field {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /*width: 100%;*/
-    width: 350px;
-    /*height: 3em;*/
-    margin: 0.5em auto;
-
-    background-color: #313131;
-    border-radius: 0.5em;
-  }
-
-  .input-field input {
-    width: 100%;
-    height: 100%;
-    border: none;
-    outline: none;
-    background-color: #00000000;
-    color: white;
-    font-size: 1.1rem;
-    padding: 0.5em;
-    margin: 0;
-    border-bottom: 1px solid #ffffff;
-    border-radius: inherit;
-  }
-
-  .input-field label {
-    border-radius: inherit;
-  }
-
-  .input-field button {
-    position: absolute;
-    right: 0;
-    top: 0;
-    height: 100%;
-    background-color: var(--primary-color);
-    border-radius: inherit;
-  }
-
-  .input-field button:hover {
-    background-color: var(--primary-color-accent);
-  }
 
   .tags-nav {
     position: relative;
