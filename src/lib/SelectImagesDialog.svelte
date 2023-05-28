@@ -5,7 +5,7 @@
   import { writable } from "svelte/store";
   import { gallery } from "../scripts/firebase/firebaseManager";
   import { createEventDispatcher, onMount } from "svelte";
-  import { getSrc } from "../scripts/util/cacheHelper";
+  import ImageWrapper from "./util/ImageWrapper.svelte";
 
   export let images: ReadWritable<Image[]> = writable(null);
   export let selectedImages: Image[] = [];
@@ -76,7 +76,10 @@
 
           <button class="image-container clear" class:selected={selectedImages.includes(image)}
                   on:click={e=>toggle(image, e.shiftKey)}>
-            <img loading="lazy" src={image.src} alt={image.name}/>
+              <div class="img">
+
+                <ImageWrapper {image} cover={true} />
+              </div>
             <div class="image-overlay">
             <span class="material-icons">
               check
@@ -128,9 +131,10 @@
     border-radius: 0.5rem;
     /*margin: 0.5rem;*/
     /*overflow: hidden;*/
+    overflow: hidden
   }
 
-  .image-container img {
+  .image-container .img {
     position: relative;
     /*width: 250px;*/
     /*height: auto;*/
@@ -160,7 +164,7 @@
     opacity: 1;
   }
 
-  .image-container.selected img {
+  .image-container.selected .img {
     filter: brightness(0.5);
   }
 

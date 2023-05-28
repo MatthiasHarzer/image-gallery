@@ -1,0 +1,38 @@
+<script lang="ts">
+
+  import Zoom from "./svelte-zoom/Zoom.svelte";
+  import LoadingSpinner from "./LoadingSpinner.svelte";
+  import type Image from "../../scripts/gallery/image";
+
+  export let image: Image;
+  export let zoomEnabled: boolean = false;
+  export let zoom: number = 1;
+
+  let loader: Zoom;
+  let elementZoom: number;
+
+  $: zoom = elementZoom ?? 1;
+</script>
+
+<div class="main">
+  <Zoom loading="lazy" src={image.src} alt={image.name} {zoomEnabled} bind:zoom={elementZoom}
+        bind:this={loader} {...$$props}
+  />
+  {#if loader}
+    {#await loader.loaded}
+      <LoadingSpinner />
+    {:then img}
+    {/await}
+  {/if}
+</div>
+
+<style>
+  .main{
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+</style>

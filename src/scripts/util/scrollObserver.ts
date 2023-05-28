@@ -87,6 +87,7 @@ export const createScrollObserver = (element: HTMLElement = null, params: Scroll
   let deltaPosition: ScrollDelta = [0, 0];
   let initialScrollDirection: ScrollDirection | null = null;
   let scrollEventStamps: ScrollEventStamp[] = [];
+  let pointerTouchDown = false;
   const uniDirectional = params?.uniDirectional ?? false;
   const eventStore: Writable<ScrollObserverEvent> = writable(defaultScrollEvent);
   const clientDimensions = [element.clientWidth, element.clientHeight];
@@ -161,15 +162,17 @@ export const createScrollObserver = (element: HTMLElement = null, params: Scroll
 
   let onScrollEndCallback: ScrollEndCallback = null;
 
-  const on_touch_start = (event: TouchEvent) => {
-    startPosition = [event.touches[0].clientX, event.touches[0].clientY];
+  const handle_start = (pos: [number, number]) => {
+    pointerTouchDown = true;
+    startPosition = pos;
     update();
   }
 
-  const on_touch_move = (event: TouchEvent) => {
+  const handle_move = (pos: [number, number]) => {
+    if (!pointerTouchDown) return;
     deltaPosition = [
-      event.touches[0].clientX - startPosition[0],
-      event.touches[0].clientY - startPosition[1]
+      pos[0] - startPosition[0],
+      pos[1] - startPosition[1]
     ]
 
     if (initialScrollDirection == null) {
@@ -184,7 +187,8 @@ export const createScrollObserver = (element: HTMLElement = null, params: Scroll
     update();
   }
 
-  const on_touch_end = (event: TouchEvent) => {
+  const handle_end = (_) => {
+    pointerTouchDown = false;
     const delta = get_delta();
     onScrollEndCallback?.(delta, get_speed(), get_progress(delta));
     deltaPosition = [0, 0];
@@ -192,12 +196,28 @@ export const createScrollObserver = (element: HTMLElement = null, params: Scroll
     update();
 
     scrollEventStamps = [];
-
   }
 
-  element.ontouchstart = on_touch_start;
-  element.ontouchmove = on_touch_move;
-  element.ontouchend = on_touch_end;
+  const create_touch_handler = (callback: (pos: [number ,number]) => void) => {
+    return (event: TouchEvent) => {
+      callback([event.touches[0].clientX, event.touches[0].clientY]);
+    }
+  }
+
+  const create_pointer_handler = (callback: (pos: [number ,number]) => void) => {
+    return (event: PointerEvent) => {
+      callback([event.clientX, event.clientY]);
+    }
+  }
+
+
+  element.ontouchstart = create_touch_handler(handle_start);
+  element.ontouchmove = create_touch_handler(handle_move);
+  element.ontouchend = handle_end;
+  element.onpointerdown = create_pointer_handler(handle_start);
+  element.onpointermove = create_pointer_handler(handle_move);
+  window.onpointerup = handle_end;
+
 
   return {
     ...readable(get(eventStore), (set) => {

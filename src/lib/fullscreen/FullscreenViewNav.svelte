@@ -90,6 +90,9 @@
   }
 </script>
 
+<button class="material back-btn" on:click={onClose}>
+  <span class="material-icons">arrow_back</span>
+</button>
 <button class="material toggle-nav-btn" on:click={toggleNav}>
   <span class="material-icons-outlined">{navShown ? "visibility_off" : "info"}</span>
 </button>
@@ -97,7 +100,7 @@
 <div class="main" class:visible={navShown}>
   <div class="top-nav-bar">
     <div class="left">
-      <button class="material" on:click={onClose}>
+      <button class="material back-btn-fake">
         <span class="material-icons">arrow_back</span>
       </button>
     </div>
@@ -190,10 +193,18 @@
     top: -1px;
     right: 16px;
     margin: 0.5rem;
-    z-index: 100;
+    z-index: 1;
   }
 
-  .toggle-nav-btn-fake{
+  .back-btn{
+    position: absolute;
+    top: -1px;
+    left: 16px;
+    margin: 0.5rem;
+    z-index: 1;
+  }
+
+  .toggle-nav-btn-fake, .back-btn-fake{
     visibility: hidden;
   }
 

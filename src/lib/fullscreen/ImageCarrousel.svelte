@@ -3,11 +3,12 @@
   import type { ReadWritable } from "../../scripts/util/helperTypes";
   import { writable } from "svelte/store";
   import type Image from "../../scripts/gallery/image";
-  import Zoom from "svelte-zoom";
+  import Zoom from "../util/svelte-zoom/Zoom.svelte";
   import { onMount } from "svelte";
   import type { ScrollObserver } from "../../scripts/util/scrollObserver";
   import { createScrollObserver } from "../../scripts/util/scrollObserver";
-  import { getSrc } from "../../scripts/util/cacheHelper";
+  import LoadingSpinner from "../util/LoadingSpinner.svelte";
+  import ImageWrapper from "../util/ImageWrapper.svelte";
 
   export let images: ReadWritable<Image[]> = writable([]);
 
@@ -19,6 +20,9 @@
   const SPEED_TO_NEXT_IMAGE = 0.8;
 
   let initialized = false;
+  let zoom: number;
+
+  $: zooming = zoom != 1;
 
   $: upcomingImageIndex = (currentImageIndex + 1) % $images.length;
   $: previousImageIndex = (currentImageIndex - 1 + $images.length) % $images.length;
@@ -37,18 +41,18 @@
     });
   }
 
-  const scrollToAbs = (x: number, smooth: boolean = false) =>{
+  const scrollToAbs = (x: number, smooth: boolean = false) => {
     carouselElement?.scrollTo({
       left: x,
       behavior: smooth ? "smooth" : "auto"
     });
   }
 
-  const scrollTo = (index: number, smooth: boolean = false) =>{
+  const scrollTo = (index: number, smooth: boolean = false) => {
     scrollToAbs(carouselElement.clientWidth * index, smooth);
   }
 
-  $: if(currentImageIndex != null && !initialized){
+  $: if (currentImageIndex != null && !initialized) {
     initialized = true;
     scrollTo(currentImageIndex, false);
   }
@@ -57,6 +61,7 @@
     scrollObserver = createScrollObserver(carouselElement, { uniDirectional: true });
 
     scrollObserver.onScrollEnd(([x, y], [speedX, speedY], [progressX, progressY]) => {
+      if(zooming) return;
       const transition = Math.abs(progressX) > PROGRESS_TO_NEXT_IMAGE || Math.abs(speedX) > SPEED_TO_NEXT_IMAGE;
       const deltaIndex = -Math.sign(progressX);
 
@@ -75,11 +80,15 @@
     })
 
     scrollTo(currentImageIndex, false);
+
+    window.onresize = () => {
+      scrollTo(currentImageIndex, false);
+    }
   })
 
   $: sliding = $scrollObserver?.direction != null;
 
-  $: if (scrollObserver && carouselElement) {
+  $: if (scrollObserver && carouselElement && !zooming) {
     scrollToAbs(carouselElement.clientWidth * currentImageIndex - $scrollObserver?.deltaX, !sliding);
   }
 
@@ -90,7 +99,7 @@
   <div class="image-list">
     {#each $images as image, index}
       <div class="image-container" class:active={index === currentImageIndex}>
-        <Zoom loading="lazy" src={image.src} alt={image.alt}/>
+        <ImageWrapper {image} zoomEnabled={index === currentImageIndex} bind:zoom />
       </div>
     {/each}
   </div>

@@ -7,6 +7,7 @@ interface LocalConfig {
   navPined: boolean;
   navOpen: boolean;
   includeSubAlbum: boolean;
+  showFullscreenNav: boolean;
 }
 
 const defaultLocalConfig: LocalConfig = {
@@ -14,6 +15,7 @@ const defaultLocalConfig: LocalConfig = {
   navPined: false,
   navOpen: false,
   includeSubAlbum: false,
+  showFullscreenNav: false,
 }
 
 const noCache = ["navOpen"];

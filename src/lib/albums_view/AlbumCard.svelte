@@ -3,6 +3,7 @@
   import type Album from "../../scripts/gallery/album";
   import { createEventDispatcher } from "svelte";
   import { getSrc } from "../../scripts/util/cacheHelper";
+  import ImageWrapper from "../util/ImageWrapper.svelte";
 
   const dispatch = createEventDispatcher();
 
@@ -23,8 +24,12 @@
 
 <div class="main" on:click|stopPropagation={openAlbum}>
   {#if cover}
-    <img loading="lazy" src="{cover.src}" alt="{cover.name}"/>
-    <img loading="lazy" class="blur" src="{cover.src}" alt="{cover.name}" style="--titleHeight: {titleHeight}px"/>
+    <div class="img">
+      <ImageWrapper loading="lazy" image={cover} cover={true}/>
+    </div>
+    <div class="img blur" style="--titleHeight: {titleHeight}px">
+      <ImageWrapper loading="lazy" image={cover} cover={true}/>
+    </div>
   {/if}
   <h1 bind:clientHeight={titleHeight}>{album.name}</h1>
 
@@ -49,9 +54,10 @@
     padding: 10px;
     cursor: pointer;
     position: relative;
+    overflow: hidden;
   }
 
-  .main img{
+  .main .img{
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -60,7 +66,7 @@
     border-radius: inherit;
   }
 
-  .main img.blur{
+  .main .img.blur{
     filter: blur(5px);
     /*opacity: 0.5;*/
     z-index: -1;

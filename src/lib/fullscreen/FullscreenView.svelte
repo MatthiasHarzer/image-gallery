@@ -12,6 +12,7 @@
   import { fade } from 'svelte/transition';
   import { route } from "../../scripts/routeManager";
   import ImageCarrousel from "./ImageCarrousel.svelte";
+  import { localConfig } from "../../scripts/localConfig";
 
   export let images: ReadWritable<CustomImage[]> = writable([]);
   export let initialImageIdx: number = 0;
@@ -21,15 +22,12 @@
     name: string;
   }
 
-  let navShown = false;
   const imageCache = new Map<number, Promise<PromisedImage>>();
   let imagePromise: Promise<PromisedImage> = null;
   let upcomingImagePromise: Promise<PromisedImage> = null;
   let previousImagePromise: Promise<PromisedImage> = null;
   let scrollElement: HTMLElement;
-  let pageWidth: number;
 
-  let zoomEnabled = false
   let index = null;
   let upcomingImageIndex = null;
   let previousImageIndex = null;
@@ -84,7 +82,7 @@
     const now = Date.now();
     if (now - lastToggle < 200) return;
     lastToggle = now;
-    navShown = !navShown;
+    $localConfig.showFullscreenNav = !$localConfig.showFullscreenNav;
   }
 
 
@@ -110,7 +108,7 @@
   </div>
 
   <FullscreenViewNav on:next={onNext} on:prev={onPrevious} image={currentImage} on:close={onClose}
-                     {navShown} on:delete={onDelete} {zoomEnabled} on:toggle-nav={toggleNav}
+                     navShown={$localConfig.showFullscreenNav} on:delete={onDelete} on:toggle-nav={toggleNav}
   />
 
 </div>
