@@ -15,8 +15,8 @@
 
   export let currentImage: Image;
 
-  const PROGRESS_TO_NEXT_IMAGE = 0.5;
-  const SPEED_TO_NEXT_IMAGE = 1.2;
+  const PROGRESS_TO_NEXT_IMAGE = 0.3;
+  const SPEED_TO_NEXT_IMAGE = 0.8;
 
   let initialized = false;
 
