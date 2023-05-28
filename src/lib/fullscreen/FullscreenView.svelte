@@ -64,17 +64,16 @@
     route.setFullscreenImage(null);
   }
 
-  const invalidateCache = () => {
-    imageCache.clear();
-  }
-
   const onDelete = async () => {
      if (!$firebaseUser || !currentImage) return;
     const confirm = window.confirm("Are you sure you want to delete this image?");
     if (!confirm) return;
+
+    const nextImage = $images[index + 1] || $images[index - 1] || null;
+
+    route.setFullscreenImage(nextImage, true);
     await firestoreManager.deleteImage($firebaseUser, currentImage);
 
-    invalidateCache();
   }
 
   let lastToggle = 0;

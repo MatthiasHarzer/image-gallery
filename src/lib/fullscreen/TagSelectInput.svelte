@@ -11,7 +11,7 @@
 
   let tagInput: string = "";
 
-  let matchingTags: Tag[] = [];
+  let matchingTags: Tag[];
   let availableTags: Tag[] = [];
 
   $: if(image != null) availableTags = $gallery?.tags.filter(tag => !image.tags.some(t => t.id === tag.id));

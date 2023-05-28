@@ -10,6 +10,7 @@
 
   let loader: Zoom;
   let elementZoom: number;
+  $: infiniteLoad = image?.url != null ? null : new Promise((_)=>_);
 
   $: zoom = elementZoom ?? 1;
 </script>
@@ -18,8 +19,8 @@
   <Zoom loading="lazy" src={image.src} alt={image.name} {zoomEnabled} bind:zoom={elementZoom}
         bind:this={loader} {...$$props}
   />
-  {#if loader}
-    {#await loader.loaded}
+  {#if loader || infiniteLoad}
+    {#await (infiniteLoad || loader.loaded)}
       <LoadingSpinner />
     {:then img}
     {/await}
