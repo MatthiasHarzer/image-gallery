@@ -3,7 +3,7 @@
   import type Album from "../../scripts/gallery/album";
   import AlbumCard from "./AlbumCard.svelte";
   import { createEventDispatcher } from "svelte";
-  import ImagesView from "../ImagesView.svelte";
+  import ImagesView from "../components/ImagesView.svelte";
   import { gallery } from "../../scripts/firebase/firebaseManager";
   import FlipSlider from "../util/FlipSlider.svelte";
   import { localConfig } from "../../scripts/localConfig";

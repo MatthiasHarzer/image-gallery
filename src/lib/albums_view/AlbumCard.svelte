@@ -3,7 +3,7 @@
   import type Album from "../../scripts/gallery/album";
   import { createEventDispatcher } from "svelte";
   import { getSrc } from "../../scripts/util/cacheHelper";
-  import ImageWrapper from "../util/ImageWrapper.svelte";
+  import ImageWrapper from "../components/ImageWrapper.svelte";
 
   const dispatch = createEventDispatcher();
 

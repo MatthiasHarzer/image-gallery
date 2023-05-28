@@ -1,12 +1,12 @@
 <script lang="ts">
 
-  import type Image from "../scripts/gallery/image";
+  import type Image from "../../scripts/gallery/image";
   import GalleryView from 'svelte-gallery-view'
-  import { fullscreenDialog } from "../scripts/fullscreenDialog";
+  import { fullscreenDialog } from "../../scripts/fullscreenDialog";
   import { writable } from "svelte/store";
-  import type { ReadWritable } from "../scripts/util/helperTypes";
-  import type Album from "../scripts/gallery/album";
-  import { route } from "../scripts/routeManager";
+  import type { ReadWritable } from "../../scripts/util/helperTypes";
+  import type Album from "../../scripts/gallery/album";
+  import { route } from "../../scripts/routeManager";
 
   export let images: ReadWritable<Image[]> = writable([]);
   export let album: ReadWritable<Album> = null;

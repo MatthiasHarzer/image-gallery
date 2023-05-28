@@ -5,7 +5,7 @@
   import { writable } from "svelte/store";
   import { gallery } from "../scripts/firebase/firebaseManager";
   import { createEventDispatcher, onMount } from "svelte";
-  import ImageWrapper from "./util/ImageWrapper.svelte";
+  import ImageWrapper from "./components/ImageWrapper.svelte";
 
   export let images: ReadWritable<Image[]> = writable(null);
   export let selectedImages: Image[] = [];

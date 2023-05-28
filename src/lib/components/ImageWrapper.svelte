@@ -1,7 +1,7 @@
 <script lang="ts">
 
-  import Zoom from "./svelte-zoom/Zoom.svelte";
-  import LoadingSpinner from "./LoadingSpinner.svelte";
+  import Zoom from "../util/svelte-zoom/Zoom.svelte";
+  import LoadingSpinner from "../util/LoadingSpinner.svelte";
   import type Image from "../../scripts/gallery/image";
 
   export let image: Image;

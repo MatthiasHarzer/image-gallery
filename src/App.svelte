@@ -3,6 +3,7 @@
   import GalleryApp from "./lib/GalleryApp.svelte";
   import { fullscreenDialog } from "./scripts/fullscreenDialog";
   import FullscreenView from "./lib/fullscreen/FullscreenView.svelte";
+  import NavigationPanel from "./lib/components/NavigationPanel.svelte";
   //
 
   // $: console.log($fullscreenDialog)
@@ -15,6 +16,8 @@
   <div class="app-content">
     <GalleryApp/>
   </div>
+
+  <NavigationPanel />
 </main>
 
 {#if $fullscreenDialog.shown}

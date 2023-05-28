@@ -163,7 +163,7 @@
   .toggle-nav-btn{
     position: absolute;
     top: -1px;
-    right: 16px;
+    right: 0;
     margin: 0.5rem;
     z-index: 1;
   }
@@ -171,7 +171,7 @@
   .back-btn{
     position: absolute;
     top: -1px;
-    left: 16px;
+    left: 0;
     margin: 0.5rem;
     z-index: 1;
   }

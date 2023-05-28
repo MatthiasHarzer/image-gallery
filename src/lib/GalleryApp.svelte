@@ -1,6 +1,6 @@
 <script lang="ts">
 
-  import ImagesView from "./ImagesView.svelte";
+  import ImagesView from "./components/ImagesView.svelte";
   import { gallery } from "../scripts/firebase/firebaseManager";
   import { Screen } from "../scripts/screen";
   import { localConfig } from "../scripts/localConfig";
