@@ -1,9 +1,9 @@
-import type { Writable } from "svelte/store";
-import { get, writable } from "svelte/store";
+import type { Readable, Writable } from "svelte/store";
+import { derived, get, writable } from "svelte/store";
 import type Image from "./gallery/image";
 import type { ReadWritable } from "./util/helperTypes";
 import type Album from "./gallery/album";
-import { route } from "./routeManager";
+import { Route, route } from "./routeManager";
 import { rootAlbum } from "./rootAlbum";
 import { localConfig } from "./localConfig";
 import { gallery } from "./firebase/firebaseManager";
@@ -43,24 +43,28 @@ const createFullscreenDialog = (): Writable<FullscreenDialogConfig> => {
     });
   }
 
-  route.subscribe(r => {
-    if (r.fullscreenImage == null) return hide();
+  let sub;
 
-    const album = r.albums.length > 0 && r.screen == Screen.ALBUMS ? r.albums[r.albums.length - 1] : get(rootAlbum);
+  derived([route, get(localConfig).currentImageViewStore], ([r, images]) => {
 
-    const includeSubAlbums = get(localConfig).includeSubAlbum;
+    return [r, images];
 
-    const images = album.id != null
-      ? get(gallery).listener.getAlbumImageStore(album, includeSubAlbums)
-      : get(gallery).listener.galleryImageStore;
+  }).subscribe(([r, images]: [Route, Readable<Image[]>]) => {
+      if (r.fullscreenImage == null) return hide();
 
-    if (get(images).length === 0) return hide();
+      const album = r.albums.length > 0 && r.screen == Screen.ALBUMS ? r.albums[r.albums.length - 1] : get(rootAlbum);
 
-    const initialImageIdx = get(images).findIndex(i => i.id === r.fullscreenImage.id);
 
-    if (initialImageIdx === -1) return hide();
+      if (get(images).length === 0) return hide();
 
-    show(images, initialImageIdx, get(gallery).listener.getAlbumStore(album));
+
+      const initialImageIdx = get(images).findIndex(i => i.id === r.fullscreenImage.id);
+
+      if (initialImageIdx === -1) return hide();
+
+      // return ;
+
+      show(images, initialImageIdx, get(gallery).listener.getAlbumStore(album));
   });
 
   return {

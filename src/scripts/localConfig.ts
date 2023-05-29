@@ -1,6 +1,8 @@
 import { Screen } from "./screen";
-import { writable } from "svelte/store";
+import { readable, writable } from "svelte/store";
+import type { Readable } from "svelte/store";
 import type { Writable } from "svelte/store";
+import type Image from "./gallery/image";
 
 interface LocalConfig {
   currentScreen: Screen;
@@ -8,6 +10,8 @@ interface LocalConfig {
   navOpen: boolean;
   includeSubAlbum: boolean;
   showFullscreenNav: boolean;
+  favoritesOnly: boolean;
+  currentImageViewStore: Writable<Readable<Image[]>>
 }
 
 const defaultLocalConfig: LocalConfig = {
@@ -16,9 +20,11 @@ const defaultLocalConfig: LocalConfig = {
   navOpen: false,
   includeSubAlbum: false,
   showFullscreenNav: false,
+  favoritesOnly: false,
+  currentImageViewStore: writable(readable([])),
 }
 
-const noCache = ["navOpen"];
+const noCache = ["navOpen", "currentImageViewStore"];
 
 const localConfigKey = "localConfig";
 
@@ -27,8 +33,10 @@ const createLocalConfig = () => {
   const localConfigString = localStorage.getItem(localConfigKey);
   const localConfig = localConfigString ? JSON.parse(localConfigString ?? null) : defaultLocalConfig;
 
+
+
   for (const key of Object.keys(defaultLocalConfig)) {
-    if (!localConfig[key]) {
+    if (!localConfig[key] || noCache.includes(key)) {
       localConfig[key] = defaultLocalConfig[key];
     }
   }

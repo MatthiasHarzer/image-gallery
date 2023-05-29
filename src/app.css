@@ -536,3 +536,33 @@ button.material > * {
     position: relative;
 }
 
+.ripple{
+    position: relative;
+}
+.ripple:before {
+    content: "";
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-position: center;
+    transition: background 0.8s;
+}
+.ripple:hover:before {
+    content: "";
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: rgba(203, 203, 203, 0.15) radial-gradient(circle, transparent 1%, rgba(203, 203, 203, 0.15) 1%) center/15000%;
+}
+.ripple:active:before {
+    background-color: rgba(203, 203, 203, 0.25);
+    background-size: 100%;
+    transition: background 0s;
+}
+

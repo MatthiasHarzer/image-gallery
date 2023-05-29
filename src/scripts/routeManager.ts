@@ -5,7 +5,7 @@ import type Album from "./gallery/album";
 import type Image from "./gallery/image";
 import { gallery } from "./firebase/firebaseManager";
 
-class Route {
+export class Route {
 
   constructor(
     public screen: Screen,

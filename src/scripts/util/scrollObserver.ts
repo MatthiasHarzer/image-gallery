@@ -17,6 +17,11 @@ interface ScrollObserverParams {
    * If true, the scroll observer will only observe the scroll direction that was first detected.
    */
   uniDirectional?: boolean;
+
+  /**
+   * If true, the scroll observer will not emit events when the user scrolls using a pointer device.
+   */
+  disablePointerSupport?: boolean;
 }
 
 /**
@@ -89,6 +94,7 @@ export const createScrollObserver = (element: HTMLElement = null, params: Scroll
   let scrollEventStamps: ScrollEventStamp[] = [];
   let pointerTouchDown = false;
   const uniDirectional = params?.uniDirectional ?? false;
+  const disablePointerSupport = params?.disablePointerSupport ?? false;
   const eventStore: Writable<ScrollObserverEvent> = writable(defaultScrollEvent);
   const clientDimensions = [element.clientWidth, element.clientHeight];
 
@@ -216,9 +222,12 @@ export const createScrollObserver = (element: HTMLElement = null, params: Scroll
   element.ontouchstart = create_touch_handler(handle_start);
   element.ontouchmove = create_touch_handler(handle_move);
   element.ontouchend = handle_end;
-  element.onpointerdown = create_pointer_handler(handle_start);
-  element.onpointermove = create_pointer_handler(handle_move);
-  window.onpointerup = handle_end;
+
+  if (!disablePointerSupport){
+    element.onpointerdown = create_pointer_handler(handle_start);
+    element.onpointermove = create_pointer_handler(handle_move);
+    window.onpointerup = handle_end;
+  }
 
 
   return {

@@ -1,3 +1,4 @@
+<!--suppress ALL -->
 <script lang="ts">
 
   import { localConfig } from "../../scripts/localConfig";
@@ -6,8 +7,11 @@
   import { createScrollObserver } from "../../scripts/util/scrollObserver";
   import { Screen } from "../../scripts/screen";
   import { route } from "../../scripts/routeManager";
+  import FlipSlider from "../util/FlipSlider.svelte";
 
   $: navOpen = $localConfig.navOpen
+
+  // $localConfig.navOpen = true;
 
   const SPEED_TO_OPEN_CLOSE = 0.8;
   const DISTANCE_TO_OPEN_CLOSE = 100;
@@ -17,7 +21,7 @@
   let scrollObserver: ScrollObserver;
 
   onMount(() => {
-    scrollObserver = createScrollObserver(dragBar, { uniDirectional: true });
+    scrollObserver = createScrollObserver(dragBar, { uniDirectional: true, disablePointerSupport: true });
 
     scrollObserver.onScrollEnd(([dx, dy], [speedX, speedY], _) => {
       const speed = Math.abs(speedX);
@@ -65,12 +69,22 @@
 
     <div class="page-selection">
       {#each pages as page}
-        <button class="material text-button no-effect" on:click={() => enterPage(page.screen)}
+        <button class="material text-button" on:click={() => enterPage(page.screen)}
                 class:active={$route.screen === page.screen}>
           <span class="material-icons">{page.icon}</span>
           <span>{page.name}</span>
         </button>
       {/each}
+    </div>
+    <hr/>
+
+    <div class="filters">
+
+      <label class="full-width-item toggle-option ripple" for="fav-only">
+        <FlipSlider bind:active={$localConfig.favoritesOnly} id="fav-only"/>
+        Show favorites only
+      </label>
+
     </div>
 
 
@@ -124,7 +138,6 @@
     width: 17px;
     height: 100%;
     background-color: transparent;
-    cursor: ew-resize;
   }
 
   .close-btn {
@@ -156,6 +169,15 @@
     font-size: 20px;
     font-weight: 500;
     transition: all 0.3s ease-in-out;
+    border-radius: 100px;
+    margin: 2px 0;
+  }
+
+  hr {
+    border: none;
+    height: 1px;
+    background-color: #a2a2a2;
+    margin: 10px 0;
   }
 
   .page-selection button.material .material-icons {
@@ -164,7 +186,34 @@
 
   .page-selection button.material.active {
     background-color: #646cff;
-    border-radius: 100px;
+
   }
+
+  .filters {
+    margin-top: 20px;
+  }
+
+
+
+  .full-width-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    font-size: 20px;
+    font-weight: 400;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    user-select: none;
+  }
+
+  .full-width-item:active {
+    /*background-color: #858585;*/
+  }
+
+
+
+
 
 </style>

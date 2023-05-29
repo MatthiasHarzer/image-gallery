@@ -2,16 +2,27 @@
 
   import type Image from "../../scripts/gallery/image";
   import GalleryView from 'svelte-gallery-view'
-  import { writable } from "svelte/store";
+  import { get, writable } from "svelte/store";
+  import type { Readable, } from "svelte/store";
   import type { ReadWritable } from "../../scripts/util/helperTypes";
   import type Album from "../../scripts/gallery/album";
   import { route } from "../../scripts/routeManager";
+  import { localConfig } from "../../scripts/localConfig";
+  import { applyFilters } from "../../scripts/filters";
 
   export let images: ReadWritable<Image[]> = writable([]);
   export let album: ReadWritable<Album> = null;
 
-  $: photosFormatted = $images.map((img) => {
+  let filteredImages: Readable<Image[]>
+
+  // Store goes brrrr
+  $: $localConfig.currentImageViewStore.set(applyFilters(images))
+  $: imageViewStore = $localConfig.currentImageViewStore;
+  $: filteredImages = $imageViewStore;
+
+  $: photosFormatted = $filteredImages.map((img) => {
     return {
+      orig: img,
       title: img.name,
       ...img,
       url: img.src,
@@ -19,11 +30,9 @@
   });
 
   const openFullscreenDialog = (image) => {
-    const index = photosFormatted.indexOf(image);
+    const index = $filteredImages.indexOf(image.orig);
 
-    route.setFullscreenImage($images[index])
-
-    // fullscreenDialog.show(images, Math.max(index, 0), album);
+    route.setFullscreenImage($filteredImages[index])
   }
 </script>
 
