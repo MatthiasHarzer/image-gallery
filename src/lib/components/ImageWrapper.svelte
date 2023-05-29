@@ -7,6 +7,7 @@
   export let image: Image;
   export let zoomEnabled: boolean = false;
   export let zoom: number = 1;
+  export let thumbnail: boolean = false;
 
   let loader: Zoom;
   let elementZoom: number;
@@ -16,7 +17,7 @@
 </script>
 
 <div class="main">
-  <Zoom loading="lazy" src={image.src} alt={image.name} {zoomEnabled} bind:zoom={elementZoom}
+  <Zoom loading="lazy" src={thumbnail ? image.thumbnailSrc : image.src} alt={image.name} {zoomEnabled} bind:zoom={elementZoom}
         bind:this={loader} {...$$props}
   />
   {#if loader || infiniteLoad}

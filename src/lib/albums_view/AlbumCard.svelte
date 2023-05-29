@@ -24,10 +24,10 @@
 <div class="main" on:click|stopPropagation={openAlbum}>
   {#if cover}
     <div class="img">
-      <ImageWrapper loading="lazy" image={cover} cover={true}/>
+      <ImageWrapper loading="lazy" image={cover} cover={true} thumbnail={true}/>
     </div>
     <div class="img blur" style="--titleHeight: {titleHeight}px">
-      <ImageWrapper loading="lazy" image={cover} cover={true}/>
+      <ImageWrapper loading="lazy" image={cover} cover={true} thumbnail={true}/>
     </div>
   {/if}
   <h1 bind:clientHeight={titleHeight}>{album.name}</h1>

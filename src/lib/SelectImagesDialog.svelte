@@ -78,7 +78,7 @@
                   on:click={e=>toggle(image, e.shiftKey)}>
             <div class="img">
 
-              <ImageWrapper {image} cover={true}/>
+              <ImageWrapper {image} cover={true} thumbnail={true}/>
             </div>
             <div class="image-overlay">
             <span class="material-icons">

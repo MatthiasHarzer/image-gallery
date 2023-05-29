@@ -25,7 +25,7 @@
       orig: img,
       title: img.name,
       ...img,
-      url: img.src,
+      url: img.thumbnailSrc,
     }
   });
 

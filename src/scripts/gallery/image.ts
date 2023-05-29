@@ -1,6 +1,6 @@
 import type Entry from "./entry";
 import type Tag from "./tag";
-import { getSrc } from "../util/cacheHelper";
+import { getSrc, getThumbnailSrc } from "../util/cacheHelper";
 
 
 export enum ImageState {
@@ -14,6 +14,10 @@ export default class Image implements Entry {
 
   public get src(): string {
     return getSrc(this.url);
+  }
+
+  public get thumbnailSrc(): string {
+    return getThumbnailSrc(this.url);
   }
 
   constructor(
