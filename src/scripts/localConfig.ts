@@ -4,6 +4,20 @@ import type { Readable } from "svelte/store";
 import type { Writable } from "svelte/store";
 import type Image from "./gallery/image";
 
+export interface TagConfig {
+  enabled: boolean;
+  includedTags: string[];
+  excludedTags: string[];
+  matchAll: boolean;
+}
+
+export const defaultTagConfig: TagConfig = {
+  enabled: false,
+  includedTags: [],
+  excludedTags: [],
+  matchAll: false,
+}
+
 interface LocalConfig {
   currentScreen: Screen;
   navPined: boolean;
@@ -12,6 +26,7 @@ interface LocalConfig {
   showFullscreenNav: boolean;
   favoritesOnly: boolean;
   currentImageViewStore: Writable<Readable<Image[]>>
+  tagConfig: TagConfig;
 }
 
 const defaultLocalConfig: LocalConfig = {
@@ -22,6 +37,7 @@ const defaultLocalConfig: LocalConfig = {
   showFullscreenNav: false,
   favoritesOnly: false,
   currentImageViewStore: writable(readable([])),
+  tagConfig: defaultTagConfig
 }
 
 const noCache = ["navOpen", "currentImageViewStore"];

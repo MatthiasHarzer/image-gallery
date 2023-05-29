@@ -8,6 +8,7 @@
   import { Screen } from "../../scripts/screen";
   import { route } from "../../scripts/routeManager";
   import FlipSlider from "../util/FlipSlider.svelte";
+  import TagSelectDialog from "../tag_select/TagSelectDialog.svelte";
 
   $: navOpen = $localConfig.navOpen
 
@@ -19,6 +20,7 @@
 
   let dragBar: HTMLElement;
   let scrollObserver: ScrollObserver;
+  let tagSelectOpen = false;
 
   onMount(() => {
     scrollObserver = createScrollObserver(dragBar, { uniDirectional: true, disablePointerSupport: true });
@@ -47,6 +49,11 @@
     route.setScreen(screen);
   }
 
+  const submitTags = ({detail: tagConfig}: CustomEvent<TagConfig>) => {
+    $localConfig.tagConfig = tagConfig;
+    tagSelectOpen = false;
+  }
+
   const pages = [
     {
       name: "Gallery",
@@ -59,6 +66,8 @@
       screen: Screen.ALBUMS
     }
   ]
+
+  // $: console.log($localConfig.tagConfig)
 </script>
 
 <div class="main" class:open={navOpen} on:click|self|stopPropagation={close} style="--width: {NAV_WIDTH}px;">
@@ -84,6 +93,19 @@
         <FlipSlider bind:active={$localConfig.favoritesOnly} id="fav-only"/>
         Show favorites only
       </label>
+      <label class="full-width-item ripple" for="tags-enabled">
+        <FlipSlider bind:active={$localConfig.tagConfig.enabled} id="tags-enabled" />
+        Filter by tags
+      </label>
+      <div class="full-width-item">
+        <button class="full-width-item material text-button select-tags-btn"
+                disabled={!$localConfig.tagConfig.enabled}
+                on:click={()=>tagSelectOpen = true}
+        >
+          <span class="material-icons">label</span>
+          Select Tags
+        </button>
+      </div>
 
     </div>
 
@@ -91,6 +113,12 @@
     <div bind:this={dragBar} class="drag-bar"></div>
   </div>
 </div>
+
+{#if tagSelectOpen}
+  <TagSelectDialog on:close={()=>tagSelectOpen = false}
+                   on:submit={submitTags}
+                   tagConfig={{...$localConfig.tagConfig}}/>
+{/if}
 
 <style>
 
@@ -196,10 +224,12 @@
 
 
   .full-width-item {
+    box-sizing: border-box;
     display: flex;
     justify-content: space-between;
     align-items: center;
     color: white;
+    width: 100%;
     font-size: 20px;
     font-weight: 400;
     padding: 10px 20px;
@@ -210,6 +240,13 @@
 
   .full-width-item:active {
     /*background-color: #858585;*/
+  }
+
+  .select-tags-btn:disabled{
+    color: #a2a2a2;
+  }
+  .select-tags-btn:disabled span {
+    color: #a2a2a2;
   }
 
 
