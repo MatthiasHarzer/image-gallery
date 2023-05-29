@@ -32,7 +32,7 @@
   $: offset = Math.min($scrollObserver?.deltaX || 0, NAV_WIDTH);
   $: sliding = $scrollObserver?.direction != null;
 
-  $: console.log(offset)
+  // $: console.log(offset)
 
   const close = () => {
     $localConfig.navOpen = false
@@ -120,8 +120,8 @@
   .nav .drag-bar {
     position: absolute;
     top: 0;
-    right: -30px;
-    width: 30px;
+    right: -17px;
+    width: 17px;
     height: 100%;
     background-color: transparent;
     cursor: ew-resize;

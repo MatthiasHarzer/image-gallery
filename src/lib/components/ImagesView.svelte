@@ -2,7 +2,6 @@
 
   import type Image from "../../scripts/gallery/image";
   import GalleryView from 'svelte-gallery-view'
-  import { fullscreenDialog } from "../../scripts/fullscreenDialog";
   import { writable } from "svelte/store";
   import type { ReadWritable } from "../../scripts/util/helperTypes";
   import type Album from "../../scripts/gallery/album";

@@ -40,12 +40,13 @@
 
 <div class="main" bind:this={pathElement} on:wheel={handleScroll}>
 
-  <div class="path" >
+  <div class="path">
     {#each indexedAlbums as [album, index] }
       <div class="album" on:click={() => handleAlbumSkip(index)}>
         <button class="clear album-title material text-button">
           {album.name}
-          <button class:hidden={!album?.valid} class="edit-album material" on:click|stopPropagation={()=>handleAlbumEdit(album)}>
+          <button class:hidden={!album?.valid} class="edit-album material"
+                  on:click|stopPropagation={()=>handleAlbumEdit(album)}>
           <span class="material-icons">
             edit
           </span>
@@ -89,7 +90,7 @@
     margin: 0 10px;
   }
 
-  .edit-album{
+  .edit-album {
     margin-left: 10px;
     padding: 5px;
     /*width: 30px;*/
@@ -103,7 +104,8 @@
     align-items: center;
     font-size: 1px;
   }
-  .edit-album span{
+
+  .edit-album span {
     font-size: 1rem;
   }
 

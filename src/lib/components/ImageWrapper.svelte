@@ -10,7 +10,7 @@
 
   let loader: Zoom;
   let elementZoom: number;
-  $: infiniteLoad = image?.url != null ? null : new Promise((_)=>_);
+  $: infiniteLoad = image?.url != null ? null : new Promise((_) => _);
 
   $: zoom = elementZoom ?? 1;
 </script>
@@ -21,14 +21,14 @@
   />
   {#if loader || infiniteLoad}
     {#await (infiniteLoad || loader.loaded)}
-      <LoadingSpinner />
+      <LoadingSpinner/>
     {:then img}
     {/await}
   {/if}
 </div>
 
 <style>
-  .main{
+  .main {
     position: relative;
     width: 100%;
     height: 100%;

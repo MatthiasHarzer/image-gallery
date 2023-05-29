@@ -76,10 +76,10 @@
 
           <button class="image-container clear" class:selected={selectedImages.includes(image)}
                   on:click={e=>toggle(image, e.shiftKey)}>
-              <div class="img">
+            <div class="img">
 
-                <ImageWrapper {image} cover={true} />
-              </div>
+              <ImageWrapper {image} cover={true}/>
+            </div>
             <div class="image-overlay">
             <span class="material-icons">
               check

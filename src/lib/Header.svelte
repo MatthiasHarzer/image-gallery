@@ -5,7 +5,6 @@
   import { signInWithPopup, signOut } from "firebase/auth";
   import UploadDialog from "./UploadDialog.svelte";
   import { localConfig } from "../scripts/localConfig";
-  import { Screen } from "../scripts/screen";
   import { createEventDispatcher } from "svelte";
   import { route } from "../scripts/routeManager";
 
@@ -16,7 +15,7 @@
 
   const dispatch = createEventDispatcher();
 
-  const signInOut = async() => {
+  const signInOut = async () => {
     if (signedId) {
       await signOut(auth);
       route.clear();
@@ -96,7 +95,7 @@
     border: 1px solid #12436b;
   }
 
-  .navigation{
+  .navigation {
     position: relative;
   }
 
@@ -107,7 +106,6 @@
   .navigation:not(:focus-within) .drop-down {
     height: 0;
   }
-
 
 
 </style>

@@ -209,7 +209,7 @@
     background-color: #646cff;
   }
 
-  .finished-uploading{
+  .finished-uploading {
     display: flex;
     align-items: center;
     justify-content: center;

@@ -29,7 +29,6 @@
   }
 
 
-
   const submitAlbum = async ({ detail: album }: CustomEvent<Album>) => {
 
     const isValid = album.name != null && album.name.length > 0;
@@ -93,7 +92,8 @@
       {/if}
     </div>
 
-    <button class:hidden={!openedAlbum?.valid && !openedAlbum?.isRoot} class="material text-button add-album" on:click={onNewOrEditAlbum}>
+    <button class:hidden={!openedAlbum?.valid && !openedAlbum?.isRoot} class="material text-button add-album"
+            on:click={onNewOrEditAlbum}>
       <span class="material-icons">add</span>
       <span class="text">New Album</span>
     </button>
@@ -151,7 +151,7 @@
     overflow: hidden;
   }
 
-  .album-nav .move-back-btn{
+  .album-nav .move-back-btn {
     margin-left: 5px;
   }
 

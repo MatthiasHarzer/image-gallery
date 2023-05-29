@@ -159,7 +159,7 @@
     margin-bottom: 0;
   }
 
-  .number-selected-images{
+  .number-selected-images {
     margin-left: 10px;
   }
 

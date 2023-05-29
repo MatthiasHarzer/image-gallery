@@ -2,14 +2,11 @@
 
   import type { default as CustomImage } from "../../scripts/gallery/image";
   import { onMount } from "svelte";
-  import LoadingSpinner from "../util/LoadingSpinner.svelte";
   import FullscreenViewNav from "./FullscreenViewNav.svelte";
   import { swipe } from 'svelte-gestures';
   import { firebaseUser, firestoreManager } from "../../scripts/firebase/firebaseManager";
   import type { ReadWritable } from "../../scripts/util/helperTypes";
   import { writable } from "svelte/store";
-  import Zoom from "svelte-zoom";
-  import { fade } from 'svelte/transition';
   import { route } from "../../scripts/routeManager";
   import ImageCarrousel from "./ImageCarrousel.svelte";
   import { localConfig } from "../../scripts/localConfig";
@@ -38,7 +35,7 @@
   $: loaded = renderedImages && renderedImages.every(promise => promise != null);
 
 
-  $: if(currentImage) {
+  $: if (currentImage) {
     route.setFullscreenImage(currentImage, true);
   }
 
@@ -65,7 +62,7 @@
   }
 
   const onDelete = async () => {
-     if (!$firebaseUser || !currentImage) return;
+    if (!$firebaseUser || !currentImage) return;
     const confirm = window.confirm("Are you sure you want to delete this image?");
     if (!confirm) return;
 
@@ -85,8 +82,8 @@
   }
 
 
-  const handleSwipe = (event) =>{
-    if (event.detail.direction === "bottom"){
+  const handleSwipe = (event) => {
+    if (event.detail.direction === "bottom") {
       toggleNav();
     }
   }
@@ -100,10 +97,10 @@
        use:swipe={{ timeframe: 300, minSwipeDistance: 100 }}
        on:swipe={handleSwipe}
   >
-      <ImageCarrousel
-          images={images}
-          bind:currentImage
-          bind:currentImageIndex={index} />
+    <ImageCarrousel
+        images={images}
+        bind:currentImage
+        bind:currentImageIndex={index}/>
   </div>
 
   <FullscreenViewNav on:next={onNext} on:prev={onPrevious} image={currentImage} on:close={onClose}

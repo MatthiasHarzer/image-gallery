@@ -14,7 +14,7 @@
   let matchingTags: Tag[];
   let availableTags: Tag[] = [];
 
-  $: if(image != null) availableTags = $gallery?.tags.filter(tag => !image.tags.some(t => t.id === tag.id));
+  $: if (image != null) availableTags = $gallery?.tags.filter(tag => !image.tags.some(t => t.id === tag.id));
   $: availableTags.sort((a, b) => a.name.localeCompare(b.name));
   $: matchingTags = tagInput.length == 0
       ? []
@@ -49,7 +49,6 @@
     tagInput = "";
   }
 </script>
-
 
 
 <div class="main">
@@ -124,7 +123,7 @@
     background-color: var(--primary-color-accent);
   }
 
-  .suggestion-box{
+  .suggestion-box {
     position: absolute;
     /*bottom: 200px;*/
     bottom: 100%;
@@ -140,7 +139,7 @@
     align-items: center;
   }
 
-  button.suggestion{
+  button.suggestion {
     display: flex;
     justify-content: flex-start;
     align-items: center;
@@ -159,22 +158,22 @@
     white-space: nowrap;
   }
 
-  button.suggestion span{
+  button.suggestion span {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  button.suggestion:not(:last-child){
+  button.suggestion:not(:last-child) {
     border-bottom: 1px solid #ffffff;
     border-radius: 0;
   }
 
-  button.suggestion:last-child{
+  button.suggestion:last-child {
     border-radius: 0 0 0.5em 0.5em;
   }
 
-  button.suggestion:first-child{
+  button.suggestion:first-child {
     border-radius: 0.5em 0.5em 0 0;
   }
 

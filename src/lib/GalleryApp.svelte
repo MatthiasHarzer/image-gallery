@@ -3,7 +3,6 @@
   import ImagesView from "./components/ImagesView.svelte";
   import { gallery } from "../scripts/firebase/firebaseManager";
   import { Screen } from "../scripts/screen";
-  import { localConfig } from "../scripts/localConfig";
   import { fly } from "svelte/transition";
   import AlbumsView from "./albums_view/AlbumsView.svelte";
   import { route } from "../scripts/routeManager";

@@ -70,9 +70,9 @@
   import Matrix from "./matrix"
   import MultiTouchVelocity from "./velocity"
 
-  import {calculateAspectRatioFit, getDistance} from "./other"
+  import { calculateAspectRatioFit, getDistance } from "./other"
 
-  import {onMount} from "svelte"
+  import { onMount } from "svelte"
 
   let smooth = true
   let touchScreen = false
@@ -128,7 +128,7 @@
 
   $: if (zoomEnabled) zoom = scale.value
 
-  $: if(!zoomEnabled){
+  $: if (!zoomEnabled) {
     scale.value = 1
   }
 
@@ -265,7 +265,6 @@
   export const zoomOut = () => fireManualZoom(-1)
 
 
-
   function onResize() {
     onLoad()
     fireDown(0, 0)
@@ -299,7 +298,7 @@
   }
 
   function onLoad() {
-    const {naturalWidth, naturalHeight} = img
+    const { naturalWidth, naturalHeight } = img
 
     ratio = calculateAspectRatioFit(naturalWidth, naturalHeight, window.innerWidth, window.innerHeight)
 
@@ -309,15 +308,15 @@
 
     loadedResolve?.()
 
-    img.addEventListener("wheel", onWheel, {passive: false})
-    img.addEventListener("touchstart", onTouchStart, {passive: false})
+    img.addEventListener("wheel", onWheel, { passive: false })
+    img.addEventListener("touchstart", onTouchStart, { passive: false })
   }
 
   onMount(() => {
     matrix = new Matrix()
 
-    img.addEventListener("wheel", onWheel, {passive: false})
-    img.addEventListener("touchstart", onTouchStart, {passive: false})
+    img.addEventListener("wheel", onWheel, { passive: false })
+    img.addEventListener("touchstart", onTouchStart, { passive: false })
 
     return () => {
       img.removeEventListener("wheel", onWheel)
@@ -339,7 +338,7 @@
 
       velocity.down(touchA, touchB)
     } else {
-      const {pageX, pageY} = touchA
+      const { pageX, pageY } = touchA
       var now = new Date().getTime()
       if (now - lastTap.time < 250 && Math.hypot(lastTap.x - pageX, lastTap.y - pageY) <= 20) {
         smooth = true
@@ -377,7 +376,7 @@
     window.removeEventListener("touchcancel", onTouchEnd)
   }
 
-  function onMouseDown({clientX, clientY}) {
+  function onMouseDown({ clientX, clientY }) {
     if (touchScreen) return
     fireDown(clientX, clientY)
 
@@ -387,7 +386,7 @@
     window.addEventListener("mouseup", onMouseUp)
   }
 
-  function onMouseMove({clientX, clientY}) {
+  function onMouseMove({ clientX, clientY }) {
     fireMove(clientX, clientY)
   }
 
