@@ -2,12 +2,27 @@ import type Image from "./gallery/image";
 import type { Readable } from "svelte/store";
 import { get, readable } from "svelte/store";
 import type { TagConfig } from "./localConfig";
-import { localConfig } from "./localConfig";
+import { localConfig, SortMode } from "./localConfig";
 
 interface LocalConfigLike {
   favoritesOnly: boolean,
   tagConfig: TagConfig,
   [key: string]: any
+}
+
+const sortImages = (images: Image[], sortMode: SortMode): Image[] => {
+  switch (sortMode) {
+    case SortMode.DATE_ASC:
+      // @ts-ignore
+      return images.sort((a, b) => a.timestamp - b.timestamp);
+    case SortMode.DATE_DESC:
+      // @ts-ignore
+      return images.sort((a, b) => b.timestamp - a.timestamp);
+    case SortMode.RANDOM:
+      return images.sort(() => Math.random() - 0.5);
+    default:
+      return images;
+  }
 }
 
 export const applyFiltersWithConfig = (images: Image[], config: LocalConfigLike): Image[] => {
@@ -37,7 +52,7 @@ export const applyFiltersWithConfig = (images: Image[], config: LocalConfigLike)
     }
   }
 
-  return images;
+  return sortImages(images, config.sortMode);
 }
 
 export const applyFilters = (images: Readable<Image[]>): Readable<Image[]> => {

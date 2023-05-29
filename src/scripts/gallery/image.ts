@@ -25,6 +25,7 @@ export default class Image implements Entry {
     public state: ImageState = ImageState.ready,
     public width: number,
     public height: number,
+    public timestamp: Date,
     public favorite: boolean = false,
   ) {
   }
@@ -37,6 +38,7 @@ export default class Image implements Entry {
     this.state = image.state;
     this.width = image.width;
     this.height = image.height;
+    this.timestamp = image.timestamp;
     this.favorite = image.favorite;
     return this;
   }
@@ -54,5 +56,6 @@ export interface ImageData {
   state: ImageState;
   width: number;
   height: number;
+  timestamp: Date;
   favorite?: boolean;
 }

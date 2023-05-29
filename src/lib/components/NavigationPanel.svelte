@@ -1,7 +1,7 @@
-<!--suppress ALL -->
 <script lang="ts">
 
-  import { localConfig } from "../../scripts/localConfig";
+  import { localConfig, SortMode } from "../../scripts/localConfig";
+  import type { TagConfig } from "../../scripts/localConfig";
   import { onMount } from "svelte";
   import type { ScrollObserver } from "../../scripts/util/scrollObserver";
   import { createScrollObserver } from "../../scripts/util/scrollObserver";
@@ -67,7 +67,42 @@
     }
   ]
 
-  // $: console.log($localConfig.tagConfig)
+  const cycleSortMode = () =>{
+    const current = $localConfig.sortMode;
+
+    switch (current) {
+      case SortMode.DATE_ASC:
+        $localConfig.sortMode = SortMode.DATE_DESC;
+        break;
+      case SortMode.DATE_DESC:
+        $localConfig.sortMode = SortMode.RANDOM;
+        break;
+      case SortMode.RANDOM:
+        $localConfig.sortMode = SortMode.DATE_ASC;
+        break;
+    }
+  }
+
+  const shuffle = () => {
+    $localConfig.sortMode = SortMode.RANDOM;
+  }
+
+
+  let sortModeLabel: string;
+  $: {
+    switch ($localConfig.sortMode) {
+      case SortMode.DATE_ASC:
+        sortModeLabel = "Sort by date (asc)";
+        break;
+      case SortMode.DATE_DESC:
+        sortModeLabel = "Sort by date (desc)";
+        break;
+      case SortMode.RANDOM:
+        sortModeLabel = "Random";
+        break;
+    }
+  }
+
 </script>
 
 <div class="main" class:open={navOpen} on:click|self|stopPropagation={close} style="--width: {NAV_WIDTH}px;">
@@ -87,8 +122,8 @@
     </div>
     <hr/>
 
-    <div class="filters">
-
+    <div class="filters group">
+      <h5 class="group-header">FILTERS</h5>
       <label class="full-width-item toggle-option ripple" for="fav-only">
         <FlipSlider bind:active={$localConfig.favoritesOnly} id="fav-only"/>
         Show favorites only
@@ -106,7 +141,21 @@
           Select Tags
         </button>
       </div>
-
+    </div>
+    <hr/>
+    <div class="group">
+      <h5 class="group-header">SORTING</h5>
+      <div class="sort-mode-button-wrapper">
+        <button class="material text-button sort-mode-btn" on:click={cycleSortMode}>
+          <span class="material-icons">sort</span>
+          {sortModeLabel}
+        </button>
+        {#if $localConfig.sortMode === SortMode.RANDOM}
+          <button class="material" on:click={shuffle}>
+            <span class="material-icons">shuffle</span>
+          </button>
+        {/if}
+      </div>
     </div>
 
 
@@ -242,11 +291,45 @@
     /*background-color: #858585;*/
   }
 
+  .select-tags-btn{
+    /*background-color: #5e5e5e;*/
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.5);
+  }
   .select-tags-btn:disabled{
     color: #a2a2a2;
+    box-shadow: none;
   }
   .select-tags-btn:disabled span {
     color: #a2a2a2;
+  }
+
+
+  .group-header{
+    color: #c5c5c5;
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0 20px;
+  }
+
+  .sort-mode-button-wrapper{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 20px;
+    padding: 10px 0;
+  }
+
+  .sort-mode-btn{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #2f2f2f;
+    box-shadow: 2px 2px 5px 0 rgba(0, 0, 0, 0.5);
+  }
+
+  .sort-mode-btn span{
+    margin-right: 15px;
   }
 
 

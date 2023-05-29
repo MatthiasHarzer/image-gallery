@@ -18,6 +18,12 @@ export const defaultTagConfig: TagConfig = {
   matchAll: false,
 }
 
+export enum SortMode {
+  DATE_ASC = "DATE_ASC",
+  DATE_DESC = "DATE_DESC",
+  RANDOM = "RANDOM",
+}
+
 interface LocalConfig {
   currentScreen: Screen;
   navPined: boolean;
@@ -27,6 +33,7 @@ interface LocalConfig {
   favoritesOnly: boolean;
   currentImageViewStore: Writable<Readable<Image[]>>
   tagConfig: TagConfig;
+  sortMode: SortMode;
 }
 
 const defaultLocalConfig: LocalConfig = {
@@ -37,7 +44,8 @@ const defaultLocalConfig: LocalConfig = {
   showFullscreenNav: false,
   favoritesOnly: false,
   currentImageViewStore: writable(readable([])),
-  tagConfig: defaultTagConfig
+  tagConfig: defaultTagConfig,
+  sortMode: SortMode.DATE_ASC,
 }
 
 const noCache = ["navOpen", "currentImageViewStore"];

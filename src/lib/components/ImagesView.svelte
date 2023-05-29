@@ -2,8 +2,8 @@
 
   import type Image from "../../scripts/gallery/image";
   import GalleryView from 'svelte-gallery-view'
-  import { get, writable } from "svelte/store";
   import type { Readable, } from "svelte/store";
+  import { writable } from "svelte/store";
   import type { ReadWritable } from "../../scripts/util/helperTypes";
   import type Album from "../../scripts/gallery/album";
   import { route } from "../../scripts/routeManager";
