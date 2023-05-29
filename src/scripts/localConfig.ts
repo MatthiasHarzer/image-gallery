@@ -34,6 +34,7 @@ interface LocalConfig {
   currentImageViewStore: Writable<Readable<Image[]>>
   tagConfig: TagConfig;
   sortMode: SortMode;
+  randomSeed: number;
 }
 
 const defaultLocalConfig: LocalConfig = {
@@ -46,6 +47,7 @@ const defaultLocalConfig: LocalConfig = {
   currentImageViewStore: writable(readable([])),
   tagConfig: defaultTagConfig,
   sortMode: SortMode.DATE_ASC,
+  randomSeed: 0,
 }
 
 const noCache = ["navOpen", "currentImageViewStore"];

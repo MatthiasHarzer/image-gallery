@@ -3,14 +3,17 @@ import type { Readable } from "svelte/store";
 import { get, readable } from "svelte/store";
 import type { TagConfig } from "./localConfig";
 import { localConfig, SortMode } from "./localConfig";
+import math from "random-seed";
 
 interface LocalConfigLike {
   favoritesOnly: boolean,
   tagConfig: TagConfig,
+  randomSeed: number,
   [key: string]: any
 }
 
-const sortImages = (images: Image[], sortMode: SortMode): Image[] => {
+const sortImages = (images: Image[], config: LocalConfigLike): Image[] => {
+  const sortMode = config.sortMode;
   switch (sortMode) {
     case SortMode.DATE_ASC:
       // @ts-ignore
@@ -19,7 +22,8 @@ const sortImages = (images: Image[], sortMode: SortMode): Image[] => {
       // @ts-ignore
       return images.sort((a, b) => b.timestamp - a.timestamp);
     case SortMode.RANDOM:
-      return images.sort(() => Math.random() - 0.5);
+      const rand = math.create(config.randomSeed);
+      return images.sort(() => rand.random() - 0.5);
     default:
       return images;
   }
@@ -52,7 +56,7 @@ export const applyFiltersWithConfig = (images: Image[], config: LocalConfigLike)
     }
   }
 
-  return sortImages(images, config.sortMode);
+  return sortImages(images, config);
 }
 
 export const applyFilters = (images: Readable<Image[]>): Readable<Image[]> => {

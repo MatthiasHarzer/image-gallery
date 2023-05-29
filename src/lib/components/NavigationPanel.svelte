@@ -84,7 +84,7 @@
   }
 
   const shuffle = () => {
-    $localConfig.sortMode = SortMode.RANDOM;
+    $localConfig.randomSeed = Date.now();
   }
 
 
