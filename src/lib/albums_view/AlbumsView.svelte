@@ -16,7 +16,9 @@
   $: selectedAlbum = $route.albums.length > 0 ? $route.albums[$route.albums.length - 1] : null;
   $: openedAlbum = selectedAlbum || $rootAlbum;
 
-  const onNewOrEditAlbum = ({ detail: album }) => {
+  const onNewOrEditAlbum = ({ detail: album }: CustomEvent<Album>) => {
+    if (album?.isFavorites) return;
+
     if (!(album instanceof Album)) {
       album = Album.dummy();
       album.parent = selectedAlbum;
@@ -91,7 +93,7 @@
       {/if}
     </div>
 
-    <button class="material text-button add-album" on:click={onNewOrEditAlbum}>
+    <button class:hidden={!openedAlbum?.valid && !openedAlbum?.isRoot} class="material text-button add-album" on:click={onNewOrEditAlbum}>
       <span class="material-icons">add</span>
       <span class="text">New Album</span>
     </button>

@@ -13,6 +13,18 @@ export default class Album implements Entry {
     return new Album(null, "root", "", images, albums, null, null);
   }
 
+  public get valid(): boolean {
+    return this.id != null && this.id !== "favorites";
+  }
+
+  public get isRoot(): boolean {
+    return this.id == null;
+  }
+
+  public get isFavorites(): boolean {
+    return this.id === "favorites";
+  }
+
   public modifyWith(album: Album): Album {
     this.name = album.name;
     this.description = album.description;

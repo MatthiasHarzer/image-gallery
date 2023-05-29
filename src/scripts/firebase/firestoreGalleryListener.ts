@@ -2,7 +2,7 @@ import type { User } from "firebase/auth";
 import Gallery from "../gallery/gallery";
 import { onSnapshot, orderBy, query, QuerySnapshot } from "firebase/firestore";
 
-import { ALBUMS_REF, IMAGES_REF, TAGS_REF } from "./firebasePathConfig";
+import { ALBUMS_REF, IMAGES_REF, TAGS_REF, USER_REF } from "./firebasePathConfig";
 import type { AlbumData } from "../gallery/album";
 import Album from "../gallery/album";
 import type { ImageData } from "../gallery/image";
@@ -26,6 +26,7 @@ class GallerySkeleton {
     public tags: TagData[],
     public images: ImageData[],
     public albums: AlbumData[],
+    public favoritesCover?: string,
   ) {
   }
 }
@@ -42,7 +43,7 @@ export default class FirestoreGalleryListener {
   private callbacks: ((gallery: Gallery) => void)[] = [];
   private subscriptions: (() => void)[];
 
-  private skeleton: GallerySkeleton = new GallerySkeleton([], [], []);
+  private skeleton: GallerySkeleton = new GallerySkeleton([], [], [], null);
   private cachedImages: Image[] = [];
   private cachedAlbums: Album[] = [];
   private cachedTags: Tag[] = [];
@@ -63,6 +64,13 @@ export default class FirestoreGalleryListener {
       onSnapshot(albumsRef, this.createSnapshotResolver(GallerySkeletonKey.ALBUMS)),
       onSnapshot(tagsRef, this.createSnapshotResolver(GallerySkeletonKey.TAGS)),
     ];
+
+    onSnapshot(USER_REF(user), async (snapshot) => {
+      const { favoritesCover } = snapshot.data();
+
+      this.skeleton.favoritesCover = favoritesCover;
+      await this.syncGallery();
+    });
   }
 
   public get galleryImageStore(): Readable<Image[]> {
@@ -87,7 +95,7 @@ export default class FirestoreGalleryListener {
 
     return readable([], (set) => {
       return this.listen((gallery) => {
-        const images = gallery.albums.filter((i) => albumIds.includes(i.id)).flatMap((a) => a.images);
+        const images = gallery.albumsWithFavorites.filter((i) => albumIds.includes(i.id)).flatMap((a) => a.images);
         set([...new Set(images)]);
       });
     });
@@ -96,7 +104,7 @@ export default class FirestoreGalleryListener {
   public getAlbumStore(album: Album): Readable<Album> {
     return readable(null, (set) => {
       return this.listen((gallery) => {
-        set(gallery.albums.find(a => a.id === album.id));
+        set(gallery.albumsWithFavorites.find(a => a.id === album.id));
       });
     });
   }
@@ -212,7 +220,16 @@ export default class FirestoreGalleryListener {
       }
     });
 
-    this.gallery = new Gallery(images, albums, tags);
+    const favoriteImages = images.filter((image) => image.favorite);
+    let favoriteAlbum = null;
+
+    if (favoriteImages.length > 0) {
+      const cover = images.find((image) => image.id === this.skeleton.favoritesCover) ?? favoriteImages[0];
+      favoriteAlbum =this.getCachedOrInitAlbum(new Album("favorites", "Favorites", "Your favorite images", favoriteImages, [], null, cover));
+
+    }
+
+    this.gallery = new Gallery(images, albums, tags, favoriteAlbum);
     this.broadcast(this.gallery);
   }
 

@@ -32,7 +32,7 @@ class Route {
       }
     }
 
-    const availableAlbums = get(gallery).albums;
+    const availableAlbums = get(gallery).albumsWithFavorites;
     const availableImages = get(gallery).images;
 
     const galleryAlbums = albums

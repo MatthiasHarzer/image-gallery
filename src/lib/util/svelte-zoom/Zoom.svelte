@@ -127,6 +127,7 @@
   })
 
   $: if (zoomEnabled) zoom = scale.value
+
   $: if(!zoomEnabled){
     scale.value = 1
   }
@@ -307,15 +308,20 @@
     scale.max = naturalWidth > naturalHeight ? Math.max(naturalWidth / window.innerWidth, 1) : Math.max(naturalHeight / window.innerHeight, 1)
 
     loadedResolve?.()
+
+    img.addEventListener("wheel", onWheel, {passive: false})
+    img.addEventListener("touchstart", onTouchStart, {passive: false})
   }
 
   onMount(() => {
     matrix = new Matrix()
-    window.addEventListener("wheel", onWheel, {passive: false})
-    window.addEventListener("resize", onResize)
+
+    img.addEventListener("wheel", onWheel, {passive: false})
+    img.addEventListener("touchstart", onTouchStart, {passive: false})
+
     return () => {
-      window.removeEventListener("wheel", onWheel)
-      window.removeEventListener("resize", onResize)
+      img.removeEventListener("wheel", onWheel)
+      img.removeEventListener("resize", onResize)
     }
   })
 

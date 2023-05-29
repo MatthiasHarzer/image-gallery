@@ -175,7 +175,9 @@ export const createScrollObserver = (element: HTMLElement = null, params: Scroll
       pos[1] - startPosition[1]
     ]
 
-    if (initialScrollDirection == null) {
+    const distance = Math.sqrt(Math.pow(deltaPosition[0], 2) + Math.pow(deltaPosition[1], 2));
+
+    if (initialScrollDirection == null && distance > 10) {
       const abs_delta_x = Math.abs(deltaPosition[0]);
       const abs_delta_y = Math.abs(deltaPosition[1]);
       if (abs_delta_x > abs_delta_y) {

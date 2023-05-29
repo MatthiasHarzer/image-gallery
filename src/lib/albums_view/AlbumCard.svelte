@@ -2,7 +2,6 @@
 
   import type Album from "../../scripts/gallery/album";
   import { createEventDispatcher } from "svelte";
-  import { getSrc } from "../../scripts/util/cacheHelper";
   import ImageWrapper from "../components/ImageWrapper.svelte";
 
   const dispatch = createEventDispatcher();
@@ -11,11 +10,11 @@
 
   let titleHeight: number = 0;
 
-  const openEdit = () =>{
+  const openEdit = () => {
     dispatch("edit", album);
   }
 
-  const openAlbum = () =>{
+  const openAlbum = () => {
     dispatch("open", album);
   }
 
@@ -33,7 +32,7 @@
   {/if}
   <h1 bind:clientHeight={titleHeight}>{album.name}</h1>
 
-  <button class="material edit-btn" on:click|stopPropagation={openEdit}>
+  <button class="material edit-btn" class:hidden={!album?.valid} on:click|stopPropagation={openEdit}>
     <span class="material-icons">edit</span>
   </button>
 
@@ -41,7 +40,7 @@
 
 <style>
 
-  .main{
+  .main {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -57,7 +56,7 @@
     overflow: hidden;
   }
 
-  .main .img{
+  .main .img {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -66,7 +65,7 @@
     border-radius: inherit;
   }
 
-  .main .img.blur{
+  .main .img.blur {
     filter: blur(5px);
     /*opacity: 0.5;*/
     z-index: -1;
@@ -74,8 +73,7 @@
   }
 
 
-
-  .main h1{
+  .main h1 {
     font-size: 1.5rem;
     text-align: center;
     margin: 0;
@@ -84,7 +82,7 @@
     user-select: none;
   }
 
-  .edit-btn{
+  .edit-btn {
     position: absolute;
     top: 10px;
     right: 10px;
@@ -98,9 +96,6 @@
     justify-content: center;
     cursor: pointer;
   }
-
-
-
 
 
 </style>

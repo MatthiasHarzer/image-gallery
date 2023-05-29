@@ -42,11 +42,10 @@
 
   <div class="path" >
     {#each indexedAlbums as [album, index] }
-
       <div class="album" on:click={() => handleAlbumSkip(index)}>
         <button class="clear album-title material text-button">
           {album.name}
-          <button class="edit-album material" on:click|stopPropagation={()=>handleAlbumEdit(album)}>
+          <button class:hidden={!album?.valid} class="edit-album material" on:click|stopPropagation={()=>handleAlbumEdit(album)}>
           <span class="material-icons">
             edit
           </span>

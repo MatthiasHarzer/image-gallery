@@ -296,12 +296,12 @@ button:focus {
 }
 
 .hidden {
-    display: none;
+    display: none !important;
     width: 0 !important;
     height: 0 !important;
-    position: fixed;
-    top: -100vh;
-    z-index: -1;
+    position: fixed !important;
+    top: -100vh !important;
+    z-index: -1 !important;
 }
 
 .invisible{

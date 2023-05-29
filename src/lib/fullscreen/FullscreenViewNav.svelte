@@ -2,7 +2,7 @@
 
   import { createEventDispatcher, onMount } from "svelte";
   import type Image from "../../scripts/gallery/image";
-  import { firebaseUser, firestoreManager, gallery } from "../../scripts/firebase/firebaseManager";
+  import { firebaseUser, firestoreManager } from "../../scripts/firebase/firebaseManager";
   import Tag from "../../scripts/gallery/tag";
   import AddToAlbumScreen from "../AddToAlbumScreen.svelte";
   import { fullscreenDialog } from "../../scripts/fullscreenDialog";
@@ -13,6 +13,8 @@
   export let image: Image;
 
   export let navShown = false;
+
+  // let album: ReadWritable<Album>;
 
   $: album = $fullscreenDialog.album;
 
@@ -56,7 +58,7 @@
   }
 
 
-  const addTag = async({detail: tag}: CustomEvent<Tag>) => {
+  const addTag = async ({ detail: tag }: CustomEvent<Tag>) => {
     await firestoreManager.addTagToImage($firebaseUser, image, tag);
   }
 
@@ -67,7 +69,11 @@
   const makeAlbumCover = () => {
     if ($album == null) return;
 
-    firestoreManager.updateAlbumProps($firebaseUser, $album, { cover: image.id });
+    if ($album.isFavorites) {
+      firestoreManager.updateFavoriteAlbumCover($firebaseUser, image);
+    } else {
+      firestoreManager.updateAlbumProps($firebaseUser, $album, { cover: image.id });
+    }
   }
 </script>
 
@@ -86,43 +92,43 @@
       </button>
     </div>
 
-      <div class="right">
-        <button class="material favorite" class:is-favorite={image?.favorite} on:click={onFavorite}>
-          <span class="material-icons-outlined">{image?.favorite ? "star" : "star_outline"}</span>
-        </button>
-        <button class="material add-to-album" on:click={()=>addToAlbumOpen = true}>
-          <span class="material-icons-outlined">add_to_photos</span>
-        </button>
-        <div class="context-menu">
+    <div class="right">
+      <button class="material favorite" class:is-favorite={image?.favorite} on:click={onFavorite}>
+        <span class="material-icons-outlined">{image?.favorite ? "star" : "star_outline"}</span>
+      </button>
+      <button class="material add-to-album" on:click={()=>addToAlbumOpen = true}>
+        <span class="material-icons-outlined">add_to_photos</span>
+      </button>
+      <div class="context-menu">
 
-          <button class="material toggle-nav">
+        <button class="material toggle-nav">
             <span class="material-icons">
               more_vert
             </span>
-          </button>
-          <div class="drop-down box-shadow">
-            <button class="material text-button drop-down-item"
-                    on:click={onDelete}>
+        </button>
+        <div class="drop-down box-shadow">
+          <button class="material text-button drop-down-item"
+                  on:click={onDelete}>
             <span class="name">
               Delete
             </span>
-            </button>
-            {#if $album != null}
-              <button class="material text-button drop-down-item"
-                      on:click={makeAlbumCover}>
+          </button>
+          {#if $album != null}
+            <button class="material text-button drop-down-item"
+                    on:click={makeAlbumCover}>
             <span class="name">
               Make album cover
             </span>
-              </button>
-            {/if}
-          </div>
+            </button>
+          {/if}
         </div>
-
-        <button class="material toggle-nav-btn-fake">
-          <span class="material-icons-outlined">{navShown ? "visibility_off" : "visibility"}</span>
-        </button>
-
       </div>
+
+      <button class="material toggle-nav-btn-fake">
+        <span class="material-icons-outlined">{navShown ? "visibility_off" : "visibility"}</span>
+      </button>
+
+    </div>
 
   </div>
 
@@ -148,7 +154,7 @@
       {/each}
     </div>
     <div class="input-field">
-      <TagSelectInput on:addTag={addTag} {image} />
+      <TagSelectInput {image} on:addTag={addTag}/>
     </div>
   </div>
 
@@ -160,7 +166,7 @@
 
 <style>
 
-  .toggle-nav-btn{
+  .toggle-nav-btn {
     position: absolute;
     top: -1px;
     right: 0;
@@ -168,7 +174,7 @@
     z-index: 1;
   }
 
-  .back-btn{
+  .back-btn {
     position: absolute;
     top: -1px;
     left: 0;
@@ -176,7 +182,7 @@
     z-index: 1;
   }
 
-  .toggle-nav-btn-fake, .back-btn-fake{
+  .toggle-nav-btn-fake, .back-btn-fake {
     visibility: hidden;
   }
 
@@ -203,7 +209,7 @@
     transition: visibility 0.2s, opacity 0.2s ease-in-out;
   }
 
-  .main.visible{
+  .main.visible {
     opacity: 1;
     visibility: visible;
   }

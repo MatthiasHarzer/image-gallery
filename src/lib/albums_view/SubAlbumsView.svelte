@@ -20,7 +20,7 @@
     dispatch("open", album);
   }
 
-  $: albumStore = album?.id != null ? $gallery.listener.getAlbumStore(album) : null;
+  $: albumStore = $gallery.listener.getAlbumStore(album);
   $: images = album?.id != null ? $gallery.listener.getAlbumImageStore(album, $localConfig.includeSubAlbum)
       : $gallery.listener.galleryImageStore;
 

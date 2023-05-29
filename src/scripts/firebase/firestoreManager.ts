@@ -128,6 +128,7 @@ export default class FirestoreManager {
   }
 
   private async updateAlbum(user: User, album: Album): Promise<void> {
+    if (!album.valid) return;
     const albumRef = doc(ALBUMS_REF(user), album.id);
 
     await updateDoc(albumRef, {
@@ -142,12 +143,14 @@ export default class FirestoreManager {
   }
 
   public async deleteAlbum(user: User, album: Album): Promise<void> {
+    if (!album.valid) return;
     const albumRef = doc(ALBUMS_REF(user), album.id);
 
     await deleteDoc(albumRef);
   }
 
   public async updateAlbumProps(user: User, album: Album, updateData: { [key: string]: any }): Promise<void> {
+    if (!album.valid) return;
     const albumRef = doc(ALBUMS_REF(user), album.id);
 
 
@@ -187,6 +190,13 @@ export default class FirestoreManager {
     await updateDoc(imageNode, {
       url: await getDownloadURL(bucket.ref),
       state: ImageState.ready,
+    });
+  }
+
+  public async updateFavoriteAlbumCover(user: User, image: CustomImage): Promise<void> {
+    const ref = USER_REF(user);
+    await updateDoc(ref, {
+      favoritesCover: image.id,
     });
   }
 }

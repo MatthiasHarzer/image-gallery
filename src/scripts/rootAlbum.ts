@@ -8,11 +8,12 @@ const isSelfParent = (parent: Album, self: Album) => {
 }
 
 const getRootAlbums = (albums: Album[]) => {
+  if (albums == null) return [];
   return albums.filter(a => a.parent == null || isSelfParent(a.parent, a));
 }
 
 export const rootAlbum = readable(null, (set) => {
   return gallery.subscribe((gallery) => {
-    set(Album.root(gallery.images, getRootAlbums(gallery.albums)))
+    set(Album.root(gallery.images, getRootAlbums(gallery.albumsWithFavorites)))
   });
 });

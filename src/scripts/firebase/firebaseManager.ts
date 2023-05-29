@@ -1,11 +1,14 @@
 import type { User } from "firebase/auth";
 import { onAuthStateChanged } from "firebase/auth";
-import type { Readable, Writable } from "svelte/store";
-import { readable, writable } from "svelte/store";
+import type { Readable } from "svelte/store";
+import { readable } from "svelte/store";
 import { auth } from "./firebase";
 import type Gallery from "../gallery/gallery";
 import FirestoreManager from "./firestoreManager";
 import type FirestoreGalleryListener from "./firestoreGalleryListener";
+import type Album from "../gallery/album";
+import type Tag from "../gallery/tag";
+import type Image from "../gallery/image";
 
 export const firestoreManager = new FirestoreManager();
 
@@ -25,20 +28,41 @@ interface AdvancedGallery extends Gallery {
   listener: FirestoreGalleryListener;
 }
 
-const emptyAdvancedGallery: AdvancedGallery = {
-  albums: [],
-  images: [],
-  tags: [],
-  listener: null,
+class AdvancedGallery {
+
+  private constructor(
+    public albums: Album[],
+    public images: Image[],
+    public tags: Tag[],
+    public listener: FirestoreGalleryListener,
+    public albumsWithFavorites: Album[],
+  ) {
+  }
+
+  public static fromGallery(gallery: Gallery, listener: FirestoreGalleryListener): AdvancedGallery {
+    return new AdvancedGallery(
+      gallery.albums,
+      gallery.images,
+      gallery.tags,
+      listener,
+      gallery.albumsWithFavorites,
+    );
+  }
+
+  public static empty(): AdvancedGallery {
+    return new AdvancedGallery([], [], [], null, []);
+  }
+
 }
+
 
 const createGallery = () => {
   let gallerySub;
   let galleryListener: FirestoreGalleryListener | null = null;
-  return readable<AdvancedGallery>(emptyAdvancedGallery, (set) => {
+  return readable<AdvancedGallery>(AdvancedGallery.empty(), (set) => {
     return firebaseUser.subscribe(async (user) => {
       if (user === null) {
-        set(emptyAdvancedGallery);
+        set(AdvancedGallery.empty());
         gallerySub && gallerySub();
         galleryListener && galleryListener.unsubscribeAll();
         return;
@@ -47,10 +71,7 @@ const createGallery = () => {
       galleryListener = firestoreManager.getGallery(user);
 
       gallerySub = galleryListener.listen((gallery) => {
-        set({
-          ...gallery,
-          listener: galleryListener,
-        });
+        return set(AdvancedGallery.fromGallery(gallery, galleryListener));
       });
     });
   });
