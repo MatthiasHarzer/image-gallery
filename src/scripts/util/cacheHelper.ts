@@ -1,4 +1,4 @@
-const THUMBNAIL_SIZE = 400;
+const THUMBNAIL_SIZE = 600;
 
 const FIREBASE_STORAGE_CACHE_PROXY = "https://firebase-storage-cache.taptwice.dev"
 const FIREBASE_STORAGE_CACHE_PROXY_THUMBNAIL = `${FIREBASE_STORAGE_CACHE_PROXY}/scale/${THUMBNAIL_SIZE}/`
