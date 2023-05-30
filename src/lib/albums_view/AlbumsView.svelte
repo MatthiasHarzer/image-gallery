@@ -35,6 +35,7 @@
     if (!isValid) return;
 
 
+
     await firestoreManager.createOrUpdateAlbum($firebaseUser, album);
 
 

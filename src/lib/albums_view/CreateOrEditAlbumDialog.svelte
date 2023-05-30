@@ -17,7 +17,7 @@
   let dummyAlbum: Album;
 
   onMount(() => {
-    dummyAlbum = album !== null ? { ...album } : Album.dummy();
+    dummyAlbum = album !== null ? album.copy() : Album.dummy();
   })
 
   const close = () => {

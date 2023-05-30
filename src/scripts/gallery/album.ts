@@ -34,6 +34,10 @@ export default class Album implements Entry {
     this.cover = album.cover;
     return this;
   }
+
+  public copy(): Album {
+    return new Album(this.id, this.name, this.description, this.images, this.children, this.parent, this.cover);
+  }
 }
 
 /**

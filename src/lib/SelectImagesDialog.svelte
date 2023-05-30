@@ -47,7 +47,7 @@
       if (shift) {
         const start = Math.min(index, lastIndex);
         const end = Math.max(index, lastIndex);
-        console.log(index, start, end);
+        // console.log(index, start, end);
         selectedImages = [...selectedImages, ...$availableImages.slice(start, end + 1)];
       } else {
         selectedImages = [...selectedImages, image];
@@ -69,7 +69,7 @@
         <span class="material-icons">close</span>
       </button>
     </div>
-    <div class="dialog-content">
+    <div class="dialog-content discrete-scrollbar">
       <div class="images">
 
         {#each $availableImages as image (image.id)}
@@ -91,11 +91,13 @@
       </div>
 
 
+    </div>
+    <div class="dialog-footer">
       <button class="material text-button submit-btn" on:click={submit}>
 
-        <span class="material-icons">
-          check
-        </span>
+          <span class="material-icons">
+            check
+          </span>
         Submit
       </button>
     </div>
@@ -104,18 +106,34 @@
 
 <style>
 
+  .dialog-header{
+    flex: 0;
+  }
+
   .dialog-content {
+    flex: 1;
     margin-top: 1rem;
     width: 90vw;
+    height: 100%;
 
     display: flex;
     flex-direction: column;
     align-items: center;
+
+    overflow-y: auto;
+
+  }
+
+  .dialog-footer{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    flex: 0;
   }
 
   .images {
     width: 90%;
-    /*margin: 100px;*/
+    height: fit-content;
     display: grid;
     grid-gap: 10px;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, min(150px, 25%)), 1fr));
