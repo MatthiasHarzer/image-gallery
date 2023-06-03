@@ -18,6 +18,7 @@
   const PROGRESS_TO_NEXT_IMAGE = 0.3;
   const SPEED_TO_NEXT_IMAGE = 0.8;
   const LOAD_IMAGES_AHEAD = 2;
+  const SINGLE_CLICK_PROGRESS_TO_NEXT_IMAGE = 0.2;
 
   let initialized = false;
   let zoom: number;
@@ -36,6 +37,18 @@
 
   let carouselElement: HTMLElement;
   let carrouselHelper: CarrouselScrollHelper;
+  let carrouselSingleClickEnabled = true;
+
+  let to;
+
+  $: if(zooming){
+    carrouselSingleClickEnabled = false;
+    to && clearTimeout(to);
+  }else{
+    to = setTimeout(() => {
+      carrouselSingleClickEnabled = true;
+    }, 300);
+  }
 
 
   $: if (currentImageIndex != null && carrouselHelper != undefined) {
@@ -44,20 +57,31 @@
   }
 
   onMount(() => {
-    carrouselHelper = new CarrouselScrollHelper(carouselElement, currentImageIndex,{
+    carrouselHelper = new CarrouselScrollHelper(carouselElement, currentImageIndex, {
       progress_to_next_image: PROGRESS_TO_NEXT_IMAGE,
       speed_to_next_image: SPEED_TO_NEXT_IMAGE,
     });
 
     carrouselHelper.index.subscribe((index) => {
-      if (index != currentImageIndex){
+      if (index != currentImageIndex) {
         currentImageIndex = index;
       }
-    })
+    });
+
+    carrouselHelper.observer.onClick((_: [x: number, y: number], [progressX,]: [x: number, y: number]) => {
+      if (!carrouselSingleClickEnabled) return;
+      if (progressX < SINGLE_CLICK_PROGRESS_TO_NEXT_IMAGE) {
+        carrouselHelper.movePrevious();
+      }
+
+      if (progressX > 1 - SINGLE_CLICK_PROGRESS_TO_NEXT_IMAGE) {
+        carrouselHelper.moveNext();
+      }
+    });
   })
 
 
-  $: if(carrouselHelper) carrouselHelper.enabled = !zooming;
+  $: if (carrouselHelper) carrouselHelper.enabled = !zooming;
 
 
 </script>
@@ -67,7 +91,8 @@
     <div class="image-list">
         {#each $images as image, index}
             <div class="image-container" class:active={index === currentImageIndex}>
-                <ImageWrapper loading={loaded_image_indexes.includes(index) ? "eager" : "lazy"} {image} zoomEnabled={index === currentImageIndex} bind:zoom/>
+                <ImageWrapper loading={loaded_image_indexes.includes(index) ? "eager" : "lazy"} {image}
+                              zoomEnabled={index === currentImageIndex} bind:zoom/>
             </div>
         {/each}
     </div>

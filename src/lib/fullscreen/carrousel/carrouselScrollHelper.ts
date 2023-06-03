@@ -56,6 +56,16 @@ export class CarrouselScrollHelper {
     return this._element.scrollLeft;
   }
 
+  public moveNext() {
+    if (this._currentScrollOffset === this._element.scrollWidth - this._element.clientWidth) return;
+    this.setIndex(get(this._index) + 1, true);
+  }
+
+  public movePrevious() {
+    if (get(this._index) === 0) return;
+    this.setIndex(get(this._index) - 1, true);
+  }
+
   /**
    * Sets the index of the carrousel. If smooth is true, the carrousel will animate to the new index.
    * @param index The index to set

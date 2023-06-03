@@ -59,20 +59,25 @@ const defaultScrollEvent: ScrollObserverEvent = {
 
 type ScrollDelta = [x: number, y: number];
 type ScrollSpeed = [dx: number, dy: number];
-type ScrollProgress = [x: number, y: number];
-type ScrollEndCallback = (pos: ScrollDelta, speed: ScrollSpeed, progress: ScrollProgress) => void;
+type Progress = [x: number, y: number];
+type Position = [x: number, y: number];
+type ScrollEndCallback = (pos: ScrollDelta, speed: ScrollSpeed, progress: Progress) => void;
 
 /**
  * A scroll observer, which emits events whenever the user scrolls inside the observed element.
  */
 export type ScrollObserver = Readable<ScrollObserverEvent> & {
   onScrollEnd: (callback: ScrollEndCallback) => void;
+  onClick: (callback: (pos: Position, progress: Progress) => void) => void;
 };
 
 const createEmptyScrollObserver = (): ScrollObserver => {
   return {
     ...readable(defaultScrollEvent),
     onScrollEnd: () => {
+    },
+    onClick: () => {
+
     }
   };
 }
@@ -92,6 +97,7 @@ export const createScrollObserver = (element: HTMLElement = null, params: Scroll
   let deltaPosition: ScrollDelta = [0, 0];
   let initialScrollDirection: ScrollDirection | null = null;
   let scrollEventStamps: ScrollEventStamp[] = [];
+  let onClickCallback: (pos: Position, progress: Progress) => void = null;
   let pointerTouchDown = false;
   const uniDirectional = params?.uniDirectional ?? false;
   const disablePointerSupport = params?.disablePointerSupport ?? false;
@@ -132,7 +138,7 @@ export const createScrollObserver = (element: HTMLElement = null, params: Scroll
     return [delta_x / delta_time, delta_y / delta_time];
   }
 
-  const get_progress = (position: ScrollDelta): ScrollProgress => {
+  const get_progress = (position: ScrollDelta): Progress => {
     return [
       position[0] / clientDimensions[0],
       position[1] / clientDimensions[1]
@@ -206,6 +212,11 @@ export const createScrollObserver = (element: HTMLElement = null, params: Scroll
     scrollEventStamps = [];
   }
 
+  const handle_click = (pos: [number, number]) => {
+    if (onClickCallback == null) return;
+    onClickCallback(pos, get_progress([pos[0], pos[1]]));
+  }
+
   const create_touch_handler = (callback: (pos: [number ,number]) => void) => {
     return (event: TouchEvent) => {
       callback([event.touches[0].clientX, event.touches[0].clientY]);
@@ -229,6 +240,7 @@ export const createScrollObserver = (element: HTMLElement = null, params: Scroll
     window.onpointerup = handle_end;
   }
 
+  element.onclick = (event: MouseEvent) => handle_click([event.clientX, event.clientY])
 
   return {
     ...readable(get(eventStore), (set) => {
@@ -236,6 +248,9 @@ export const createScrollObserver = (element: HTMLElement = null, params: Scroll
     }),
     onScrollEnd: (callback: ScrollEndCallback) => {
       onScrollEndCallback = callback;
+    },
+    onClick: (callback: (pos: Position, progress: Progress) => void) => {
+      onClickCallback = callback;
     }
   };
 }

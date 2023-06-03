@@ -25,9 +25,6 @@
 
   let tagsScrollElement: HTMLElement;
 
-  let tagInput = "";
-  let invisibleNavShown = true;
-
   onMount(() => {
     tagsScrollElement.onwheel = (event) => {
       event.stopPropagation();
@@ -90,15 +87,6 @@
     }
   }
 
-  let to;
-  $: if(zooming){
-    invisibleNavShown = false;
-    to && clearTimeout(to);
-  }else{
-    to = setTimeout(()=>{
-      invisibleNavShown = true;
-    }, 300);
-  }
 </script>
 
 <div class="bare-nav" class:not-shown={zooming && !navShown}>
@@ -110,14 +98,6 @@
     </button>
 </div>
 
-
-{#if invisibleNavShown}
-    <div class="invisible-fs-nav">
-        <div class="left" role="button" on:click={onPrev}></div>
-        <div class="center" role="button"></div>
-        <div class="right" role="button" on:click={onNext}></div>
-    </div>
-{/if}
 
 <div class="main" class:visible={navShown}>
     <div class="top-nav-bar">
@@ -200,34 +180,6 @@
 {/if}
 
 <style lang="scss">
-
-  .invisible-fs-nav {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    pointer-events: none;
-
-    .left, .right, .center {
-      flex: 1 1 auto;
-      height: 100%;
-    }
-
-    .center {
-      width: 60%;
-    }
-
-    .left, .right {
-      pointer-events: auto;
-    }
-  }
-
-
   .bare-nav {
     position: absolute;
     top: 0;
