@@ -40,13 +40,19 @@ export class Route {
   }
 
   public toPath(): string {
-    let path = `/${this.screen}`;
-    if (this.albums.length > 0) {
-      path += `/album@${this.albums.map(a => a.id).join(":")}`;
-    }
+    let path = this.toPathWithoutImage();
 
     if (this.fullscreenImage) {
       path += `/image@${this.fullscreenImage.id}`;
+    }
+
+    return path;
+  }
+
+  public toPathWithoutImage(): string {
+    let path = `/${this.screen}`;
+    if (this.albums.length > 0) {
+      path += `/album@${this.albums.map(a => a.id).join(":")}`;
     }
 
     return path;
@@ -80,9 +86,9 @@ const getPathnameOrLocal = () => {
 }
 
 const createRoute = (): Router => {
-  let route = Route.fromString(getPathnameOrLocal());
-
-  console.log("route", route);
+  const initPath = getPathnameOrLocal();
+  window.history.replaceState({}, "", initPath)
+  let route = Route.fromString(initPath);
 
   const {subscribe, set, update} = writable<Route>(route);
 
@@ -95,9 +101,9 @@ const createRoute = (): Router => {
     setRouteInternal(r);
     const path = route.toPath();
     if (replace) window.history.replaceState({}, "", path); else window.history.pushState({}, "", path);
-    localStorage.setItem(localStorageKey, path);
+    localStorage.setItem(localStorageKey, route.toPathWithoutImage());
   }
-  
+
   gallery.subscribe((g) => {
     setRouteInternal(Route.fromString(getPathnameOrLocal()));
   });
