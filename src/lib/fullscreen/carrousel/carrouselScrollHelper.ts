@@ -25,6 +25,9 @@ export class CarrouselScrollHelper {
     this._index = writable(_initialIndex);
     this._animationHelper.value.subscribe(this._scrollToAbs.bind(this));
     this._scrollToAbs(this._currentIndexTargetOffset);
+    window.addEventListener("resize", () => {
+      this._scrollToAbs(this._currentIndexTargetOffset);
+    });
   }
 
   public get sliding(): Readable<boolean> {

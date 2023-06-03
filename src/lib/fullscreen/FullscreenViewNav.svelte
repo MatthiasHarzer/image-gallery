@@ -35,6 +35,16 @@
         left: event.deltaY < 0 ? -30 : 30,
       })
     }
+
+    window.onkeydown = (event) => {
+      if (event.key === "ArrowLeft") {
+        onPrev();
+      } else if (event.key === "ArrowRight") {
+        onNext();
+      } else if (event.key === "Escape") {
+        onClose();
+      }
+    }
   })
 
   const onNext = () => {
