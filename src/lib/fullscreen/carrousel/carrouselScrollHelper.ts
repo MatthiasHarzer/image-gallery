@@ -99,10 +99,11 @@ export class CarrouselScrollHelper {
       return;
     }
 
-    const targetIndex = get(this._index) + deltaIndex;
-    if (targetIndex < 0) return;
-
-    this.setIndex(targetIndex, true);
+    if (deltaIndex > 0) {
+      this.moveNext();
+    }else{
+      this.movePrevious();
+    }
   }
 
   private _onScroll({deltaX}: ScrollObserverEvent) {
