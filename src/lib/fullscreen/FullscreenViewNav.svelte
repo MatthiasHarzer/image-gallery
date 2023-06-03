@@ -238,18 +238,21 @@
     justify-content: space-between;
     z-index: 1;
     transition: top 0.2s ease-in-out;
+    pointer-events: none;
 
     .toggle-nav-btn {
       position: relative;
       top: -1px;
       right: 0;
       margin: 0.5rem;
+      pointer-events: auto;
     }
 
     .back-btn {
       position: relative;
       top: -1px;
       left: 0;
+      pointer-events: auto;
       margin: 0.5rem;
 
     }
