@@ -9,6 +9,8 @@
   export let zoom: number = 1;
   export let thumbnail: boolean = false;
 
+  export let loading: string = "lazy";
+
   let loader: Zoom;
   let elementZoom: number;
   $: infiniteLoad = image?.url != null ? null : new Promise((_) => _);
@@ -17,7 +19,7 @@
 </script>
 
 <div class="main">
-  <Zoom loading="lazy" src={thumbnail ? image.thumbnailSrc : image.src} alt={image.name} {zoomEnabled} bind:zoom={elementZoom}
+  <Zoom {loading} src={thumbnail ? image.thumbnailSrc : image.src} alt={image.name} {zoomEnabled} bind:zoom={elementZoom}
         bind:this={loader} {...$$props}
   />
   {#if loader || infiniteLoad}

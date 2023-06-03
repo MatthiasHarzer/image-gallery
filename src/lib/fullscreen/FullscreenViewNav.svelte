@@ -1,18 +1,21 @@
 <script lang="ts">
 
-  import { createEventDispatcher, onMount } from "svelte";
+  import {createEventDispatcher, onMount} from "svelte";
   import type Image from "../../scripts/gallery/image";
-  import { firebaseUser, firestoreManager } from "../../scripts/firebase/firebaseManager";
+  import {firebaseUser, firestoreManager} from "../../scripts/firebase/firebaseManager";
   import Tag from "../../scripts/gallery/tag";
   import AddToAlbumScreen from "../AddToAlbumScreen.svelte";
-  import { fullscreenDialog } from "../../scripts/fullscreenDialog";
+  import {fullscreenDialog} from "../../scripts/fullscreenDialog";
   import TagSelectInput from "./TagSelectInput.svelte";
+  import {fly} from "svelte/transition";
 
   const dispatch = createEventDispatcher();
 
   export let image: Image;
 
   export let navShown = false;
+
+  export let zooming = false;
 
   // let album: ReadWritable<Album>;
 
@@ -23,6 +26,7 @@
   let tagsScrollElement: HTMLElement;
 
   let tagInput = "";
+  let invisibleNavShown = true;
 
   onMount(() => {
     tagsScrollElement.onwheel = (event) => {
@@ -54,11 +58,11 @@
   }
 
   const onFavorite = () => {
-    firestoreManager.updateImageProps($firebaseUser, image, { favorite: !image.favorite });
+    firestoreManager.updateImageProps($firebaseUser, image, {favorite: !image.favorite});
   }
 
 
-  const addTag = async ({ detail: tag }: CustomEvent<Tag>) => {
+  const addTag = async ({detail: tag}: CustomEvent<Tag>) => {
     await firestoreManager.addTagToImage($firebaseUser, image, tag);
   }
 
@@ -72,114 +76,177 @@
     if ($album.isFavorites) {
       firestoreManager.updateFavoriteAlbumCover($firebaseUser, image);
     } else {
-      firestoreManager.updateAlbumProps($firebaseUser, $album, { cover: image.id });
+      firestoreManager.updateAlbumProps($firebaseUser, $album, {cover: image.id});
     }
+  }
+
+  let to;
+  $: if(zooming){
+    invisibleNavShown = false;
+    to && clearTimeout(to);
+  }else{
+    to = setTimeout(()=>{
+      invisibleNavShown = true;
+    }, 300);
   }
 </script>
 
-<button class="material back-btn" on:click={onClose}>
-  <span class="material-icons">arrow_back</span>
-</button>
-<button class="material toggle-nav-btn" on:click={toggleNav}>
-  <span class="material-icons-outlined">{navShown ? "visibility_off" : "info"}</span>
-</button>
+<div class="bare-nav" class:not-shown={zooming && !navShown}>
+    <button class="material back-btn" on:click={onClose}>
+        <span class="material-icons">arrow_back</span>
+    </button>
+    <button class="material toggle-nav-btn" on:click={toggleNav}>
+        <span class="material-icons-outlined">{navShown ? "visibility_off" : "info"}</span>
+    </button>
+</div>
+
+
+{#if invisibleNavShown}
+    <div class="invisible-fs-nav">
+        <div class="left" role="button" on:click={onPrev}></div>
+        <div class="center" role="button"></div>
+        <div class="right" role="button" on:click={onNext}></div>
+    </div>
+{/if}
 
 <div class="main" class:visible={navShown}>
-  <div class="top-nav-bar">
-    <div class="left">
-      <button class="material back-btn-fake">
-        <span class="material-icons">arrow_back</span>
-      </button>
-    </div>
+    <div class="top-nav-bar">
+        <div class="left">
+            <button class="material back-btn-fake">
+                <span class="material-icons">arrow_back</span>
+            </button>
+        </div>
 
-    <div class="right">
-      <button class="material favorite" class:is-favorite={image?.favorite} on:click={onFavorite}>
-        <span class="material-icons-outlined">{image?.favorite ? "star" : "star_outline"}</span>
-      </button>
-      <button class="material add-to-album" on:click={()=>addToAlbumOpen = true}>
-        <span class="material-icons-outlined">add_to_photos</span>
-      </button>
-      <div class="context-menu">
+        <div class="right">
+            <button class="material favorite" class:is-favorite={image?.favorite} on:click={onFavorite}>
+                <span class="material-icons-outlined">{image?.favorite ? "star" : "star_outline"}</span>
+            </button>
+            <button class="material add-to-album" on:click={()=>addToAlbumOpen = true}>
+                <span class="material-icons-outlined">add_to_photos</span>
+            </button>
+            <div class="context-menu">
 
-        <button class="material toggle-nav">
+                <button class="material toggle-nav">
             <span class="material-icons">
               more_vert
             </span>
-        </button>
-        <div class="drop-down box-shadow">
-          <button class="material text-button drop-down-item"
-                  on:click={onDelete}>
+                </button>
+                <div class="drop-down box-shadow">
+                    <button class="material text-button drop-down-item"
+                            on:click={onDelete}>
             <span class="name">
               Delete
             </span>
-          </button>
-          {#if $album != null}
-            <button class="material text-button drop-down-item"
-                    on:click={makeAlbumCover}>
+                    </button>
+                    {#if $album != null}
+                        <button class="material text-button drop-down-item"
+                                on:click={makeAlbumCover}>
             <span class="name">
               Make album cover
             </span>
+                        </button>
+                    {/if}
+                </div>
+            </div>
+
+            <button class="material toggle-nav-btn-fake">
+                <span class="material-icons-outlined">{navShown ? "visibility_off" : "visibility"}</span>
             </button>
-          {/if}
+
         </div>
-      </div>
-
-      <button class="material toggle-nav-btn-fake">
-        <span class="material-icons-outlined">{navShown ? "visibility_off" : "visibility"}</span>
-      </button>
 
     </div>
 
-  </div>
+    <div class="page-nav">
+        <button class="material no-effect" on:click={onPrev}>
+            <span class="material-icons">navigate_before</span>
+        </button>
+        <button class="material no-effect" on:click={onNext}>
+            <span class="material-icons">keyboard_arrow_right</span>
+        </button>
+    </div>
 
-  <div class="page-nav">
-    <button class="material no-effect" on:click={onPrev}>
-      <span class="material-icons">navigate_before</span>
-    </button>
-    <button class="material no-effect" on:click={onNext}>
-      <span class="material-icons">keyboard_arrow_right</span>
-    </button>
-  </div>
+    <div class="tags-nav">
 
-  <div class="tags-nav">
-
-    <div bind:this={tagsScrollElement} class="tags-list">
-      {#each image?.tags ?? [] as tag (tag.id)}
-        <div class="tag">
-          <span class="name">{tag.name}</span>
-          <button class="remove-tag material" on:click={()=>removeTag(tag)}>
-            <span class="material-icons-outlined">close</span>
-          </button>
+        <div bind:this={tagsScrollElement} class="tags-list">
+            {#each image?.tags ?? [] as tag (tag.id)}
+                <div class="tag">
+                    <span class="name">{tag.name}</span>
+                    <button class="remove-tag material" on:click={()=>removeTag(tag)}>
+                        <span class="material-icons-outlined">close</span>
+                    </button>
+                </div>
+            {/each}
         </div>
-      {/each}
+        <div class="input-field">
+            <TagSelectInput {image} on:addTag={addTag}/>
+        </div>
     </div>
-    <div class="input-field">
-      <TagSelectInput {image} on:addTag={addTag}/>
-    </div>
-  </div>
 
 </div>
 
 {#if addToAlbumOpen}
-  <AddToAlbumScreen {image} on:close={()=>addToAlbumOpen = false}/>
+    <AddToAlbumScreen {image} on:close={()=>addToAlbumOpen = false}/>
 {/if}
 
-<style>
+<style lang="scss">
 
-  .toggle-nav-btn {
+  .invisible-fs-nav {
     position: absolute;
-    top: -1px;
-    right: 0;
-    margin: 0.5rem;
-    z-index: 1;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: none;
+
+    .left, .right, .center {
+      flex: 1 1 auto;
+      height: 100%;
+    }
+
+    .center {
+      width: 60%;
+    }
+
+    .left, .right {
+      pointer-events: auto;
+    }
   }
 
-  .back-btn {
+
+  .bare-nav {
     position: absolute;
-    top: -1px;
+    top: 0;
     left: 0;
-    margin: 0.5rem;
+    width: 100%;
+
+    display: flex;
+    justify-content: space-between;
     z-index: 1;
+    transition: top 0.2s ease-in-out;
+
+    .toggle-nav-btn {
+      position: relative;
+      top: -1px;
+      right: 0;
+      margin: 0.5rem;
+    }
+
+    .back-btn {
+      position: relative;
+      top: -1px;
+      left: 0;
+      margin: 0.5rem;
+
+    }
+  }
+
+  .bare-nav.not-shown{
+    top: -100px;
   }
 
   .toggle-nav-btn-fake, .back-btn-fake {

@@ -8,7 +8,7 @@
   import type { ReadWritable } from "../../scripts/util/helperTypes";
   import { writable } from "svelte/store";
   import { route } from "../../scripts/routeManager";
-  import ImageCarrousel from "./ImageCarrousel.svelte";
+  import ImageCarrousel from "./carrousel/ImageCarrousel.svelte";
   import { localConfig } from "../../scripts/localConfig";
 
   export let images: ReadWritable<CustomImage[]> = writable([]);
@@ -30,6 +30,8 @@
   let previousImageIndex = null;
 
   let currentImage: CustomImage = null;
+  let loaded;
+  let zooming;
 
   $: renderedImages = [previousImagePromise, imagePromise, upcomingImagePromise]
   $: loaded = renderedImages && renderedImages.every(promise => promise != null);
@@ -100,10 +102,12 @@
     <ImageCarrousel
         images={images}
         bind:currentImage
-        bind:currentImageIndex={index}/>
+        bind:currentImageIndex={index}
+        bind:zooming
+    />
   </div>
 
-  <FullscreenViewNav on:next={onNext} on:prev={onPrevious} image={currentImage} on:close={onClose}
+  <FullscreenViewNav on:next={onNext} on:prev={onPrevious} image={currentImage} on:close={onClose} {zooming}
                      navShown={$localConfig.showFullscreenNav} on:delete={onDelete} on:toggle-nav={toggleNav}
   />
 

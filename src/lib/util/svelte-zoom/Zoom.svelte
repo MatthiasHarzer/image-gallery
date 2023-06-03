@@ -130,6 +130,11 @@
 
   $: if (!zoomEnabled) {
     scale.value = 1
+    zoom = 1
+    if (img){
+        img.style.transform = `matrix(1,0,0,1,0,0)`
+      // onResize()
+    }
   }
 
   function fireDown(x, y) {

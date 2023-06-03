@@ -1,16 +1,13 @@
-import { Screen } from "./screen";
-import type { Writable } from "svelte/store";
-import { get, writable } from "svelte/store";
+import {Screen} from "./screen";
+import type {Writable} from "svelte/store";
+import {get, writable} from "svelte/store";
 import type Album from "./gallery/album";
 import type Image from "./gallery/image";
-import { gallery } from "./firebase/firebaseManager";
+import {gallery} from "./firebase/firebaseManager";
 
 export class Route {
 
-  constructor(
-    public screen: Screen,
-    public albums: Album[],
-    public fullscreenImage: Image | null) {
+  constructor(public screen: Screen, public albums: Album[], public fullscreenImage: Image | null) {
   }
 
   public static fromString(route: string): Route {
@@ -72,15 +69,22 @@ type Router = Writable<Route> & {
 
 const albumRouteRegex = /^album@(.+$)/;
 const imageRouteRegex = /^image@(.+$)/;
+const localStorageKey = "route";
 
+const getPathnameOrLocal = () => {
+  const localRoute = localStorage.getItem(localStorageKey);
+  const presentRoute = window.location.pathname;
+  const presentRouteIsEmpty = presentRoute === "/";
 
-// const
+  return presentRouteIsEmpty ? (localRoute ?? "/") : presentRoute;
+}
 
 const createRoute = (): Router => {
-  let route = Route.fromString(window.location.pathname);
-  const { subscribe, set, update } = writable<Route>(route);
+  let route = Route.fromString(getPathnameOrLocal());
 
+  console.log("route", route);
 
+  const {subscribe, set, update} = writable<Route>(route);
 
   const setRouteInternal = (r: Route) => {
     route = r;
@@ -90,36 +94,32 @@ const createRoute = (): Router => {
   const push = (r: Route, replace: boolean = false) => {
     setRouteInternal(r);
     const path = route.toPath();
-    if (replace) window.history.replaceState({}, "", path);
-    else window.history.pushState({}, "", path);
+    if (replace) window.history.replaceState({}, "", path); else window.history.pushState({}, "", path);
+    localStorage.setItem(localStorageKey, path);
   }
-
+  
   gallery.subscribe((g) => {
-    setRouteInternal(Route.fromString(window.location.pathname));
+    setRouteInternal(Route.fromString(getPathnameOrLocal()));
   });
 
   window.addEventListener("popstate", () => {
-    route = Route.fromString(window.location.pathname);
+    route = Route.fromString(getPathnameOrLocal());
     setRouteInternal(route);
   });
 
   return {
     push(route: Route): void {
       push(route);
-    },
-    setAlbums(albums: Album[]): void {
+    }, setAlbums(albums: Album[]): void {
       route.albums = albums;
       push(route);
-    },
-    addAlbum(album: Album): void {
+    }, addAlbum(album: Album): void {
       route.albums.push(album);
       push(route);
-    },
-    removeAlbum(album: Album): void {
+    }, removeAlbum(album: Album): void {
       route.albums = route.albums.filter(a => a.id !== album.id);
       push(route);
-    },
-    popAlbum(): Album {
+    }, popAlbum(): Album {
       const popped = route.albums.pop();
       push(route);
       return popped;
@@ -128,15 +128,10 @@ const createRoute = (): Router => {
     setFullscreenImage(image: Image, replace: boolean = false): void {
       route.fullscreenImage = image;
       push(route, replace);
-    },
-    setScreen(screen: Screen): void {
+    }, setScreen(screen: Screen): void {
       route.screen = screen;
       push(route);
-    },
-    subscribe,
-    set,
-    update,
-    clear: () => {
+    }, subscribe, set, update, clear: () => {
       push(defaultRoute)
     }
   }
