@@ -78,6 +78,9 @@
         $localConfig.sortMode = SortMode.RANDOM;
         break;
       case SortMode.RANDOM:
+        $localConfig.sortMode = SortMode.AUTO;
+        break;
+      case SortMode.AUTO:
         $localConfig.sortMode = SortMode.DATE_ASC;
         break;
     }
@@ -99,6 +102,9 @@
         break;
       case SortMode.RANDOM:
         sortModeLabel = "Random";
+        break;
+      case SortMode.AUTO:
+        sortModeLabel = "Auto";
         break;
     }
   }

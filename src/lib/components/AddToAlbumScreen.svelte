@@ -1,9 +1,9 @@
 <script lang="ts">
 
-  import type Image from "../scripts/gallery/image";
-  import { firebaseUser, firestoreManager, gallery } from "../scripts/firebase/firebaseManager";
+  import type Image from "../../scripts/gallery/image";
+  import { firebaseUser, firestoreManager, gallery } from "../../scripts/firebase/firebaseManager";
   import { createEventDispatcher, onMount } from "svelte";
-  import type Album from "../scripts/gallery/album";
+  import type Album from "../../scripts/gallery/album";
 
   export let image: Image;
 

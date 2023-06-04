@@ -1,5 +1,5 @@
 import type { User } from "firebase/auth";
-import { addDoc, deleteDoc, doc, DocumentReference, getDoc, setDoc, updateDoc, serverTimestamp  } from "firebase/firestore";
+import { addDoc, deleteDoc, doc, DocumentReference, getDoc, setDoc, updateDoc, serverTimestamp, writeBatch  } from "firebase/firestore";
 import { ALBUMS_REF, IMAGE_REF, IMAGES_REF, STORAGE_BUCKET_IMAGE_REF, TAGS_REF, USER_REF } from "./firebasePathConfig";
 
 import { deleteObject, getDownloadURL, uploadBytesResumable } from "firebase/storage";
@@ -8,6 +8,7 @@ import { default as CustomImage, ImageState } from "../gallery/image";
 import type Tag from "../gallery/tag";
 import type { TagData } from "../gallery/tag";
 import type Album from "../gallery/album";
+import {firestore} from "./firebase";
 
 
 export default class FirestoreManager {
@@ -54,6 +55,19 @@ export default class FirestoreManager {
       deleteObject(storageRef),
     ]);
   }
+
+  public async multiDeleteImages(user: User, images: CustomImage[]): Promise<void>{
+    const firestoreBatch = writeBatch(firestore);
+
+    for (const image of images) {
+      const imageRef = IMAGE_REF(user, image);
+      const storageRef = STORAGE_BUCKET_IMAGE_REF(user, image.id);
+      firestoreBatch.delete(imageRef);
+      await deleteObject(storageRef)
+    }
+    await firestoreBatch.commit();
+  }
+
 
   public updateImageProps(user: User, image: CustomImage, updateData: { [key: string]: any }): Promise<void> {
     const imageRef = IMAGE_REF(user, image);
@@ -199,4 +213,5 @@ export default class FirestoreManager {
       favoritesCover: image.id,
     });
   }
+
 }

@@ -22,6 +22,7 @@ export enum SortMode {
   DATE_ASC = "DATE_ASC",
   DATE_DESC = "DATE_DESC",
   RANDOM = "RANDOM",
+  AUTO = "AUTO",
 }
 
 interface LocalConfig {

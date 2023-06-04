@@ -4,6 +4,7 @@ import { get, readable } from "svelte/store";
 import type { TagConfig } from "./localConfig";
 import { localConfig, SortMode } from "./localConfig";
 import math from "random-seed";
+import type Album from "./gallery/album";
 
 interface LocalConfigLike {
   favoritesOnly: boolean,
@@ -12,7 +13,7 @@ interface LocalConfigLike {
   [key: string]: any
 }
 
-const sortImages = (images: Image[], config: LocalConfigLike): Image[] => {
+const sortImages = (images: Image[], config: LocalConfigLike, album: Album | null = null): Image[] => {
   const sortMode = config.sortMode;
   switch (sortMode) {
     case SortMode.DATE_ASC:
@@ -24,12 +25,15 @@ const sortImages = (images: Image[], config: LocalConfigLike): Image[] => {
     case SortMode.RANDOM:
       const rand = math.create(config.randomSeed);
       return images.sort(() => rand.random() - 0.5);
+    case SortMode.AUTO:
+      if (album == null) return images;
+      return images.sort((a, b) => album.images.indexOf(a) - album.images.indexOf(b));
     default:
       return images;
   }
 }
 
-export const applyFiltersWithConfig = (images: Image[], config: LocalConfigLike): Image[] => {
+export const applyFiltersWithConfig = (images: Image[], config: LocalConfigLike, album: Album | null = null): Image[] => {
   if (config.favoritesOnly) {
     images = images.filter(i => i.favorite);
   }
@@ -56,9 +60,13 @@ export const applyFiltersWithConfig = (images: Image[], config: LocalConfigLike)
     }
   }
 
-  return sortImages(images, config);
+  return sortImages(images, config, album);
 }
 
-export const applyFilters = (images: Readable<Image[]>): Readable<Image[]> => {
-  return readable(applyFiltersWithConfig(get(images), get(localConfig)), set => images.subscribe(i => set(applyFiltersWithConfig(i, get(localConfig)))));
+export const applyFilters = (images: Readable<Image[]>, album: Readable<Album> | null = null): Readable<Image[]> => {
+  album = album ?? readable(null, () => {});
+
+  return readable(applyFiltersWithConfig(get(images), get(localConfig)), set => images.subscribe(i => {
+    set(applyFiltersWithConfig(i, get(localConfig), get(album)))
+  }));
 }

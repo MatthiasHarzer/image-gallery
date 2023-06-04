@@ -203,6 +203,7 @@ export default class FirestoreGalleryListener {
 
     const albums = albumsData.map((albumData) => {
       const imagesForAlbum = images.filter((image) => albumData.images.includes(image.id));
+      imagesForAlbum.sort((a, b) => albumData.images.indexOf(a.id) - albumData.images.indexOf(b.id));
       const cover = images.find((image) => image.id === albumData.cover);
 
       return this.getCachedOrInitAlbum(new Album(albumData.id, albumData.name, albumData.description, imagesForAlbum, [], null, cover));

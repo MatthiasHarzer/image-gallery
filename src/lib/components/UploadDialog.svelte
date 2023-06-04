@@ -1,8 +1,8 @@
 <script lang="ts">
 
   import { createEventDispatcher, onMount } from "svelte";
-  import { firestoreManager } from "../scripts/firebase/firebaseManager";
-  import { firebaseUser } from "../scripts/firebase/firebaseManager.js";
+  import { firestoreManager } from "../../scripts/firebase/firebaseManager";
+  import { firebaseUser } from "../../scripts/firebase/firebaseManager.js";
 
   const dispatch = createEventDispatcher();
   const close = () => {

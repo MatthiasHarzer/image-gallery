@@ -15,8 +15,10 @@
 
   let filteredImages: Readable<Image[]>
 
+  // $: console.log("ALBUM", $album)
+
   // Store goes brrrr
-  $: $localConfig.currentImageViewStore.set(applyFilters(images))
+  $: $localConfig.currentImageViewStore.set(applyFilters(images, album))
   $: imageViewStore = $localConfig.currentImageViewStore;
   $: filteredImages = $imageViewStore;
 

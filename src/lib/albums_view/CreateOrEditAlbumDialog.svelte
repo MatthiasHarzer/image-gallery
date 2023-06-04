@@ -1,10 +1,11 @@
 <script lang="ts">
 
   import Album from "../../scripts/gallery/album";
-  import { createEventDispatcher, onMount } from "svelte";
-  import { gallery } from "../../scripts/firebase/firebaseManager";
+  import {createEventDispatcher, onMount} from "svelte";
+  import {gallery} from "../../scripts/firebase/firebaseManager";
   import type Image from "../../scripts/gallery/image";
-  import SelectImagesDialog from "../SelectImagesDialog.svelte";
+  import SelectImagesDialog from "../components/SelectImagesDialog.svelte";
+  import OrderImagesDialog from "../components/OrderImagesDialog.svelte";
 
   const dispatch = createEventDispatcher();
 
@@ -13,6 +14,7 @@
   $: isEdit = album !== null && album?.id !== null;
 
   let selectImagesDialogOpen = false;
+  let orderImagesDialogOpen = false;
 
   let dummyAlbum: Album;
 
@@ -32,9 +34,14 @@
     dispatch("delete", dummyAlbum);
   }
 
-  const submitSelectedImages = ({ detail: images }: CustomEvent<Image[]>) => {
+  const submitSelectedImages = ({detail: images}: CustomEvent<Image[]>) => {
     dummyAlbum.images = images;
     selectImagesDialogOpen = false;
+  }
+
+  const submitOrderedImages = ({detail: images}: CustomEvent<Image[]>) => {
+    dummyAlbum.images = images;
+    orderImagesDialogOpen = false;
   }
 
   $: availableParents = $gallery.albums.filter(a => a.id !== dummyAlbum?.id);
@@ -70,17 +77,22 @@
         </div>
       {/if}
 
-      <button class="material text-button select-images" on:click={()=>selectImagesDialogOpen = true}>
+      <div class="select-reorder-wrapper">
+        <button class="material text-button select-images" on:click={()=>selectImagesDialogOpen = true}>
+          <span class="material-icons">add</span>
+          <span>Select Images</span>
 
-        <span class="material-icons">add</span>
-        <span>Select Images</span>
+          <span class="number-selected-images">
+              ({dummyAlbum?.images.length} selected)
+          </span>
+        </button>
 
-        <span class="number-selected-images">
-          ({dummyAlbum?.images.length} selected)
-        </span>
+        <button class="material text-button reorder-images" on:click={()=>orderImagesDialogOpen = true}>
+          <span class="material-icons">reorder</span>
+          <span>Reorder Images</span>
+        </button>
 
-      </button>
-
+      </div>
       <button class="material text-button submit-btn" on:click={submit}>
         <span class="material-icons">done</span>
         <span>Submit</span>
@@ -97,70 +109,91 @@
   />
 {/if}
 
+{#if orderImagesDialogOpen}
+  <OrderImagesDialog
+      images={dummyAlbum.images ?? []}
+      on:submit={submitOrderedImages}
+      on:close={()=>orderImagesDialogOpen = false}
+  />
+{/if}
+
 <style>
-  .dialog-content {
-    position: relative;
-    margin: 10px;
-    width: 80%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    flex: 1;
+    .dialog-content {
+        position: relative;
+        margin: 10px;
+        width: 80%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
 
-  }
+    }
 
-  .submit-btn {
-    margin-top: 20px;
-    background-color: #4CAF50;
-  }
+    .submit-btn {
+        margin-top: 20px;
+        background-color: #4CAF50;
+    }
 
-  .album-name {
-    width: 100%;
-    height: 30px;
-    border: none;
-    border-bottom: 1px solid #ccc;
-    font-size: 20px;
-    padding: 5px;
-    margin-bottom: 20px;
-  }
+    .album-name {
+        width: 100%;
+        height: 30px;
+        border: none;
+        border-bottom: 1px solid #ccc;
+        font-size: 20px;
+        padding: 5px;
+        margin-bottom: 20px;
+    }
 
-  .delete {
-    position: absolute;
-    top: 0;
-    left: 0;
-    margin: 10px;
-    background: none;
-    border: none;
-    outline: none;
-    cursor: pointer;
-  }
+    .delete {
+        position: absolute;
+        top: 0;
+        left: 0;
+        margin: 10px;
+        background: none;
+        border: none;
+        outline: none;
+        cursor: pointer;
+    }
 
-  .parent-select {
-    width: 100%;
-    margin-bottom: 20px;
-    display: flex;
-    flex-direction: row;
-  }
+    .parent-select {
+        width: 100%;
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: row;
+    }
 
-  .parent-select label {
-    margin-right: 10px;
-    font-size: 1.2em;
-  }
+    .parent-select label {
+        margin-right: 10px;
+        font-size: 1.2em;
+    }
 
-  .parent-select select {
-    flex: 1;
-    height: 30px;
-    border: none;
-    border-bottom: 1px solid #ccc;
-    font-size: 1em;
-    padding: 5px;
-    background-color: #2c2c2c;
-    margin-bottom: 0;
-  }
+    .parent-select select {
+        flex: 1;
+        height: 30px;
+        border: none;
+        border-bottom: 1px solid #ccc;
+        font-size: 1em;
+        padding: 5px;
+        background-color: #2c2c2c;
+        margin-bottom: 0;
+    }
 
-  .number-selected-images {
-    margin-left: 10px;
-  }
+    .select-reorder-wrapper {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .select-reorder-wrapper > button {
+        box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.5);
+        margin: 5px
+    }
+
+    .number-selected-images {
+        margin-left: 10px;
+    }
 
 </style>

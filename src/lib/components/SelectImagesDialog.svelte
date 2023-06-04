@@ -1,14 +1,16 @@
 <script lang="ts">
 
-  import type { ReadWritable } from "../scripts/util/helperTypes";
-  import type Image from "../scripts/gallery/image";
-  import { writable } from "svelte/store";
-  import { gallery } from "../scripts/firebase/firebaseManager";
-  import { createEventDispatcher, onMount } from "svelte";
-  import ImageWrapper from "./components/ImageWrapper.svelte";
+  import type {ReadWritable} from "../../scripts/util/helperTypes";
+  import type Image from "../../scripts/gallery/image";
+  import {writable} from "svelte/store";
+  import {gallery} from "../../scripts/firebase/firebaseManager";
+  import {createEventDispatcher, onMount} from "svelte";
+  import ImageWrapper from "./ImageWrapper.svelte";
 
   export let images: ReadWritable<Image[]> = writable(null);
   export let selectedImages: Image[] = [];
+
+  export let title: string = "Select Images";
 
   export let multiple: boolean = true;
 
@@ -63,7 +65,7 @@
   <div class="dialog no-scroll-bar">
     <div class="dialog-header">
       <h3>
-        Select Images
+        {title}
       </h3>
       <button class="material close-btn" on:click={close}>
         <span class="material-icons">close</span>
@@ -74,10 +76,9 @@
 
         {#each $availableImages as image (image.id)}
 
-          <button class="image-container clear" class:selected={selectedImages.includes(image)}
+          <div role="button" class="image-container clear" class:selected={selectedImages.includes(image)}
                   on:click={e=>toggle(image, e.shiftKey)}>
             <div class="img">
-
               <ImageWrapper {image} cover={true} thumbnail={true}/>
             </div>
             <div class="image-overlay">
@@ -85,7 +86,7 @@
               check
             </span>
             </div>
-          </button>
+          </div>
 
         {/each}
       </div>
@@ -106,104 +107,100 @@
 
 <style>
 
-  .dialog-header{
-    flex: 0;
-  }
+    .dialog-header {
+        flex: 0;
+    }
 
-  .dialog-content {
-    flex: 1;
-    margin-top: 1rem;
-    width: 90vw;
-    height: 100%;
+    .dialog-content {
+        flex: 1;
+        margin-top: 1rem;
+        width: 90vw;
+        height: 100%;
 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
 
-    overflow-y: auto;
+        overflow-y: auto;
+    }
 
-  }
+    .dialog-footer {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        flex: 0;
+    }
 
-  .dialog-footer{
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    flex: 0;
-  }
+    .images {
+        width: 90%;
+        height: fit-content;
+        display: grid;
+        grid-gap: 10px;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, min(150px, 25%)), 1fr));
+        grid-auto-rows: 1fr;
+    }
 
-  .images {
-    width: 90%;
-    height: fit-content;
-    display: grid;
-    grid-gap: 10px;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, min(150px, 25%)), 1fr));
-    grid-auto-rows: 1fr;
-  }
+    .image-container {
+        padding: 0;
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1;
+        border-radius: 0.5rem;
+        overflow: hidden
+    }
 
-  .image-container {
-    padding: 0;
-    position: relative;
-    width: 100%;
-    aspect-ratio: 1;
-    /*height: 200px;*/
-    border-radius: 0.5rem;
-    /*margin: 0.5rem;*/
-    /*overflow: hidden;*/
-    overflow: hidden
-  }
+    .image-container .img {
+        position: relative;
+        /*width: 250px;*/
+        /*height: auto;*/
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: inherit;
+        transition: all 0.2s ease-in-out;
+    }
 
-  .image-container .img {
-    position: relative;
-    /*width: 250px;*/
-    /*height: auto;*/
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: inherit;
-    transition: all 0.2s ease-in-out;
-  }
-
-  .image-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    padding: 0;
+    .image-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 0;
 
 
-    opacity: 0;
+        opacity: 0;
 
-    transition: all 0.2s ease-in-out;
+        transition: all 0.2s ease-in-out;
 
-  }
+    }
 
-  .image-container.selected .image-overlay {
-    opacity: 1;
-  }
+    .image-container.selected .image-overlay {
+        opacity: 1;
+    }
 
-  .image-container.selected .img {
-    filter: brightness(0.5);
-  }
+    .image-container.selected .img {
+        filter: brightness(0.5);
+    }
 
-  .image-overlay span {
-    font-size: 2rem;
-    color: white;
-    text-align: center;
-    background: rgba(1, 135, 218, 0.8);
-    border-radius: 50%;
-    padding: 0.5rem;
+    .image-overlay span {
+        font-size: 2rem;
+        color: white;
+        text-align: center;
+        background: rgba(1, 135, 218, 0.8);
+        border-radius: 50%;
+        padding: 0.5rem;
 
-    position: absolute;
-    right: 10px;
-    top: 10px;
-  }
+        position: absolute;
+        right: 10px;
+        top: 10px;
+    }
 
-  .submit-btn {
-    margin: 1rem;
-    width: 100%;
-    max-width: 300px;
-    background-color: var(--primary-color);
-  }
+    .submit-btn {
+        margin: 1rem;
+        width: 100%;
+        max-width: 300px;
+        background-color: var(--primary-color);
+    }
 
 </style>

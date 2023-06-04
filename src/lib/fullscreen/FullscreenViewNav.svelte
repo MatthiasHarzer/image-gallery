@@ -4,7 +4,7 @@
   import type Image from "../../scripts/gallery/image";
   import {firebaseUser, firestoreManager} from "../../scripts/firebase/firebaseManager";
   import Tag from "../../scripts/gallery/tag";
-  import AddToAlbumScreen from "../AddToAlbumScreen.svelte";
+  import AddToAlbumScreen from "../components/AddToAlbumScreen.svelte";
   import {fullscreenDialog} from "../../scripts/fullscreenDialog";
   import TagSelectInput from "./TagSelectInput.svelte";
   import {fly} from "svelte/transition";
@@ -90,93 +90,93 @@
 </script>
 
 <div class="bare-nav" class:not-shown={zooming && !navShown}>
-    <button class="material back-btn" on:click={onClose}>
-        <span class="material-icons">arrow_back</span>
-    </button>
-    <button class="material toggle-nav-btn" on:click={toggleNav}>
-        <span class="material-icons-outlined">{navShown ? "visibility_off" : "info"}</span>
-    </button>
+  <button class="material back-btn" on:click={onClose}>
+    <span class="material-icons">arrow_back</span>
+  </button>
+  <button class="material toggle-nav-btn" on:click={toggleNav}>
+    <span class="material-icons-outlined">{navShown ? "visibility_off" : "info"}</span>
+  </button>
 </div>
 
 
 <div class="main" class:visible={navShown}>
-    <div class="top-nav-bar">
-        <div class="left">
-            <button class="material back-btn-fake">
-                <span class="material-icons">arrow_back</span>
-            </button>
-        </div>
+  <div class="top-nav-bar">
+    <div class="left">
+      <button class="material back-btn-fake">
+        <span class="material-icons">arrow_back</span>
+      </button>
+    </div>
 
-        <div class="right">
-            <button class="material favorite" class:is-favorite={image?.favorite} on:click={onFavorite}>
-                <span class="material-icons-outlined">{image?.favorite ? "star" : "star_outline"}</span>
-            </button>
-            <button class="material add-to-album" on:click={()=>addToAlbumOpen = true}>
-                <span class="material-icons-outlined">add_to_photos</span>
-            </button>
-            <div class="context-menu">
+    <div class="right">
+      <button class="material favorite" class:is-favorite={image?.favorite} on:click={onFavorite}>
+        <span class="material-icons-outlined">{image?.favorite ? "star" : "star_outline"}</span>
+      </button>
+      <button class="material add-to-album" on:click={()=>addToAlbumOpen = true}>
+        <span class="material-icons-outlined">add_to_photos</span>
+      </button>
+      <div class="context-menu">
 
-                <button class="material toggle-nav">
+        <button class="material toggle-nav">
             <span class="material-icons">
               more_vert
             </span>
-                </button>
-                <div class="drop-down box-shadow">
-                    <button class="material text-button drop-down-item"
-                            on:click={onDelete}>
+        </button>
+        <div class="drop-down box-shadow">
+          <button class="material text-button drop-down-item"
+                  on:click={onDelete}>
             <span class="name">
               Delete
             </span>
-                    </button>
-                    {#if $album != null}
-                        <button class="material text-button drop-down-item"
-                                on:click={makeAlbumCover}>
+          </button>
+          {#if $album != null}
+            <button class="material text-button drop-down-item"
+                    on:click={makeAlbumCover}>
             <span class="name">
               Make album cover
             </span>
-                        </button>
-                    {/if}
-                </div>
-            </div>
-
-            <button class="material toggle-nav-btn-fake">
-                <span class="material-icons-outlined">{navShown ? "visibility_off" : "visibility"}</span>
             </button>
-
+          {/if}
         </div>
+      </div>
+
+      <button class="material toggle-nav-btn-fake">
+        <span class="material-icons-outlined">{navShown ? "visibility_off" : "visibility"}</span>
+      </button>
 
     </div>
 
-    <div class="page-nav">
-        <button class="material no-effect" on:click={onPrev}>
-            <span class="material-icons">navigate_before</span>
-        </button>
-        <button class="material no-effect" on:click={onNext}>
-            <span class="material-icons">keyboard_arrow_right</span>
-        </button>
-    </div>
+  </div>
 
-    <div class="tags-nav">
+  <div class="page-nav">
+    <button class="material no-effect" on:click={onPrev}>
+      <span class="material-icons">navigate_before</span>
+    </button>
+    <button class="material no-effect" on:click={onNext}>
+      <span class="material-icons">keyboard_arrow_right</span>
+    </button>
+  </div>
 
-        <div bind:this={tagsScrollElement} class="tags-list">
-            {#each image?.tags ?? [] as tag (tag.id)}
-                <div class="tag">
-                    <span class="name">{tag.name}</span>
-                    <button class="remove-tag material" on:click={()=>removeTag(tag)}>
-                        <span class="material-icons-outlined">close</span>
-                    </button>
-                </div>
-            {/each}
+  <div class="tags-nav">
+
+    <div bind:this={tagsScrollElement} class="tags-list">
+      {#each image?.tags ?? [] as tag (tag.id)}
+        <div class="tag">
+          <span class="name">{tag.name}</span>
+          <button class="remove-tag material" on:click={()=>removeTag(tag)}>
+            <span class="material-icons-outlined">close</span>
+          </button>
         </div>
-        <div class="input-field">
-            <TagSelectInput {image} on:addTag={addTag}/>
-        </div>
+      {/each}
     </div>
+    <div class="input-field">
+      <TagSelectInput {image} on:addTag={addTag}/>
+    </div>
+  </div>
 
 </div>
 
 {#if addToAlbumOpen}
-    <AddToAlbumScreen {image} on:close={()=>addToAlbumOpen = false}/>
+  <AddToAlbumScreen {image} on:close={()=>addToAlbumOpen = false}/>
 {/if}
 
 <style lang="scss">
@@ -210,7 +210,7 @@
     }
   }
 
-  .bare-nav.not-shown{
+  .bare-nav.not-shown {
     top: -100px;
   }
 
