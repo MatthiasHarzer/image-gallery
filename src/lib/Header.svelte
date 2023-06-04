@@ -132,6 +132,7 @@
       images={get($localConfig.currentImageViewStore)}
       title="Select Images To Delete"
       on:submit={submitMultiDelete}
+      on:close={()=>multiDeleteDialog = false}
   />
 {/if}
 
