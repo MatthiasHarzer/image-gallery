@@ -24,6 +24,7 @@
   let addToAlbumOpen = false;
 
   let tagsScrollElement: HTMLElement;
+  let tagInputFocused = false;
 
   onMount(() => {
     tagsScrollElement.onwheel = (event) => {
@@ -34,6 +35,7 @@
     }
 
     window.onkeydown = (event) => {
+      if (tagInputFocused) return;
       if (event.key === "ArrowLeft") {
         onPrev();
       } else if (event.key === "ArrowRight") {
@@ -169,7 +171,7 @@
       {/each}
     </div>
     <div class="input-field">
-      <TagSelectInput {image} on:addTag={addTag}/>
+      <TagSelectInput {image} on:addTag={addTag} bind:focused={tagInputFocused}/>
     </div>
   </div>
 

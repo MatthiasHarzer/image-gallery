@@ -46,6 +46,20 @@ export default class Image implements Entry {
     this.favorite = image.favorite;
     return this;
   }
+
+  public toJson(): ImageData {
+    return {
+      name: this.name,
+      description: this.description,
+      url: this.url,
+      tags: this.tags.map((tag) => tag.id),
+      state: this.state,
+      width: this.width,
+      height: this.height,
+      timestamp: this.timestamp,
+      favorite: this.favorite,
+    };
+  }
 }
 
 /**

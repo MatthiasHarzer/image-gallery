@@ -1,7 +1,7 @@
 <script lang="ts">
   import Header from "./lib/Header.svelte";
   import GalleryApp from "./lib/GalleryApp.svelte";
-  import { fullscreenDialog } from "./scripts/fullscreenDialog";
+  import {fullscreenDialog} from "./scripts/fullscreenDialog";
   import FullscreenView from "./lib/fullscreen/FullscreenView.svelte";
   import NavigationPanel from "./lib/components/NavigationPanel.svelte";
   //
@@ -17,7 +17,7 @@
     <GalleryApp/>
   </div>
 
-  <NavigationPanel />
+  <NavigationPanel/>
 </main>
 
 {#if $fullscreenDialog.shown}
@@ -36,7 +36,7 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
+    /*overflow-y: auto;*/
   }
 
   .header {
@@ -45,6 +45,8 @@
 
   .app-content {
     flex: 1;
+    height: auto;
+    overflow-y: auto;
   }
 
   .logo {

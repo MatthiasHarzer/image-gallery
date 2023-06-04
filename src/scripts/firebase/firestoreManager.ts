@@ -222,4 +222,15 @@ export default class FirestoreManager {
     return imageRefId;
   }
 
+  public async updateMultiImages(user: User, images: CustomImage[]): Promise<void> {
+    const firestoreBatch = writeBatch(firestore);
+
+    for (const image of images) {
+      const imageRef = IMAGE_REF(user, image);
+      // @ts-ignore
+      firestoreBatch.update(imageRef, image.toJson());
+    }
+    await firestoreBatch.commit();
+  }
+
 }

@@ -8,20 +8,31 @@
   const dispatch = createEventDispatcher();
 
   export let image: Image;
+  export let presentTags: Tag[] = [];
+
+  export let focused: boolean = false;
 
   let tagInput: string = "";
 
   let matchingTags: Tag[];
   let availableTags: Tag[] = [];
+  let activeIndex: number = -1;
 
-  $: if (image != null) availableTags = $gallery?.tags.filter(tag => !image.tags.some(t => t.id === tag.id));
+  $: if (image != null) availableTags = $gallery?.tags.filter(tag => !image.tags.some(t => t.id === tag.id))
+  else availableTags = $gallery?.tags.filter(tag => !presentTags.some(t => t.id === tag.id));
   $: availableTags.sort((a, b) => a.name.localeCompare(b.name));
-  $: matchingTags = tagInput.length == 0
-      ? []
-      : availableTags.filter(tag => tag.name.toLowerCase().includes(tagInput.toLowerCase()));
-  $: topTenTags = matchingTags.slice(0, 10);
+  $: matchingTags = tagInput.length != 0 || focused
+      ? availableTags.filter(tag => tag.name.toLowerCase().includes(tagInput.toLowerCase()))
+      : [];
+
 
   const onTagEnter = async () => {
+
+    if (activeIndex >= 0 && activeIndex < matchingTags.length) {
+      addTag(matchingTags[activeIndex]);
+      return;
+    }
+
     tagInput = tagInput.trim();
 
     if (tagInput.length === 0) return;
@@ -31,7 +42,7 @@
     let tag: Tag;
 
     if (existingTag) {
-      if (image.tags.some(tag => tag.id === existingTag.id)) return;
+      if (image && image.tags.some(tag => tag.id === existingTag.id)) return;
       tag = existingTag;
     } else {
       const doc = await firestoreManager.createTag($firebaseUser, {
@@ -46,16 +57,36 @@
 
   const addTag = (tag: Tag) => {
     dispatch("addTag", tag);
+    activeIndex = -1;
     tagInput = "";
   }
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (activeIndex < matchingTags.length - 1) activeIndex++;
+      else activeIndex = 0;
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (activeIndex > 0) activeIndex--;
+      else activeIndex = matchingTags.length - 1;
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      activeIndex = -1;
+    }
+
+    elmnts[activeIndex]?.scrollIntoView({block: "nearest", behavior: "smooth"});
+  }
+
+  let elmnts = [];
 </script>
 
 
 <div class="main">
-  {#if topTenTags.length > 0}
+  {#if matchingTags.length > 0}
     <div class="suggestion-box box-shadow">
-      {#each topTenTags as tag}
-        <button class="suggestion material text-button" on:click={() => addTag(tag)}>
+      {#each matchingTags as tag, i}
+        <button bind:this={elmnts[i]} class="suggestion material text-button" class:active={i === activeIndex} on:click={() => addTag(tag)}>
           <span>{tag.name}</span>
         </button>
       {/each}
@@ -65,6 +96,9 @@
   <input bind:value={tagInput} id="tag"
          on:keyup={e => {if(e.key === "Enter") onTagEnter()}}
          placeholder="Enter tag..."
+         on:keydown={handleKeyDown}
+          on:focus={() => focused = true}
+          on:blur={() => setTimeout(() => focused = false, 300)}
          type="text"
   />
   <label for="tag">
@@ -75,7 +109,7 @@
 
 </div>
 
-<style>
+<style lang="scss">
 
   .main {
     position: relative;
@@ -133,10 +167,17 @@
     border-radius: 0.5em;
     pointer-events: all;
 
-    /*overflow-y: auto;*/
+    max-height: 70vh;
+
+
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
+
+    button.active, button:hover {
+      background-color: var(--primary-color-accent);
+    }
   }
 
   button.suggestion {
@@ -146,7 +187,7 @@
     flex: 0;
     width: 100%;
     height: 2.5em !important;
-    padding: 0.5em 20px;
+    padding: 10px 20px;
     border: none;
     background-color: #00000000;
     color: white;

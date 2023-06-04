@@ -64,6 +64,11 @@
       name: "Albums",
       icon: "photo_library",
       screen: Screen.ALBUMS
+    },
+    {
+      name: "Edit",
+      icon: "edit",
+      screen: Screen.EDIT
     }
   ]
 
