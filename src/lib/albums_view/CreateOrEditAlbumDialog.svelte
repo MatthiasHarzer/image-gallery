@@ -15,6 +15,7 @@
 
   let selectImagesDialogOpen = false;
   let orderImagesDialogOpen = false;
+  let selectCoverDialogOpen = false;
 
   let dummyAlbum: Album;
 
@@ -42,6 +43,11 @@
   const submitOrderedImages = ({detail: images}: CustomEvent<Image[]>) => {
     dummyAlbum.images = images;
     orderImagesDialogOpen = false;
+  }
+
+  const submitCover = ({detail: image}: CustomEvent<Image | null>) => {
+    selectCoverDialogOpen = false;
+    dummyAlbum.cover = image;
   }
 
   $: availableParents = $gallery.albums.filter(a => a.id !== dummyAlbum?.id);
@@ -92,6 +98,11 @@
           <span>Reorder Images</span>
         </button>
 
+        <button class="material text-button select-cover" on:click={()=>selectCoverDialogOpen = true}>
+          <span class="material-icons">image</span>
+          <span>Select Cover</span>
+        </button>
+
       </div>
       <button class="material text-button submit-btn" on:click={submit}>
         <span class="material-icons">done</span>
@@ -114,6 +125,15 @@
       images={dummyAlbum.images ?? []}
       on:submit={submitOrderedImages}
       on:close={()=>orderImagesDialogOpen = false}
+  />
+{/if}
+
+{#if selectCoverDialogOpen}
+  <SelectImagesDialog
+      selectedImages={dummyAlbum?.cover !== null ? [dummyAlbum.cover] : []}
+      multiple={false}
+      on:submit={submitCover}
+      on:close={()=>selectCoverDialogOpen = false}
   />
 {/if}
 

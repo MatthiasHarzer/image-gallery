@@ -121,7 +121,10 @@
 </div>
 
 {#if uploadDialog}
-  <UploadDialog on:close={()=>uploadDialog = false}/>
+  <UploadDialog
+      targetAlbum={$route.album}
+      on:close={()=>uploadDialog = false}
+  />
 {/if}
 
 {#if multiDeleteDialog}

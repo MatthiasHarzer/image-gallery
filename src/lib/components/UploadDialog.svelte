@@ -1,10 +1,20 @@
 <script lang="ts">
 
   import { createEventDispatcher, onMount } from "svelte";
-  import { firestoreManager } from "../../scripts/firebase/firebaseManager";
+  import {firestoreManager, gallery} from "../../scripts/firebase/firebaseManager";
   import { firebaseUser } from "../../scripts/firebase/firebaseManager.js";
+  import type Album from "../../scripts/gallery/album";
+
+  export let targetAlbum: Album | null = null;
 
   const dispatch = createEventDispatcher();
+
+  let selectedAlbum: Album | null = null;
+
+  onMount(()=>{
+    selectedAlbum = targetAlbum;
+  })
+
   const close = () => {
     if (uploading) return;
     dispatch('close');
@@ -27,7 +37,7 @@
 
     await firestoreManager.uploadImages($firebaseUser, filesToUpload, (progress) => {
       uploadProgress = progress;
-    });
+    }, selectedAlbum);
 
     finishedUploading = true;
     uploading = false;
@@ -58,6 +68,8 @@
       upload(e.dataTransfer.files);
     });
   })
+
+  $: availableAlbums = $gallery.albums;
 
 
 </script>
@@ -101,6 +113,16 @@
             </div>
           {/each}
         </div>
+      </div>
+
+      <div class="album-select">
+        <label for="album-select">Target Album</label>
+        <select id="album-select" bind:value={selectedAlbum} disabled={uploading}>
+          <option value={null}>None</option>
+          {#each availableAlbums as album}
+            <option value={album}>{album.name}</option>
+          {/each}
+        </select>
       </div>
 
       {#if filesToUpload.length > 0 && !uploading}

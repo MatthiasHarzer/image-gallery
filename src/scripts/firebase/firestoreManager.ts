@@ -1,12 +1,22 @@
-import type { User } from "firebase/auth";
-import { addDoc, deleteDoc, doc, DocumentReference, getDoc, setDoc, updateDoc, serverTimestamp, writeBatch  } from "firebase/firestore";
-import { ALBUMS_REF, IMAGE_REF, IMAGES_REF, STORAGE_BUCKET_IMAGE_REF, TAGS_REF, USER_REF } from "./firebasePathConfig";
+import type {User} from "firebase/auth";
+import {
+  addDoc,
+  deleteDoc,
+  doc,
+  DocumentReference,
+  getDoc,
+  setDoc,
+  updateDoc,
+  serverTimestamp,
+  writeBatch
+} from "firebase/firestore";
+import {ALBUMS_REF, IMAGE_REF, IMAGES_REF, STORAGE_BUCKET_IMAGE_REF, TAGS_REF, USER_REF} from "./firebasePathConfig";
 
-import { deleteObject, getDownloadURL, uploadBytesResumable } from "firebase/storage";
+import {deleteObject, getDownloadURL, uploadBytesResumable} from "firebase/storage";
 import FirestoreGalleryListener from "./firestoreGalleryListener";
-import { default as CustomImage, ImageState } from "../gallery/image";
+import {default as CustomImage, ImageState} from "../gallery/image";
 import type Tag from "../gallery/tag";
-import type { TagData } from "../gallery/tag";
+import type {TagData} from "../gallery/tag";
 import type Album from "../gallery/album";
 import {firestore} from "./firebase";
 
@@ -21,9 +31,7 @@ export default class FirestoreManager {
 
     if (!userDocSnapshot.exists()) {
       await setDoc(userRef, {
-        name: user.displayName,
-        email: user.email,
-        photoURL: user.photoURL,
+        name: user.displayName, email: user.email, photoURL: user.photoURL,
       });
     }
   }
@@ -33,30 +41,30 @@ export default class FirestoreManager {
   }
 
 
-  public async uploadImages(user: User, images: File[], update: (value: number) => void): Promise<void> {
+  public async uploadImages(user: User, images: File[], update: (value: number) => void, targetAlbum: Album | null = null): Promise<void> {
     if (user === null) return;
     const numberOfImages = images.length;
     let numberOfFinishedImages = 0;
 
+    let imageIds: string[] = [];
 
     for (const image of images) {
-      await this.uploadImage(user, image);
+      imageIds.push(await this.uploadImage(user, image));
       numberOfFinishedImages++;
       update(numberOfFinishedImages / numberOfImages);
     }
+    if (targetAlbum == null) return;
+    await this.updateAlbumProps(user, targetAlbum, {images: [...targetAlbum.images, ...imageIds]});
   }
 
   public async deleteImage(user: User, image: CustomImage): Promise<void> {
     const imageRef = IMAGE_REF(user, image);
     const storageRef = STORAGE_BUCKET_IMAGE_REF(user, image.id);
 
-    await Promise.all([
-      deleteDoc(imageRef),
-      deleteObject(storageRef),
-    ]);
+    await Promise.all([deleteDoc(imageRef), deleteObject(storageRef),]);
   }
 
-  public async multiDeleteImages(user: User, images: CustomImage[]): Promise<void>{
+  public async multiDeleteImages(user: User, images: CustomImage[]): Promise<void> {
     const firestoreBatch = writeBatch(firestore);
 
     for (const image of images) {
@@ -117,43 +125,15 @@ export default class FirestoreManager {
     });
   }
 
-  private async createAlbum(user: User, album: Album): Promise<DocumentReference> {
-    const albumsRef = ALBUMS_REF(user);
-
-    return await addDoc(albumsRef, {
-      name: album.name,
-      description: album.description ?? "",
-      images: album.images.map(i => i.id),
-      parent: album.parent?.id ?? null,
-      cover: null,
-      timestamp: serverTimestamp(),
-    });
-  }
-
   public async createOrUpdateAlbum(user: User, album: Album): Promise<void> {
     const isNew = album.id == null;
 
     if (isNew) {
       const albumRef = await this.createAlbum(user, album);
       album.id = albumRef.id;
-    }else{
+    } else {
       await this.updateAlbum(user, album);
     }
-  }
-
-  private async updateAlbum(user: User, album: Album): Promise<void> {
-    if (!album.valid) return;
-    const albumRef = doc(ALBUMS_REF(user), album.id);
-
-    await updateDoc(albumRef, {
-      name: album.name,
-      description: album.description,
-      images: album.images.map(i => i.id),
-      children: album.children.map(a => a.id),
-      parent: album.parent?.id ?? null,
-      cover: album.cover?.id ?? null,
-    });
-
   }
 
   public async deleteAlbum(user: User, album: Album): Promise<void> {
@@ -171,13 +151,48 @@ export default class FirestoreManager {
     await updateDoc(albumRef, updateData);
   }
 
+  public async updateFavoriteAlbumCover(user: User, image: CustomImage): Promise<void> {
+    const ref = USER_REF(user);
+    await updateDoc(ref, {
+      favoritesCover: image.id,
+    });
+  }
+
+  private async createAlbum(user: User, album: Album): Promise<DocumentReference> {
+    const albumsRef = ALBUMS_REF(user);
+
+    return await addDoc(albumsRef, {
+      name: album.name,
+      description: album.description ?? "",
+      images: album.images.map(i => i.id),
+      parent: album.parent?.id ?? null,
+      cover: null,
+      timestamp: serverTimestamp(),
+    });
+  }
+
+  private async updateAlbum(user: User, album: Album): Promise<void> {
+    if (!album.valid) return;
+    const albumRef = doc(ALBUMS_REF(user), album.id);
+
+    await updateDoc(albumRef, {
+      name: album.name,
+      description: album.description,
+      images: album.images.map(i => i.id),
+      children: album.children.map(a => a.id),
+      parent: album.parent?.id ?? null,
+      cover: album.cover?.id ?? null,
+    });
+
+  }
+
   private async createImageNode(user: User, image: File): Promise<DocumentReference> {
     const imagesRef = IMAGES_REF(user);
 
     // Get images dimensions
     const imageDimensions = await new Promise<{ width: number, height: number }>((resolve, reject) => {
       const img = new Image();
-      img.onload = () => resolve({ width: img.width, height: img.height });
+      img.onload = () => resolve({width: img.width, height: img.height});
       img.onerror = reject;
       img.src = URL.createObjectURL(image);
     });
@@ -194,24 +209,17 @@ export default class FirestoreManager {
     });
   }
 
-  private async uploadImage(user: User, image: File): Promise<void> {
+  private async uploadImage(user: User, image: File): Promise<string> {
     const imageNode = await this.createImageNode(user, image);
     // const imageName = `${imageNode.id}.${image.name.split(".").pop()}`;
-    const imageRef = imageNode.id;
-    const storageRef = STORAGE_BUCKET_IMAGE_REF(user, imageRef);
+    const imageRefId = imageNode.id;
+    const storageRef = STORAGE_BUCKET_IMAGE_REF(user, imageRefId);
     const bucket = await uploadBytesResumable(storageRef, image);
 
     await updateDoc(imageNode, {
-      url: await getDownloadURL(bucket.ref),
-      state: ImageState.ready,
+      url: await getDownloadURL(bucket.ref), state: ImageState.ready,
     });
-  }
-
-  public async updateFavoriteAlbumCover(user: User, image: CustomImage): Promise<void> {
-    const ref = USER_REF(user);
-    await updateDoc(ref, {
-      favoritesCover: image.id,
-    });
+    return imageRefId;
   }
 
 }

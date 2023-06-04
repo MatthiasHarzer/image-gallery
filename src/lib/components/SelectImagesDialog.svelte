@@ -32,7 +32,7 @@
   }
 
   const submit = () => {
-    dispatch("submit", selectedImages);
+    dispatch("submit", multiple ? selectedImages : (selectedImages.length > 0 ? selectedImages[0] : null));
   }
 
   const toggle = (image: Image, shift: boolean) => {

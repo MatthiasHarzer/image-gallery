@@ -10,6 +10,10 @@ export class Route {
   constructor(public screen: Screen, public albums: Album[], public fullscreenImage: Image | null) {
   }
 
+  public get album(): Album | null {
+    return this.albums.length > 0 ? this.albums[this.albums.length - 1] : null;
+  }
+
   public static fromString(route: string): Route {
     const parts = route.split("/").slice(1);
 

@@ -34,8 +34,6 @@
     const isValid = album.name != null && album.name.length > 0;
     if (!isValid) return;
 
-
-
     await firestoreManager.createOrUpdateAlbum($firebaseUser, album);
 
 
