@@ -6,7 +6,7 @@
   import Tag from "../../scripts/gallery/tag";
   import AddToAlbumScreen from "../components/AddToAlbumScreen.svelte";
   import {fullscreenDialog} from "../../scripts/fullscreenDialog";
-  import TagSelectInput from "./TagSelectInput.svelte";
+  import TagSelectInput from "../components/TagSelectInput.svelte";
   import {fly} from "svelte/transition";
 
   const dispatch = createEventDispatcher();

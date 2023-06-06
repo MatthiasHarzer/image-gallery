@@ -1,7 +1,7 @@
 <script lang="ts">
 
-  import { createEventDispatcher } from "svelte";
-  import { firebaseUser, firestoreManager, gallery } from "../../scripts/firebase/firebaseManager";
+  import {createEventDispatcher} from "svelte";
+  import {firebaseUser, firestoreManager, gallery} from "../../scripts/firebase/firebaseManager";
   import Tag from "../../scripts/gallery/tag";
   import type Image from "../../scripts/gallery/image";
 
@@ -53,12 +53,17 @@
     }
 
     addTag(tag);
+
   }
 
   const addTag = (tag: Tag) => {
     dispatch("addTag", tag);
     activeIndex = -1;
     tagInput = "";
+
+    setTimeout(() => {
+      inputElement && inputElement.focus();
+    }, 100);
   }
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -79,6 +84,8 @@
   }
 
   let elmnts = [];
+  let inputElement: HTMLInputElement;
+  let to;
 </script>
 
 
@@ -86,19 +93,25 @@
   {#if matchingTags.length > 0}
     <div class="suggestion-box box-shadow">
       {#each matchingTags as tag, i}
-        <button bind:this={elmnts[i]} class="suggestion material text-button" class:active={i === activeIndex} on:click={() => addTag(tag)}>
+        <button bind:this={elmnts[i]} class="suggestion material text-button" class:active={i === activeIndex}
+                on:click={() => addTag(tag)}>
           <span>{tag.name}</span>
         </button>
       {/each}
     </div>
   {/if}
 
-  <input bind:value={tagInput} id="tag"
+  <input bind:this={inputElement} bind:value={tagInput}
+         id="tag"
+         on:blur={() => to = setTimeout(() => focused = false, 200)}
+         on:focus={() => {
+             to && clearTimeout(to);
+             focused = true;
+           }
+         }
+         on:keydown={handleKeyDown}
          on:keyup={e => {if(e.key === "Enter") onTagEnter()}}
          placeholder="Enter tag..."
-         on:keydown={handleKeyDown}
-          on:focus={() => focused = true}
-          on:blur={() => setTimeout(() => focused = false, 300)}
          type="text"
   />
   <label for="tag">

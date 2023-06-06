@@ -5,7 +5,8 @@
   import SelectImagesView from "../components/SelectImagesView.svelte";
   import FlipSlider from "../util/FlipSlider.svelte";
   import type Tag from "../../scripts/gallery/tag";
-  import TagSelectInput from "../fullscreen/TagSelectInput.svelte";
+  import TagSelectInput from "../components/TagSelectInput.svelte";
+  import LoadingSpinner from "../util/LoadingSpinner.svelte";
 
   let images: Image[] = [];
   let albumImagesStore;
@@ -27,7 +28,6 @@
   let tagsToAdd: Tag[] = [];
 
   const onAddTag = ({detail: tag}: CustomEvent<Tag>) => {
-    console.log(tag);
     if (tagsToAdd.includes(tag)) return;
     tagsToAdd = [...tagsToAdd, tag];
   }
@@ -37,7 +37,7 @@
   }
 
   let working = false;
-  const submit = async  () =>{
+  const submitAddTags = async () => {
     if (working || tagsToAdd.length <= 0) return;
     working = true;
 
@@ -51,7 +51,39 @@
     selectedImages = [];
   }
 
-  const toggleSelectAll = ({detail: selected}: CustomEvent<boolean>) =>{
+  const submitRemoveTags = async () => {
+    if (working || tagsToAdd.length <= 0) return;
+    working = true;
+
+    const conf = confirm(`Are you sure you want to remove the tags ${tagsToAdd.map(t => t.name).join(", ")} from ${selectedImages.length} images?`);
+    if (!conf) return;
+
+    selectedImages.forEach(i => i.tags = i.tags.filter(t => !tagsToAdd.includes(t)))
+
+    await firestoreManager.updateMultiImages($firebaseUser, selectedImages);
+
+    working = false;
+
+    tagsToAdd = [];
+    selectedImages = [];
+  }
+
+  const submitDelete = async () => {
+    if (working || selectedImages.length <= 0) return;
+    working = true;
+
+    const conf = confirm(`Are you sure you want to delete ${selectedImages.length} images?`);
+    if (!conf) return;
+
+    await firestoreManager.multiDeleteImages($firebaseUser, selectedImages);
+
+    working = false;
+
+    tagsToAdd = [];
+    selectedImages = [];
+  }
+
+  const toggleSelectAll = ({detail: selected}: CustomEvent<boolean>) => {
     if (selected) {
       selectedImages = [...images];
     } else {
@@ -62,6 +94,15 @@
   let selectedImages: Image[] = [];
   let actionAreaCollapsed = false;
   $: allSelected = selectedImages.length === images.length;
+
+  let actionPanelHeight = 0;
+  let maxActionPanelHeight: string | number = "auto";
+
+  $: if (actionPanelHeight > 0) {
+    if (maxActionPanelHeight == "auto") maxActionPanelHeight = 0;
+    // @ts-ignore
+    maxActionPanelHeight = Math.max(maxActionPanelHeight, actionPanelHeight);
+  }
 </script>
 
 <div class="main">
@@ -82,14 +123,15 @@
         <label for="include-sub-album">Include Sub Albums</label>
       </div>
       <div class="item select-all">
-        <FlipSlider on:toggle={toggleSelectAll} id="select-all"/>
+        <FlipSlider id="select-all" on:toggle={toggleSelectAll}/>
         <!--suppress XmlInvalidId -->
         <label for="select-all">Select All</label>
       </div>
     </div>
     <SelectImagesView bind:selectedImages {images} multiple={true}/>
   </div>
-  <div class="action-area" class:collapsed={actionAreaCollapsed}>
+  <div class="action-area" class:collapsed={actionAreaCollapsed}
+       style="--height: {maxActionPanelHeight}px;">
     <div class="action-area-header" on:click={() => actionAreaCollapsed = false}>
       <h3>{selectedImages.length} images selected</h3>
       <button class="material expand-collapse-btn"
@@ -114,20 +156,42 @@
         {/each}
       </div>
       <div class="add-tag">
-        <TagSelectInput on:addTag={onAddTag} presentTags={tagsToAdd} />
+        <TagSelectInput on:addTag={onAddTag} presentTags={tagsToAdd}/>
       </div>
     </div>
 
-    <button class="material text-button submit-btn" on:click={submit}>
-      <span class="material-icons">
-        done
-      </span>
-      <span>Submit</span>
-    </button>
+    <div class="button-area">
+      <div class="add-remove-tags-submit">
+        <button class="material text-button submit-add-tags-btn" on:click={submitAddTags}>
+        <span class="material-icons">
+          add
+        </span>
+          <span>Add Selected Tags</span>
+        </button>
+        <button class="material text-button submit-remove-tags-btn" on:click={submitRemoveTags}>
+        <span class="material-icons">
+          remove
+        </span>
+          <span>Remove Selected Tags</span>
+        </button>
+      </div>
+      <button class="material text-button delete-btn" on:click={submitDelete}>
+        <span class="material-icons-outlined">delete</span>
+        <span>Delete</span>
+      </button>
+    </div>
 
   </div>
 
 </div>
+
+{#if working}
+  <div class="loading-dialog blur-background">
+    <div class="loading-spinner">
+      <LoadingSpinner/>
+    </div>
+  </div>
+{/if}
 
 <style lang="scss">
   .main {
@@ -156,6 +220,7 @@
     flex: 0;
     background-color: #424242;
     height: auto;
+    transition: height 0.2s ease-in-out;
 
     &.collapsed {
       height: 60px;
@@ -176,6 +241,48 @@
       border: none;
       outline: none;
       cursor: pointer;
+    }
+
+    .button-area {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+
+      button{
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        padding: 5px 10px;
+        margin: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+
+        span {
+          margin: 0 5px;
+        }
+      }
+
+      .add-remove-tags-submit {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+
+
+        .submit-add-tags-btn {
+          background-color: #646cff;
+        }
+
+        .submit-remove-tags-btn {
+          background-color: #ff6464;
+        }
+      }
+
+      .delete-btn:hover{
+        background-color: #de3c3c;
+      }
     }
   }
 
@@ -204,14 +311,14 @@
     }
   }
 
-  .selected-tags{
+  .selected-tags {
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
     flex-wrap: wrap;
 
-    .tag{
+    .tag {
       display: flex;
       flex-direction: row;
       justify-content: flex-start;
@@ -221,33 +328,18 @@
       border-radius: 5px;
       margin: 5px;
 
-      .remove-tag-btn{
+      .remove-tag-btn {
         background-color: transparent;
         border: none;
         outline: none;
         cursor: pointer;
 
-        span{
+        span {
           font-size: 17px;
         }
       }
     }
   }
 
-  .submit-btn{
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    padding: 5px 10px;
-    margin: 10px 10px 10px auto;
-    border-radius: 5px;
-    background-color: #646cff;
-    cursor: pointer;
-
-    span{
-      margin: 0 5px;
-    }
-  }
 
 </style>

@@ -54,7 +54,7 @@ export default class FirestoreManager {
       update(numberOfFinishedImages / numberOfImages);
     }
     if (targetAlbum == null) return;
-    await this.updateAlbumProps(user, targetAlbum, {images: [...targetAlbum.images, ...imageIds]});
+    await this.updateAlbumProps(user, targetAlbum, {images: [...targetAlbum.images.map(a => a.id), ...imageIds]});
   }
 
   public async deleteImage(user: User, image: CustomImage): Promise<void> {

@@ -18,10 +18,6 @@
   let uploadDialog = false;
   let logoutBtnShown = false;
   let contextMenuOpen = false;
-  let multiDeleteDialog = false;
-  let loadingDialog = false;
-
-  const dispatch = createEventDispatcher();
 
   const signInOut = async () => {
     if (signedId) {
@@ -40,31 +36,6 @@
   const toggleNav = () => {
     $localConfig.navOpen = !$localConfig.navOpen;
   }
-
-  const onDelete = () => {
-    contextMenuOpen = false;
-    multiDeleteDialog = true;
-  }
-
-  const submitMultiDelete = async ({detail: images}: CustomEvent<Image[]>) => {
-    multiDeleteDialog = false;
-
-    const confirm = window.confirm(`Are you sure you want to delete ${images.length} ${images.length == 1 ? 'image' : 'images'}?`);
-
-    if (!confirm) return;
-
-    loadingDialog = true;
-
-    try {
-      await firestoreManager.multiDeleteImages($firebaseUser, images);
-    } catch (e) {
-      window.alert(e.message);
-    }
-
-    loadingDialog = false;
-
-  }
-
 </script>
 
 <div class="main">
@@ -87,21 +58,6 @@
     </div>
   {/if}
   <div class="auth-section right">
-    <div class="context-menu">
-      <button class="material" on:click={()=>contextMenuOpen = !contextMenuOpen}>
-        <span class="material-icons">
-          more_vert
-        </span>
-      </button>
-      <div class="drop-down box-shadow" class:open={contextMenuOpen}>
-        <button class="material text-button drop-down-item"
-                on:click={onDelete}>
-            <span class="name">
-              Multi Delete
-            </span>
-        </button>
-      </div>
-    </div>
     {#if !signedId}
       <button class="sign-in-out-btn material text-button" on:click={signInOut}>
         Sign in
@@ -125,23 +81,6 @@
       targetAlbum={$route.album}
       on:close={()=>uploadDialog = false}
   />
-{/if}
-
-{#if multiDeleteDialog}
-  <SelectImagesDialog
-      images={get($localConfig.currentImageViewStore)}
-      title="Select Images To Delete"
-      on:submit={submitMultiDelete}
-      on:close={()=>multiDeleteDialog = false}
-  />
-{/if}
-
-{#if loadingDialog}
-  <div class="loading-dialog blur-background">
-    <div class="loading-spinner">
-      <LoadingSpinner/>
-    </div>
-  </div>
 {/if}
 
 <style lang="scss">
@@ -230,17 +169,6 @@
     border: 1px solid #12436b;
   }
 
-  .navigation {
-    position: relative;
-  }
-
-  .navigation button {
-    pointer-events: all;
-  }
-
-  .navigation:not(:focus-within) .drop-down {
-    height: 0;
-  }
 
   .account-btn {
     background-color: transparent;
@@ -287,9 +215,6 @@
 
   }
 
-  .loading-dialog{
-
-  }
 
 
 </style>

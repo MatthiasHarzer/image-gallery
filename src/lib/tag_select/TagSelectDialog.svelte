@@ -37,8 +37,9 @@
   }
 
   $: numMatchingImages = applyFiltersWithConfig($gallery.images, {
+    randomSeed: 0,
     tagConfig,
-    favoritesOnly: false,
+    favoritesOnly: false
   }).length;
 
 
