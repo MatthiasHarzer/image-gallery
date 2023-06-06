@@ -51,8 +51,17 @@
     selectedImages = [];
   }
 
+  const toggleSelectAll = ({detail: selected}: CustomEvent<boolean>) =>{
+    if (selected) {
+      selectedImages = [...images];
+    } else {
+      selectedImages = [];
+    }
+  }
+
   let selectedImages: Image[] = [];
   let actionAreaCollapsed = false;
+  $: allSelected = selectedImages.length === images.length;
 </script>
 
 <div class="main">
@@ -69,7 +78,13 @@
       </div>
       <div class="item include-sub-albums">
         <FlipSlider bind:active={filter.includeSubAlbums} id="include-sub-album"/>
+        <!--suppress XmlInvalidId -->
         <label for="include-sub-album">Include Sub Albums</label>
+      </div>
+      <div class="item select-all">
+        <FlipSlider on:toggle={toggleSelectAll} id="select-all"/>
+        <!--suppress XmlInvalidId -->
+        <label for="select-all">Select All</label>
       </div>
     </div>
     <SelectImagesView bind:selectedImages {images} multiple={true}/>
@@ -170,6 +185,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 10px;
+    flex-wrap: wrap;
 
     .item {
       margin-right: 10px;

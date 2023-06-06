@@ -1,11 +1,22 @@
 <script>
+  import {createEventDispatcher} from "svelte";
+
+  const dispatch = createEventDispatcher();
+
   export let active = false;
   export let id;
 
-  const toggle = () => active = !active;
+  const toggle = () => {
+    active = !active;
+    dispatchToggle();
+  }
+
+  const dispatchToggle = () => {
+    dispatch("toggle", active);
+  }
 </script>
 
-<input hidden type="checkbox" bind:checked={active} id={id}/>
+<input hidden type="checkbox" bind:checked={active} on:change={dispatchToggle} id={id}/>
 
 <button class="slider-outer" class:active on:click={toggle}>
   <div class="body">
