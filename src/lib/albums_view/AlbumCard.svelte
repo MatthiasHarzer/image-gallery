@@ -1,7 +1,7 @@
 <script lang="ts">
 
   import type Album from "../../scripts/gallery/album";
-  import { createEventDispatcher } from "svelte";
+  import {createEventDispatcher} from "svelte";
   import ImageWrapper from "../components/ImageWrapper.svelte";
 
   const dispatch = createEventDispatcher();
@@ -9,6 +9,7 @@
   export let album: Album;
 
   let titleHeight: number = 0;
+  let totalHeight: number = 0;
 
   const openEdit = () => {
     dispatch("edit", album);
@@ -23,11 +24,15 @@
 
 <div class="main" on:click|stopPropagation={openAlbum}>
   {#if cover}
-    <div class="img">
+    <div class="cover" bind:clientHeight={totalHeight}>
       <ImageWrapper loading="lazy" image={cover} cover={true} thumbnail={true}/>
     </div>
-    <div class="img blur" style="--titleHeight: {titleHeight}px">
-      <ImageWrapper loading="lazy" image={cover} cover={true} thumbnail={true}/>
+    <div class="cover blur flex-center" style="--titleHeight: {titleHeight}px; --fullHeight: {totalHeight}px;">
+      <div class="cropped-img">
+        <div class="blurred-img">
+          <ImageWrapper loading="lazy" image={cover} cover={true} thumbnail={true}/>
+        </div>
+      </div>
     </div>
   {/if}
   <h1 bind:clientHeight={titleHeight}>{album.name}</h1>
@@ -38,7 +43,7 @@
 
 </div>
 
-<style>
+<style lang="scss">
 
   .main {
     display: flex;
@@ -56,20 +61,36 @@
     overflow: hidden;
   }
 
-  .main .img {
+  .cover {
     width: 100%;
     height: 100%;
     object-fit: cover;
     position: absolute;
     z-index: -2;
     border-radius: inherit;
-  }
 
-  .main .img.blur {
-    filter: blur(5px);
-    /*opacity: 0.5;*/
-    z-index: -1;
-    height: calc(var(--titleHeight) + 20px);
+    &.blur {
+      z-index: -1;
+
+
+      .cropped-img {
+        position: absolute;
+        width: 100%;
+        height: var(--titleHeight);
+        object-fit: cover;
+        overflow: hidden;
+
+        .blurred-img{
+          position: absolute;
+          top: calc(-1 * var(--fullHeight) / 2 + var(--titleHeight) / 2);
+          left: 0;
+          width: 100%;
+          height: var(--fullHeight);
+          object-fit: cover;
+          filter: blur(3px);
+        }
+      }
+    }
   }
 
 
