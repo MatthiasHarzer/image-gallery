@@ -10,7 +10,7 @@
   export let image: Image;
   export let presentTags: Tag[] = [];
 
-  export let focused: boolean = false;
+  export let focused: boolean = true;
 
   let tagInput: string = "";
 
@@ -91,7 +91,7 @@
 
 <div class="main">
   {#if matchingTags.length > 0}
-    <div class="suggestion-box box-shadow">
+    <div class="suggestion-box box-shadow discrete-scrollbar">
       {#each matchingTags as tag, i}
         <button bind:this={elmnts[i]} class="suggestion material text-button" class:active={i === activeIndex}
                 on:click={() => addTag(tag)}>
@@ -200,7 +200,7 @@
     flex: 0;
     width: 100%;
     height: 2.5em !important;
-    padding: 10px 20px;
+    padding: 15px 20px;
     border: none;
     background-color: #00000000;
     color: white;
@@ -210,12 +210,15 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    transition: background-color 0.15s;
+
   }
 
   button.suggestion span {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+
   }
 
   button.suggestion:not(:last-child) {

@@ -1,16 +1,16 @@
-import type { User } from "firebase/auth";
+import type {User} from "firebase/auth";
 import Gallery from "../gallery/gallery";
-import { onSnapshot, orderBy, query, QuerySnapshot } from "firebase/firestore";
+import {onSnapshot, orderBy, query, QuerySnapshot} from "firebase/firestore";
 
-import { ALBUMS_REF, IMAGES_REF, TAGS_REF, USER_REF } from "./firebasePathConfig";
-import type { AlbumData } from "../gallery/album";
+import {ALBUMS_REF, IMAGES_REF, TAGS_REF, USER_REF} from "./firebasePathConfig";
+import type {AlbumData} from "../gallery/album";
 import Album from "../gallery/album";
-import type { ImageData } from "../gallery/image";
+import type {ImageData} from "../gallery/image";
 import Image from "../gallery/image";
-import type { TagData } from "../gallery/tag";
+import type {TagData} from "../gallery/tag";
 import Tag from "../gallery/tag";
-import type { Readable } from "svelte/store";
-import { readable } from "svelte/store";
+import type {Readable} from "svelte/store";
+import {readable} from "svelte/store";
 
 type Unsubscriber = () => void;
 
@@ -66,7 +66,7 @@ export default class FirestoreGalleryListener {
     ];
 
     onSnapshot(USER_REF(user), async (snapshot) => {
-      const { favoritesCover } = snapshot.data();
+      const {favoritesCover} = snapshot.data();
 
       this.skeleton.favoritesCover = favoritesCover;
       await this.syncGallery();
@@ -89,7 +89,7 @@ export default class FirestoreGalleryListener {
 
     const albumIds = [
       album.id,
-      ...(includeSubAlbum ? this.getAllSubAlbums(album).map((a) => a.id) : [])
+      ...(includeSubAlbum ? album.getAllSubAlbums().map((a) => a.id) : [])
     ];
 
 
@@ -190,7 +190,7 @@ export default class FirestoreGalleryListener {
    * Builds the gallery from the skeleton and calls the callbacks
    */
   private async syncGallery(): Promise<void> {
-    const { tags: tagsData, images: imagesData, albums: albumsData } = this.skeleton;
+    const {tags: tagsData, images: imagesData, albums: albumsData} = this.skeleton;
 
     const tags = tagsData.map((tagData) => this.getCachedOrInitTag(new Tag(tagData.id, tagData.name, tagData.description)));
 
@@ -206,7 +206,13 @@ export default class FirestoreGalleryListener {
       imagesForAlbum.sort((a, b) => albumData.images.indexOf(a.id) - albumData.images.indexOf(b.id));
       const cover = images.find((image) => image.id === albumData.cover);
 
-      return this.getCachedOrInitAlbum(new Album(albumData.id, albumData.name, albumData.description, imagesForAlbum, [], null, cover));
+      let autoTags = [];
+      if (albumData.autoTags !== undefined) {
+        autoTags = tags.filter((tag) => albumData.autoTags.includes(tag.id));
+      }
+
+      return this.getCachedOrInitAlbum(
+        new Album(albumData.id, albumData.name, albumData.description, imagesForAlbum, [], null, cover, autoTags, albumData.forceSort ?? false));
     });
 
     // Add children and parent
@@ -226,7 +232,7 @@ export default class FirestoreGalleryListener {
 
     if (favoriteImages.length > 0) {
       const cover = images.find((image) => image.id === this.skeleton.favoritesCover) ?? favoriteImages[0];
-      favoriteAlbum =this.getCachedOrInitAlbum(new Album("favorites", "Favorites", "Your favorite images", favoriteImages, [], null, cover));
+      favoriteAlbum = this.getCachedOrInitAlbum(new Album("favorites", "Favorites", "Your favorite images", favoriteImages, [], null, cover));
 
     }
 

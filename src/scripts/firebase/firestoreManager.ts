@@ -179,9 +179,10 @@ export default class FirestoreManager {
       name: album.name,
       description: album.description,
       images: album.images.map(i => i.id),
-      children: album.children.map(a => a.id),
       parent: album.parent?.id ?? null,
       cover: album.cover?.id ?? null,
+      autoTags: album.autoTags?.map(t => t.id) ?? [],
+      forceSort: album.forceSort,
     });
 
   }

@@ -6,6 +6,7 @@
   import type Image from "../../scripts/gallery/image";
   import SelectImagesDialog from "../components/SelectImagesDialog.svelte";
   import OrderImagesDialog from "../components/OrderImagesDialog.svelte";
+  import FlipSlider from "../util/FlipSlider.svelte";
 
   const dispatch = createEventDispatcher();
 
@@ -102,7 +103,13 @@
           <span class="material-icons">image</span>
           <span>Select Cover</span>
         </button>
-
+      </div>
+      <div class="force-order-wrapper">
+        {#if dummyAlbum}
+          <FlipSlider bind:active={dummyAlbum.forceSort} id="force-order"/>
+          <!--suppress XmlInvalidId -->
+          <label for="force-order">Force Image Order</label>
+        {/if}
       </div>
       <button class="material text-button submit-btn" on:click={submit}>
         <span class="material-icons">done</span>
@@ -137,83 +144,96 @@
   />
 {/if}
 
-<style>
-    .dialog-content {
-        position: relative;
-        margin: 10px;
-        width: 80%;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        flex: 1;
+<style lang="scss">
+  .dialog-content {
+    position: relative;
+    margin: 10px;
+    width: 80%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
 
-    }
+  }
 
-    .submit-btn {
-        margin-top: 20px;
-        background-color: #4CAF50;
-    }
+  .submit-btn {
+    margin-top: 20px;
+    background-color: #4CAF50;
+  }
 
-    .album-name {
-        width: 100%;
-        height: 30px;
-        border: none;
-        border-bottom: 1px solid #ccc;
-        font-size: 20px;
-        padding: 5px;
-        margin-bottom: 20px;
-    }
+  .album-name {
+    width: 100%;
+    height: 30px;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    font-size: 20px;
+    padding: 5px;
+    margin-bottom: 20px;
+  }
 
-    .delete {
-        position: absolute;
-        top: 0;
-        left: 0;
-        margin: 10px;
-        background: none;
-        border: none;
-        outline: none;
-        cursor: pointer;
-    }
+  .delete {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 10px;
+    background: none;
+    border: none;
+    outline: none;
+    cursor: pointer;
+  }
 
-    .parent-select {
-        width: 100%;
-        margin-bottom: 20px;
-        display: flex;
-        flex-direction: row;
-    }
+  .parent-select {
+    width: 100%;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: row;
+  }
 
-    .parent-select label {
-        margin-right: 10px;
-        font-size: 1.2em;
-    }
+  .parent-select label {
+    margin-right: 10px;
+    font-size: 1.2em;
+  }
 
-    .parent-select select {
-        flex: 1;
-        height: 30px;
-        border: none;
-        border-bottom: 1px solid #ccc;
-        font-size: 1em;
-        padding: 5px;
-        background-color: #2c2c2c;
-        margin-bottom: 0;
-    }
+  .parent-select select {
+    flex: 1;
+    height: 30px;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    font-size: 1em;
+    padding: 5px;
+    background-color: #2c2c2c;
+    margin-bottom: 0;
+  }
 
-    .select-reorder-wrapper {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
-        margin-bottom: 20px;
-    }
+  .select-reorder-wrapper {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
 
-    .select-reorder-wrapper > button {
-        box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.5);
-        margin: 5px
-    }
+  .select-reorder-wrapper > button {
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.5);
+    margin: 5px
+  }
 
-    .number-selected-images {
-        margin-left: 10px;
+  .number-selected-images {
+    margin-left: 10px;
+  }
+
+  .force-order-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 20px;
+
+    label{
+      margin-left: 10px;
+      cursor: pointer;
+      user-select: none;
     }
+  }
 
 </style>

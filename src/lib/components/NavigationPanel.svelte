@@ -135,15 +135,18 @@
 
     <div class="filters group">
       <h5 class="group-header">FILTERS</h5>
+      <!--suppress XmlInvalidId -->
       <label class="full-width-item toggle-option ripple" for="fav-only">
         <FlipSlider bind:active={$localConfig.favoritesOnly} id="fav-only"/>
         Show favorites only
       </label>
+      <!--suppress XmlInvalidId -->
       <label class="full-width-item ripple" for="tags-enabled">
         <FlipSlider bind:active={$localConfig.tagConfig.enabled} id="tags-enabled" />
         Filter by tags
       </label>
       <div class="full-width-item">
+        <!--suppress HtmlWrongAttributeValue -->
         <button class="full-width-item material text-button select-tags-btn"
                 disabled={!$localConfig.tagConfig.enabled}
                 on:click={()=>tagSelectOpen = true}
@@ -180,7 +183,7 @@
                    tagConfig={{...$localConfig.tagConfig}}/>
 {/if}
 
-<style>
+<style lang="scss">
 
   .main {
     position: fixed;
@@ -238,7 +241,7 @@
 
     position: relative;
     box-sizing: border-box;
-    padding: 0 10px;
+    padding: 0 10px 0 0;
 
   }
 
@@ -257,7 +260,7 @@
     font-size: 20px;
     font-weight: 500;
     transition: all 0.3s ease-in-out;
-    border-radius: 100px;
+    border-radius: 0 100px 100px 0;
     margin: 2px 0;
   }
 
