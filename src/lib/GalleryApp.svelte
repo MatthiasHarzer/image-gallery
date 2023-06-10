@@ -7,8 +7,7 @@
   import AlbumsView from "./albums_view/AlbumsView.svelte";
   import {route} from "../scripts/routeManager";
   import EditView from "./edit_view/EditView.svelte";
-
-
+  import TagsEditView from "./tags_edit_view/TagsEditView.svelte";
 </script>
 
 <div class="main">
@@ -22,26 +21,32 @@
         <AlbumsView/>
       </div>
     {:else if $route.screen === Screen.EDIT}
-      <EditView/>
+      <div class="edit view" transition:fly={{duration: 200, x: 200}}>
+        <EditView/>
+      </div>
+      {:else if $route.screen === Screen.TAGS}
+      <div class="tags view" transition:fly={{duration: 200, x: -200}}>
+        <TagsEditView/>
+      </div>
     {/if}
   {/if}
 
 
 </div>
 <style>
-    .main {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        overflow-x: hidden;
-    }
+  .main {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+  }
 
-    .view {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-    }
+  .view {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
 
 </style>

@@ -95,10 +95,13 @@ export default class FirestoreManager {
     await deleteDoc(tagRef);
   }
 
-  public async updateTag(user: User, tag: Tag, updateData: { [key: string]: any }): Promise<void> {
+  public async updateTag(user: User, tag: Tag): Promise<void> {
     const tagRef = doc(TAGS_REF(user), tag.id);
 
-    await updateDoc(tagRef, updateData);
+    await updateDoc(tagRef, {
+        name: tag.name,
+        description: tag.description,
+    });
   }
 
   public async addTagToImage(user: User, image: CustomImage, tag: Tag): Promise<void> {

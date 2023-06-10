@@ -194,12 +194,19 @@ export default class FirestoreGalleryListener {
 
     const tags = tagsData.map((tagData) => this.getCachedOrInitTag(new Tag(tagData.id, tagData.name, tagData.description)));
 
+    imagesData.forEach((imageData) => {
+      const tagsForImage = tags.filter((tag) => imageData.tags.includes(tag.id));
+        tagsForImage.forEach((tag)=>tag.count++)
+    });
+    tags.sort((a, b) => b.count - a.count);
+
     const images = imagesData.map((imageData) => {
       const tagsForImage = tags.filter((tag) => imageData.tags.includes(tag.id));
 
       return this.getCachedOrInitImage(new Image(imageData.id, imageData.name, imageData.description, imageData.url, tagsForImage, imageData.state,
         imageData.width, imageData.height, imageData.timestamp, imageData.favorite ?? false));
     });
+
 
     const albums = albumsData.map((albumData) => {
       const imagesForAlbum = images.filter((image) => albumData.images.includes(image.id));

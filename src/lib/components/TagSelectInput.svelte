@@ -10,7 +10,7 @@
   export let image: Image;
   export let presentTags: Tag[] = [];
 
-  export let focused: boolean = true;
+  export let focused: boolean = false;
 
   let tagInput: string = "";
 

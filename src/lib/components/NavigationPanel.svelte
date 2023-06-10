@@ -1,12 +1,12 @@
 <script lang="ts">
 
-  import { localConfig, SortMode } from "../../scripts/localConfig";
-  import type { TagConfig } from "../../scripts/localConfig";
-  import { onMount } from "svelte";
-  import type { ScrollObserver } from "../../scripts/util/scrollObserver";
-  import { createScrollObserver } from "../../scripts/util/scrollObserver";
-  import { Screen } from "../../scripts/screen";
-  import { route } from "../../scripts/routeManager";
+  import type {TagConfig} from "../../scripts/localConfig";
+  import {localConfig, SortMode} from "../../scripts/localConfig";
+  import {onMount} from "svelte";
+  import type {ScrollObserver} from "../../scripts/util/scrollObserver";
+  import {createScrollObserver} from "../../scripts/util/scrollObserver";
+  import {Screen} from "../../scripts/screen";
+  import {route} from "../../scripts/routeManager";
   import FlipSlider from "../util/FlipSlider.svelte";
   import TagSelectDialog from "../tag_select/TagSelectDialog.svelte";
 
@@ -23,7 +23,7 @@
   let tagSelectOpen = false;
 
   onMount(() => {
-    scrollObserver = createScrollObserver(dragBar, { uniDirectional: true, disablePointerSupport: true });
+    scrollObserver = createScrollObserver(dragBar, {uniDirectional: true, disablePointerSupport: true});
 
     scrollObserver.onScrollEnd(([dx, dy], [speedX, speedY], _) => {
       const speed = Math.abs(speedX);
@@ -69,10 +69,15 @@
       name: "Edit",
       icon: "edit",
       screen: Screen.EDIT
+    },
+    {
+      name: "Tags",
+      icon: "label",
+      screen: Screen.TAGS
     }
   ]
 
-  const cycleSortMode = () =>{
+  const cycleSortMode = () => {
     const current = $localConfig.sortMode;
 
     switch (current) {
@@ -142,7 +147,7 @@
       </label>
       <!--suppress XmlInvalidId -->
       <label class="full-width-item ripple" for="tags-enabled">
-        <FlipSlider bind:active={$localConfig.tagConfig.enabled} id="tags-enabled" />
+        <FlipSlider bind:active={$localConfig.tagConfig.enabled} id="tags-enabled"/>
         Filter by tags
       </label>
       <div class="full-width-item">
@@ -285,7 +290,6 @@
   }
 
 
-
   .full-width-item {
     box-sizing: border-box;
     display: flex;
@@ -305,27 +309,29 @@
     /*background-color: #858585;*/
   }
 
-  .select-tags-btn{
+  .select-tags-btn {
     /*background-color: #5e5e5e;*/
     box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.5);
   }
-  .select-tags-btn:disabled{
+
+  .select-tags-btn:disabled {
     color: #a2a2a2;
     box-shadow: none;
   }
+
   .select-tags-btn:disabled span {
     color: #a2a2a2;
   }
 
 
-  .group-header{
+  .group-header {
     color: #c5c5c5;
     font-size: 14px;
     font-weight: 500;
     margin: 0 20px;
   }
 
-  .sort-mode-button-wrapper{
+  .sort-mode-button-wrapper {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -333,7 +339,7 @@
     padding: 10px 0;
   }
 
-  .sort-mode-btn{
+  .sort-mode-btn {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -342,12 +348,9 @@
     box-shadow: 2px 2px 5px 0 rgba(0, 0, 0, 0.5);
   }
 
-  .sort-mode-btn span{
+  .sort-mode-btn span {
     margin-right: 15px;
   }
-
-
-
 
 
 </style>
