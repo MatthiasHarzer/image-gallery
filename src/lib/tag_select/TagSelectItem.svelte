@@ -19,7 +19,7 @@
 </script>
 
 <button class="main clear excluded" class:included class:excluded on:click={toggle}>
-  {tag.name}
+  {tag.name} <span class="count">({tag.count})</span>
 </button>
 
 <style>
@@ -48,6 +48,19 @@
 
   .main.excluded{
     background-color: #ab2b2b;
+  }
+
+  .main:hover:not(.included):not(.excluded){
+    background-color: #3c3c3c;
+  }
+
+  .count{
+    font-size: 0.8em;
+    color: #8d8d8d;
+  }
+
+  .main.included .count, .main.excluded .count{
+    color: #fff;
   }
 
 </style>
