@@ -9,11 +9,13 @@
   import { route } from "../../scripts/routeManager";
   import { localConfig } from "../../scripts/localConfig";
   import { applyFilters } from "../../scripts/filters";
+  import {getIfHasCachedOrUncachedOtherwise} from "../../scripts/util/cacheHelper";
 
   export let images: ReadWritable<Image[]> = writable([]);
   export let album: ReadWritable<Album> = null;
 
   let filteredImages: Readable<Image[]>
+  let photosFormatted: any[] = [];
 
   // $: console.log("ALBUM", $album)
 
@@ -22,14 +24,27 @@
   $: imageViewStore = $localConfig.currentImageViewStore;
   $: filteredImages = $imageViewStore;
 
-  $: photosFormatted = $filteredImages.map((img) => {
-    return {
-      orig: img,
-      title: img.name,
-      ...img,
-      url: img.thumbnailSrc,
+
+  let loadKey = 0;
+
+  const loadImages = async (images: Image[]) => {
+    loadKey++;
+    const key = loadKey;
+    const promises = await Promise.all(images.map((img) => getIfHasCachedOrUncachedOtherwise(img.thumbnailSrc)))
+
+    if (key !== loadKey) return;
+
+    photosFormatted = images.map((img, i) => {
+      return {
+        orig: img,
+        title: img.name,
+        ...img,
+        url: promises[i],
+      }
+    });
   }
-  });
+
+  $: loadImages($filteredImages)
 
   const openFullscreenDialog = (image) => {
     const index = $filteredImages.indexOf(image.orig);

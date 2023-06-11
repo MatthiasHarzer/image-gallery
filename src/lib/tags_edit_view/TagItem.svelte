@@ -10,7 +10,7 @@
 </script>
 
 <div class="tag-item box-shadow">
-  <div>
+  <div class="tag">
     <span>{tag.name}</span>
     <span class="count">({tag.count})</span>
   </div>
@@ -37,8 +37,18 @@
     border-radius: 1.5rem;
     border: 1px solid #ccc;
     flex: 1;
-    white-space: nowrap;
-    height: 30px;
+    max-width: 100%;
+    box-sizing: border-box;
+    //overflow: hidden;
+
+    height: 44px;
+
+    .tag{
+      flex: 0 1 auto;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
 
     &.focused, &:hover {
       background-color: #646cff;;

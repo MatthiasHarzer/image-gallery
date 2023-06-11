@@ -9,6 +9,7 @@
   import {route} from "../../scripts/routeManager";
   import FlipSlider from "../util/FlipSlider.svelte";
   import TagSelectDialog from "../tag_select/TagSelectDialog.svelte";
+  import DownloadCachedImagesDialog from "./DownloadCachedImagesDialog.svelte";
 
   $: navOpen = $localConfig.navOpen
 
@@ -21,6 +22,7 @@
   let dragBar: HTMLElement;
   let scrollObserver: ScrollObserver;
   let tagSelectOpen = false;
+  let downloadDialogOpen = false;
 
   onMount(() => {
     scrollObserver = createScrollObserver(dragBar, {uniDirectional: true, disablePointerSupport: true});
@@ -123,9 +125,15 @@
 
 <div class="main" class:open={navOpen} on:click|self|stopPropagation={close} style="--width: {NAV_WIDTH}px;">
   <div class="nav" class:no-animation={sliding} style="--offset: {offset}px;">
-    <button class="material close-btn" on:click={close}>
-      <span class="material-icons">close</span>
-    </button>
+    <div class="button-bar">
+      <button class="material close-btn" on:click={close}>
+        <span class="material-icons">close</span>
+      </button>
+
+      <button class="material download-btn" on:click={()=>downloadDialogOpen = true}>
+        <span class="material-icons">download</span>
+      </button>
+    </div>
 
     <div class="page-selection">
       {#each pages as page}
@@ -188,6 +196,10 @@
                    tagConfig={{...$localConfig.tagConfig}}/>
 {/if}
 
+{#if downloadDialogOpen}
+  <DownloadCachedImagesDialog on:close={()=>downloadDialogOpen = false}/>
+{/if}
+
 <style lang="scss">
 
   .main {
@@ -236,10 +248,24 @@
     background-color: transparent;
   }
 
-  .close-btn {
-    position: relative;
-    top: 5px;
-    left: 10px;
+  .button-bar {
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+
+    .close-btn {
+      position: relative;
+      top: 5px;
+      left: 10px;
+    }
+
+    .download-btn {
+      position: relative;
+      top: 5px;
+      right: 10px;
+    }
   }
 
   .page-selection {
