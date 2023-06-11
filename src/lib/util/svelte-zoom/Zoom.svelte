@@ -63,7 +63,9 @@
     class:fit-cover={cover}
     on:load={onLoad}
     on:mousedown={mousedown}
-    on:touchstart={touchstart}/>
+    on:touchstart={touchstart}
+
+/>
 
 <script lang="ts">
   export let alt
@@ -72,7 +74,9 @@
 
   import { calculateAspectRatioFit, getDistance } from "./other"
 
-  import { onMount } from "svelte"
+  import {createEventDispatcher, onMount} from "svelte"
+
+  const dispatch = createEventDispatcher();
 
   let smooth = true
   let touchScreen = false
@@ -92,7 +96,6 @@
   let willChange = true;
 
   let velocity = new MultiTouchVelocity()
-  let loadedResolve;
 
   let lastTap = {
     time: 0,
@@ -118,13 +121,6 @@
 
   export let zoomEnabled = true;
 
-  export const loaded = new Promise((resolve) => {
-    if (img && img.complete) {
-      resolve()
-    } else {
-      loadedResolve = resolve
-    }
-  })
 
   $: if (zoomEnabled) zoom = scale.value
 
@@ -311,7 +307,7 @@
 
     scale.max = naturalWidth > naturalHeight ? Math.max(naturalWidth / window.innerWidth, 1) : Math.max(naturalHeight / window.innerHeight, 1)
 
-    loadedResolve?.()
+    dispatch("loaded", img)
 
     img.addEventListener("wheel", onWheel, { passive: false })
     img.addEventListener("touchstart", onTouchStart, { passive: false })

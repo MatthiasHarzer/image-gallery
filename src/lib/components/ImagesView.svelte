@@ -28,7 +28,7 @@
       title: img.name,
       ...img,
       url: img.thumbnailSrc,
-    }
+  }
   });
 
   const openFullscreenDialog = (image) => {
