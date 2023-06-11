@@ -19,6 +19,7 @@
   $: matchingImages = selectedAlbum == null ? $gallery.images : $albumImages;
 
   let downloading = false;
+  let numToDownload = null;
 
   const close = () => {
     dispatch("close");
@@ -27,6 +28,8 @@
   const download = async () => {
     if (downloading) return;
     downloading = true;
+    numToDownload = matchingImages.length;
+    numDownloaded = 0;
 
     for (const image of matchingImages) {
       const urls = [image.src, image.thumbnailSrc];
@@ -37,11 +40,6 @@
     }
 
     downloading = false;
-
-    setTimeout(() => {
-          close();
-        }, 1000
-    );
   }
 </script>
 
@@ -82,9 +80,9 @@
       </button>
 
       <div class="progress">
-        {numDownloaded} / {matchingImages.length}
+        {numDownloaded} / {numToDownload ?? matchingImages.length}
         <div class="progress-bar">
-          <div class="progress-bar-value" style="width: {numDownloaded/matchingImages.length*100}%"></div>
+          <div class="progress-bar-value" style="width: {numDownloaded/(numToDownload ?? matchingImages.length)*100}%"></div>
         </div>
       </div>
     </div>
