@@ -24,10 +24,13 @@
   $: imageViewStore = $localConfig.currentImageViewStore;
   $: filteredImages = $imageViewStore;
 
-
   let loadKey = 0;
+  let previousImages: string[] = [];
 
   const loadImages = async (images: Image[]) => {
+    const ids = images.map(i=> i.id);
+    if (ids.join(",") === previousImages.join(",")) return;
+    previousImages = ids;
     loadKey++;
     const key = loadKey;
     const promises = await Promise.all(images.map((img) => getIfHasCachedOrUncachedOtherwise(img.thumbnailSrc)))
