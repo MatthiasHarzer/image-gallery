@@ -2,6 +2,7 @@
 
   import type Tag from "../../scripts/gallery/tag";
   import {createEventDispatcher, onMount} from "svelte";
+  import Dialog from "../components/Dialog.svelte";
 
   export let tag: Tag;
 
@@ -22,44 +23,44 @@
   const dispatch = createEventDispatcher();
 </script>
 
-<div class="blur-background">
-  <div class="dialog">
-    <div class="dialog-header">
-      <h3>Edit Tag</h3>
-      <button class="material close-btn" on:click={close}>
-        <span class="material-icons">close</span>
-      </button>
-    </div>
-    {#if dummyTag}
-      <div class="dialog-content">
+<Dialog on:close>
+      <h3 slot="title">Edit Tag</h3>
 
-        <div class="input-group">
-          <label for="name">Name</label>
-          <input bind:value={dummyTag.name} id="name" type="text"/>
-        </div>
+  {#if dummyTag}
+    <div class="dialog-content">
 
-
-        <div class="input-group">
-          <label for="description">Description</label>
-          <textarea bind:value={dummyTag.description} id="description"/>
-        </div>
-
+      <div class="input-group">
+        <label for="name">Name</label>
+        <input bind:value={dummyTag.name} id="name" type="text"/>
       </div>
-    {/if}
-    <div class="dialog-footer">
-      <button class="material text-button submit-btn" on:click={submit}>Submit</button>
-    </div>
 
-  </div>
-</div>
+
+      <div class="input-group">
+        <label for="description">Description</label>
+        <textarea bind:value={dummyTag.description} id="description"/>
+      </div>
+
+      <div class="footer">
+        <button class="material text-button submit-btn" on:click={submit}>Submit</button>
+      </div>
+
+    </div>
+  {/if}
+
+</Dialog>
+
 
 <style lang="scss">
 
-  .dialog-footer{
+  .footer{
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
     padding: 1rem;
 
+    .submit-btn{
+      width: 100%;
+      background-color: var(--primary-color);
+    }
   }
 
 </style>

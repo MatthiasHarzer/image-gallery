@@ -7,6 +7,7 @@
   import TagSelectItem from "./TagSelectItem.svelte";
   import FlipSlider from "../util/FlipSlider.svelte";
   import { applyFiltersWithConfig } from "../../scripts/filters";
+  import Dialog from "../components/Dialog.svelte";
 
   const dispatch = createEventDispatcher();
 
@@ -46,35 +47,32 @@
 
 </script>
 
-<div class="blur-background">
-  <div class="dialog">
-    <div class="dialog-header">
-      <h3 class="dialog-title">Select Tags</h3>
-      <button class="material close-btn" on:click={close}>
-        <span class="material-icons">close</span>
-      </button>
-    </div>
-    <div class="dialog-content">
-      <div class="tags-list">
+<Dialog on:close>
+
+  <h3 slot="title">Select Tags</h3>
+
+  <div class="dialog-content">
+    <div class="tags-list">
 
       {#each $gallery.tags as tag }
         <TagSelectItem {tag} {tagConfig} on:toggle={toggle}/>
       {/each}
-      </div>
-      <label class="match-all" id="match-all-tags">
-        <FlipSlider bind:active={tagConfig.matchAll} id="match-all-tags"/>
-        <span>Match All Tags</span>
-      </label>
-      <span class="matching-number">
+    </div>
+    <label class="match-all" id="match-all-tags">
+      <FlipSlider bind:active={tagConfig.matchAll} id="match-all-tags"/>
+      <span>Match All Tags</span>
+    </label>
+    <span class="matching-number">
 
         {numMatchingImages} matching images
       </span>
-      <button class="material text-button submit-btn" on:click={submit}>
-        Submit
-      </button>
-    </div>
+    <button class="material text-button submit-btn" on:click={submit}>
+      Close
+    </button>
   </div>
-</div>
+
+</Dialog>
+
 
 <style>
 

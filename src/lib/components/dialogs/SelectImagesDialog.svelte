@@ -1,12 +1,13 @@
 <script lang="ts">
 
-  import type {ReadWritable} from "../../scripts/util/helperTypes";
-  import type Image from "../../scripts/gallery/image";
+  import type {ReadWritable} from "../../../scripts/util/helperTypes";
+  import type Image from "../../../scripts/gallery/image";
   import {writable} from "svelte/store";
-  import {gallery} from "../../scripts/firebase/firebaseManager";
+  import {gallery} from "../../../scripts/firebase/firebaseManager";
   import {createEventDispatcher, onMount} from "svelte";
-  import ImageWrapper from "./ImageWrapper.svelte";
-  import SelectImagesView from "./SelectImagesView.svelte";
+  import ImageWrapper from "../ImageWrapper.svelte";
+  import SelectImagesView from "../SelectImagesView.svelte";
+  import Dialog from "../Dialog.svelte";
 
   export let images: ReadWritable<Image[]> = writable(null);
   export let selectedImages: Image[] = [];
@@ -38,32 +39,29 @@
 
 </script>
 
-<div class="blur-background">
-  <div class="dialog no-scroll-bar">
-    <div class="dialog-header">
-      <h3>
-        {title}
-      </h3>
-      <button class="material close-btn" on:click={close}>
-        <span class="material-icons">close</span>
-      </button>
-    </div>
-    <div class="dialog-content discrete-scrollbar">
+<Dialog on:close>
+  <h3 slot="title">
+    {title}
+  </h3>
+
+  <div class="dialog-content">
+    <div class="images discrete-scrollbar">
       <SelectImagesView bind:selectedImages images={$availableImages}/>
     </div>
-    <div class="dialog-footer">
-      <button class="material text-button submit-btn" on:click={submit}>
 
-          <span class="material-icons">
-            check
-          </span>
+    <div class="footer">
+      <button class="material text-button submit-btn" on:click={submit}>
+            <span class="material-icons">
+              check
+            </span>
         Submit
       </button>
     </div>
   </div>
-</div>
+</Dialog>
 
-<style>
+
+<style lang="scss">
 
   .dialog-header {
     flex: 0;
@@ -77,18 +75,27 @@
     height: 100%;
     padding: 0 1rem;
 
+    overflow: hidden;
+
+    position: relative;
+
     display: flex;
     flex-direction: column;
     align-items: center;
 
-    overflow-y: auto;
-  }
+    .images{
+      flex: 1;
+      width: 100%;
+      padding: 0 10px;
+      overflow-y: auto;
+    }
 
-  .dialog-footer {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    flex: 0;
+    .footer{
+      flex: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
   }
 
   .submit-btn {

@@ -1,14 +1,12 @@
 <script lang="ts">
 
-  import {createEventDispatcher} from "svelte";
-  import {gallery} from "../../scripts/firebase/firebaseManager";
-  import {getSrcAndCache} from "../../scripts/util/cacheHelper";
-  import FlipSlider from "../util/FlipSlider.svelte";
-  import type Album from "../../scripts/gallery/album";
+  import {gallery} from "../../../scripts/firebase/firebaseManager";
+  import {getSrcAndCache} from "../../../scripts/util/cacheHelper";
+  import FlipSlider from "../../util/FlipSlider.svelte";
+  import type Album from "../../../scripts/gallery/album";
   import {readable} from "svelte/store";
-  import type Image from "../../scripts/gallery/image";
-
-  const dispatch = createEventDispatcher();
+  import type Image from "../../../scripts/gallery/image";
+  import Dialog from "../Dialog.svelte";
 
   let numDownloaded = 0;
   let selectedAlbum: Album | null = null;
@@ -20,10 +18,6 @@
 
   let downloading = false;
   let numToDownload = null;
-
-  const close = () => {
-    dispatch("close");
-  }
 
   const download = async () => {
     if (downloading) return;
@@ -44,52 +38,42 @@
   }
 </script>
 
-<div class="blur-background">
-  <div class="dialog no-scroll-bar">
-    <div class="dialog-header">
-      <h3>
-        Pre-Download Images
-      </h3>
-      <button class="material close-btn" on:click={close}>
-        <span class="material-icons">close</span>
-      </button>
-    </div>
-    <div class="dialog-content">
-
-      <div class="select-album">
-        <div class="album-select">
-          <label for="album-select">Select Album</label>
-          <select bind:value={selectedAlbum} id="album-select">
-            <option value={null}>All</option>
-            {#each $gallery.albums as album}
-              <option value={album}>{album.name}</option>
-            {/each}
-          </select>
-        </div>
-
-        <div class="include-sub-albums">
-
-          <!--suppress XmlInvalidId -->
-          <label for="include-sub-albums">Include Sub-Albums</label>
-          <FlipSlider bind:active={includeSubAlbums} id="include-sub-albums"/>
-        </div>
-      </div>
-
-      <button class="material text-button download-btn" on:click={download}>
-        {downloading ? "Downloading..." : "Download"}
-        <span class="material-icons">download</span>
-      </button>
-
-      <div class="progress">
-        {numDownloaded} / {numToDownload ?? matchingImages.length}
-        <div class="progress-bar">
-          <div class="progress-bar-value" style="width: {numDownloaded/(numToDownload ?? matchingImages.length)*100}%"></div>
-        </div>
-      </div>
+<Dialog on:close>
+  <h3 slot="title">
+    Pre-Download Images
+  </h3>
+  <div class="select-album">
+    <div class="album-select">
+      <label for="album-select">Select Album</label>
+      <select bind:value={selectedAlbum} id="album-select">
+        <option value={null}>All</option>
+        {#each $gallery.albums as album}
+          <option value={album}>{album.name}</option>
+        {/each}
+      </select>
     </div>
 
+    <div class="include-sub-albums">
+
+      <!--suppress XmlInvalidId -->
+      <label for="include-sub-albums">Include Sub-Albums</label>
+      <FlipSlider bind:active={includeSubAlbums} id="include-sub-albums"/>
+    </div>
   </div>
-</div>
+
+  <button class="material text-button download-btn" on:click={download}>
+    {downloading ? "Downloading..." : "Download"}
+    <span class="material-icons">download</span>
+  </button>
+
+  <div class="progress">
+    {numDownloaded} / {numToDownload ?? matchingImages.length}
+    <div class="progress-bar">
+      <div class="progress-bar-value"
+           style="width: {numDownloaded/(numToDownload ?? matchingImages.length)*100}%"></div>
+    </div>
+  </div>
+</Dialog>
 
 <style lang="scss">
   .dialog-content {
@@ -100,7 +84,7 @@
     align-items: center;
   }
 
-  .select-album{
+  .select-album {
     display: flex;
     flex-wrap: wrap;
     flex-direction: column;
@@ -109,18 +93,18 @@
     width: 100%;
     margin-bottom: 20px;
 
-    .album-select{
+    .album-select {
       max-width: 400px;
       margin-bottom: 10px;
     }
 
-    .include-sub-albums{
+    .include-sub-albums {
       max-width: 400px;
       display: flex;
       flex-direction: row;
       justify-content: center;
 
-      label{
+      label {
         margin-right: 10px;
         display: flex;
         align-items: center;

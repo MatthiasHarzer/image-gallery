@@ -41,6 +41,7 @@
       {#if album.id !== null && album.children.length !== 0}
         <div class="include-sub-albums">
           <FlipSlider bind:active={$localConfig.includeSubAlbum} id="include-sub-albums"/>
+          <!--suppress XmlInvalidId -->
           <label for="include-sub-albums">Include Sub Albums</label>
         </div>
       {/if}

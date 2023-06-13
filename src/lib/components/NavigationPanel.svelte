@@ -9,7 +9,7 @@
   import {route} from "../../scripts/routeManager";
   import FlipSlider from "../util/FlipSlider.svelte";
   import TagSelectDialog from "../tag_select/TagSelectDialog.svelte";
-  import DownloadCachedImagesDialog from "./DownloadCachedImagesDialog.svelte";
+  import DownloadCachedImagesDialog from "./dialogs/DownloadCachedImagesDialog.svelte";
 
   $: navOpen = $localConfig.navOpen
 

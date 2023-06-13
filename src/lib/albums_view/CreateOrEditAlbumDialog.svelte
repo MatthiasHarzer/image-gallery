@@ -4,9 +4,10 @@
   import {createEventDispatcher, onMount} from "svelte";
   import {gallery} from "../../scripts/firebase/firebaseManager";
   import type Image from "../../scripts/gallery/image";
-  import SelectImagesDialog from "../components/SelectImagesDialog.svelte";
-  import OrderImagesDialog from "../components/OrderImagesDialog.svelte";
+  import SelectImagesDialog from "../components/dialogs/SelectImagesDialog.svelte";
+  import OrderImagesDialog from "../components/dialogs/OrderImagesDialog.svelte";
   import FlipSlider from "../util/FlipSlider.svelte";
+  import Dialog from "../components/Dialog.svelte";
 
   const dispatch = createEventDispatcher();
 
@@ -55,69 +56,66 @@
 
 </script>
 
-<div class="blur-background">
-  <div class="dialog">
-    <div class="dialog-header">
-      <button class="material delete" on:click={deleteAlbum}>
+<Dialog on:close>
+
+  <button class="material delete" on:click={deleteAlbum} slot="left-action">
         <span class="material-icons">
           delete
         </span>
-      </button>
-      <h3 class="dialog-title">{isEdit ? "Edit Album" : "Create Album"}</h3>
-      <button class="material close-btn" on:click={close}>
-        <span class="material-icons">close</span>
-      </button>
-    </div>
-    <div class="dialog-content">
-      {#if dummyAlbum}
-        <input type="text" class="album-name" placeholder="Enter album name..." bind:value={dummyAlbum.name}/>
+  </button>
 
-        <div class="parent-select">
-          <label for="parent-select">Parent Album</label>
-          <select id="parent-select" bind:value={dummyAlbum.parent}>
-            <option value={null}>None</option>
-            {#each availableParents as parent}
-              <option value={parent}>{parent.name}</option>
-            {/each}
-          </select>
+  <h3 slot="title">{isEdit ? "Edit Album" : "Create Album"}</h3>
 
-        </div>
-      {/if}
+  <div class="dialog-content">
+    {#if dummyAlbum}
+      <input type="text" class="album-name" placeholder="Enter album name..." bind:value={dummyAlbum.name}/>
 
-      <div class="select-reorder-wrapper">
-        <button class="material text-button select-images" on:click={()=>selectImagesDialogOpen = true}>
-          <span class="material-icons">add</span>
-          <span>Select Images</span>
+      <div class="parent-select">
+        <label for="parent-select">Parent Album</label>
+        <select id="parent-select" bind:value={dummyAlbum.parent}>
+          <option value={null}>None</option>
+          {#each availableParents as parent}
+            <option value={parent}>{parent.name}</option>
+          {/each}
+        </select>
 
-          <span class="number-selected-images">
+      </div>
+    {/if}
+
+    <div class="select-reorder-wrapper">
+      <button class="material text-button select-images" on:click={()=>selectImagesDialogOpen = true}>
+        <span class="material-icons">add</span>
+        <span>Select Images</span>
+
+        <span class="number-selected-images">
               ({dummyAlbum?.images.length} selected)
           </span>
-        </button>
+      </button>
 
-        <button class="material text-button reorder-images" on:click={()=>orderImagesDialogOpen = true}>
-          <span class="material-icons">reorder</span>
-          <span>Reorder Images</span>
-        </button>
+      <button class="material text-button reorder-images" on:click={()=>orderImagesDialogOpen = true}>
+        <span class="material-icons">reorder</span>
+        <span>Reorder Images</span>
+      </button>
 
-        <button class="material text-button select-cover" on:click={()=>selectCoverDialogOpen = true}>
-          <span class="material-icons">image</span>
-          <span>Select Cover</span>
-        </button>
-      </div>
-      <div class="force-order-wrapper">
-        {#if dummyAlbum}
-          <FlipSlider bind:active={dummyAlbum.forceSort} id="force-order"/>
-          <!--suppress XmlInvalidId -->
-          <label for="force-order">Force Image Order</label>
-        {/if}
-      </div>
-      <button class="material text-button submit-btn" on:click={submit}>
-        <span class="material-icons">done</span>
-        <span>Submit</span>
+      <button class="material text-button select-cover" on:click={()=>selectCoverDialogOpen = true}>
+        <span class="material-icons">image</span>
+        <span>Select Cover</span>
       </button>
     </div>
+    <div class="force-order-wrapper">
+      {#if dummyAlbum}
+        <FlipSlider bind:active={dummyAlbum.forceSort} id="force-order"/>
+        <!--suppress XmlInvalidId -->
+        <label for="force-order">Force Image Order</label>
+      {/if}
+    </div>
+    <button class="material text-button submit-btn" on:click={submit}>
+      <span class="material-icons">done</span>
+      <span>Submit</span>
+    </button>
   </div>
-</div>
+</Dialog>
+
 
 {#if selectImagesDialogOpen}
   <SelectImagesDialog
@@ -147,14 +145,12 @@
 <style lang="scss">
   .dialog-content {
     position: relative;
-    margin: 10px;
     width: 80%;
     height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     flex: 1;
-
   }
 
   .submit-btn {
@@ -172,16 +168,6 @@
     margin-bottom: 20px;
   }
 
-  .delete {
-    position: absolute;
-    top: 0;
-    left: 0;
-    margin: 10px;
-    background: none;
-    border: none;
-    outline: none;
-    cursor: pointer;
-  }
 
   .parent-select {
     width: 100%;
@@ -193,17 +179,6 @@
   .parent-select label {
     margin-right: 10px;
     font-size: 1.2em;
-  }
-
-  .parent-select select {
-    flex: 1;
-    height: 30px;
-    border: none;
-    border-bottom: 1px solid #ccc;
-    font-size: 1em;
-    padding: 5px;
-    background-color: #2c2c2c;
-    margin-bottom: 0;
   }
 
   .select-reorder-wrapper {
@@ -229,7 +204,7 @@
     align-items: center;
     margin-bottom: 20px;
 
-    label{
+    label {
       margin-left: 10px;
       cursor: pointer;
       user-select: none;

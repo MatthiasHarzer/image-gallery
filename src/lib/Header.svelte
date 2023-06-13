@@ -3,12 +3,12 @@
   import {firebaseUser, firestoreManager} from "../scripts/firebase/firebaseManager";
   import {auth, authProvider} from "../scripts/firebase/firebase";
   import {signInWithPopup, signOut} from "firebase/auth";
-  import UploadDialog from "./components/UploadDialog.svelte";
+  import UploadDialog from "./components/dialogs/UploadDialog.svelte";
   import {localConfig} from "../scripts/localConfig";
   import {createEventDispatcher} from "svelte";
   import {route} from "../scripts/routeManager";
   import type Image from "../scripts/gallery/image";
-  import SelectImagesDialog from "./components/SelectImagesDialog.svelte";
+  import SelectImagesDialog from "./components/dialogs/SelectImagesDialog.svelte";
   import {get} from "svelte/store";
   import LoadingSpinner from "./util/LoadingSpinner.svelte";
 

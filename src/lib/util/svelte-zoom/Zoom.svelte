@@ -274,9 +274,9 @@
   }
 
   function onWheel(e) {
-    e.preventDefault()
-
     if (!zoomEnabled) return
+
+    e.preventDefault()
 
     const dir = e.deltaY < 0 ? 1 : -1
 
