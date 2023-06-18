@@ -42,35 +42,38 @@
   <h3 slot="title">
     Pre-Download Images
   </h3>
-  <div class="select-album">
-    <div class="album-select">
-      <label for="album-select">Select Album</label>
-      <select bind:value={selectedAlbum} id="album-select">
-        <option value={null}>All</option>
-        {#each $gallery.albums as album}
-          <option value={album}>{album.name}</option>
-        {/each}
-      </select>
+  <div class="dialog-content">
+
+    <div class="select-album">
+      <div class="album-select">
+        <label for="album-select">Select Album</label>
+        <select bind:value={selectedAlbum} id="album-select">
+          <option value={null}>All</option>
+          {#each $gallery.albums as album}
+            <option value={album}>{album.name}</option>
+          {/each}
+        </select>
+      </div>
+
+      <div class="include-sub-albums">
+
+        <!--suppress XmlInvalidId -->
+        <label for="include-sub-albums">Include Sub-Albums</label>
+        <FlipSlider bind:active={includeSubAlbums} id="include-sub-albums"/>
+      </div>
     </div>
 
-    <div class="include-sub-albums">
+    <button class="material text-button download-btn" on:click={download}>
+      {downloading ? "Downloading..." : "Download"}
+      <span class="material-icons">download</span>
+    </button>
 
-      <!--suppress XmlInvalidId -->
-      <label for="include-sub-albums">Include Sub-Albums</label>
-      <FlipSlider bind:active={includeSubAlbums} id="include-sub-albums"/>
-    </div>
-  </div>
-
-  <button class="material text-button download-btn" on:click={download}>
-    {downloading ? "Downloading..." : "Download"}
-    <span class="material-icons">download</span>
-  </button>
-
-  <div class="progress">
-    {numDownloaded} / {numToDownload ?? matchingImages.length}
-    <div class="progress-bar">
-      <div class="progress-bar-value"
-           style="width: {numDownloaded/(numToDownload ?? matchingImages.length)*100}%"></div>
+    <div class="progress">
+      {numDownloaded} / {numToDownload ?? matchingImages.length}
+      <div class="progress-bar">
+        <div class="progress-bar-value"
+             style="width: {numDownloaded/(numToDownload ?? matchingImages.length)*100}%"></div>
+      </div>
     </div>
   </div>
 </Dialog>
@@ -82,6 +85,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    max-width: 400px;
   }
 
   .select-album {
@@ -94,8 +98,17 @@
     margin-bottom: 20px;
 
     .album-select {
-      max-width: 400px;
+      //width: 100%;
       margin-bottom: 10px;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+
+      label{
+        margin-right: 10px;
+        display: flex;
+        align-items: center;
+      }
     }
 
     .include-sub-albums {

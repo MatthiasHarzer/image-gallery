@@ -13,12 +13,16 @@ const cacheKeyFromUrl = (url: string): string => {
     return splits.slice(0, splits.length - 1).join("?");
 }
 
+const cacheAvailable = "caches" in self;
+
 /**
  * Gets the src for the given url, caching it if it's not already cached.
  * Note: This will fetch the image from the network if it's not already cached, thus may be slow.
  * @param proxiedUrl The url of the image
  */
 export const getSrcAndCache = async (proxiedUrl: string): Promise<string> => {
+    if (!cacheAvailable) return proxiedUrl;
+
     const cache = await caches.open("v1");
 
     const cacheKey = cacheKeyFromUrl(proxiedUrl);
@@ -43,6 +47,8 @@ export const getSrcAndCache = async (proxiedUrl: string): Promise<string> => {
  * @param proxiedUrl The url of the image
  */
 export const getIfHasCachedOrUncachedOtherwise = async (proxiedUrl: string): Promise<string> => {
+    if (!cacheAvailable) return proxiedUrl;
+
     const cache = await caches.open("v1");
 
     const cacheKey = cacheKeyFromUrl(proxiedUrl);

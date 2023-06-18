@@ -4,9 +4,11 @@
   import {fullscreenDialog} from "./scripts/fullscreenDialog";
   import FullscreenView from "./lib/fullscreen/FullscreenView.svelte";
   import NavigationPanel from "./lib/components/NavigationPanel.svelte";
+  import {localConfig} from "./scripts/localConfig";
+  import isMobile from "./scripts/util/isMobile";
   //
 
-  // $: console.log($fullscreenDialog)
+  // $: console.log(isMobile)
 </script>
 
 <main>

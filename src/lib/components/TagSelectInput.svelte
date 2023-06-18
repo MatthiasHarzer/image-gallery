@@ -61,9 +61,9 @@
     activeIndex = -1;
     tagInput = "";
 
-    setTimeout(() => {
-      inputElement && inputElement.focus();
-    }, 100);
+    // setTimeout(() => {
+    //   inputElement && inputElement.focus();
+    // }, 100);
   }
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -94,7 +94,7 @@
     <div class="suggestion-box box-shadow discrete-scrollbar">
       {#each matchingTags as tag, i}
         <button bind:this={elmnts[i]} class="suggestion material text-button" class:active={i === activeIndex}
-                on:click={() => addTag(tag)}>
+                on:mousedown|preventDefault={() => addTag(tag)}>
           <span>{tag.name}</span>
         </button>
       {/each}
