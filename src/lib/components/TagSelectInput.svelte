@@ -12,7 +12,7 @@
 
   export let focused: boolean = false;
 
-  let tagInput: string = "";
+  export let tagInput: string = "";
 
   let matchingTags: Tag[];
   let availableTags: Tag[] = [];
