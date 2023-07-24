@@ -4,13 +4,13 @@ const FIREBASE_STORAGE_CACHE_PROXY = "https://firebase-storage-cache.taptwice.de
 const FIREBASE_STORAGE_CACHE_PROXY_THUMBNAIL = `${FIREBASE_STORAGE_CACHE_PROXY}/scale/${THUMBNAIL_SIZE}`
 
 const srcFromResponse = async (response: Response): Promise<string> => {
-    return URL.createObjectURL(await response.blob());
+  return URL.createObjectURL(await response.blob());
 }
 
 const cacheKeyFromUrl = (url: string): string => {
-    const splits = url.split("?");
-    // Remove the query string from the original url
-    return splits.slice(0, splits.length - 1).join("?");
+  const splits = url.split("?");
+  // Remove the query string from the original url
+  return splits.slice(0, splits.length - 1).join("?");
 }
 
 const cacheAvailable = "caches" in self;
@@ -21,25 +21,25 @@ const cacheAvailable = "caches" in self;
  * @param proxiedUrl The url of the image
  */
 export const getSrcAndCache = async (proxiedUrl: string): Promise<string> => {
-    if (!cacheAvailable) return proxiedUrl;
+  if (!cacheAvailable) return proxiedUrl;
 
-    const cache = await caches.open("v1");
+  const cache = await caches.open("v1");
 
-    const cacheKey = cacheKeyFromUrl(proxiedUrl);
+  const cacheKey = cacheKeyFromUrl(proxiedUrl);
 
-    const existing = await cache.match(cacheKey);
+  const existing = await cache.match(cacheKey);
 
-    if (existing) {
-        return srcFromResponse(existing);
-    }
+  if (existing) {
+    return srcFromResponse(existing);
+  }
 
-    const response = await fetch(proxiedUrl);
+  const response = await fetch(proxiedUrl);
 
-    if (response.ok) {
-        await cache.put(cacheKey, response.clone());
-    }
+  if (response.ok) {
+    await cache.put(cacheKey, response.clone());
+  }
 
-    return srcFromResponse(response);
+  return srcFromResponse(response);
 }
 
 /**
@@ -47,25 +47,25 @@ export const getSrcAndCache = async (proxiedUrl: string): Promise<string> => {
  * @param proxiedUrl The url of the image
  */
 export const getIfHasCachedOrUncachedOtherwise = async (proxiedUrl: string): Promise<string> => {
-    if (!cacheAvailable) return proxiedUrl;
+  if (!cacheAvailable) return proxiedUrl;
 
-    const cache = await caches.open("v1");
+  const cache = await caches.open("v1");
 
-    const cacheKey = cacheKeyFromUrl(proxiedUrl);
+  const cacheKey = cacheKeyFromUrl(proxiedUrl);
 
-    const existing = await cache.match(cacheKey);
+  const existing = await cache.match(cacheKey);
 
-    if (existing) {
-        return srcFromResponse(existing);
-    }
-    return proxiedUrl;
+  if (existing) {
+    return srcFromResponse(existing);
+  }
+  return proxiedUrl;
 }
 
 
 
 const createProxyResolver = (proxy: string) => (url: string): string | null => {
-    if (!url || url.length == 0) return null;
-    return `${proxy}/?url=${url}`;
+  if (!url || url.length == 0) return null;
+  return `${proxy}/?url=${url}`;
 }
 
 export const getSrc = createProxyResolver(FIREBASE_STORAGE_CACHE_PROXY);

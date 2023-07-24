@@ -104,7 +104,8 @@ const createRoute = (): Router => {
     const push = (r: Route, replace: boolean = false) => {
         setRouteInternal(r);
         const path = route.toPath();
-        if (replace) window.history.replaceState({}, "", path); else window.history.pushState({}, "", path);
+        if (replace) window.history.replaceState({}, "", path);
+        else window.history.pushState({}, "", path);
         localStorage.setItem(localStorageKey, route.toPathWithoutImage());
     }
 

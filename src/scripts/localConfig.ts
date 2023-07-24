@@ -1,7 +1,7 @@
-import { Screen } from "./screen";
-import { readable, writable } from "svelte/store";
-import type { Readable } from "svelte/store";
-import type { Writable } from "svelte/store";
+import {Screen} from "./screen";
+import {readable, writable} from "svelte/store";
+import type {Readable} from "svelte/store";
+import type {Writable} from "svelte/store";
 import type Image from "./gallery/image";
 
 export interface TagConfig {
@@ -36,6 +36,7 @@ interface LocalConfig {
   tagConfig: TagConfig;
   sortMode: SortMode;
   randomSeed: number;
+  autoDownloadImages: boolean;
 }
 
 const defaultLocalConfig: LocalConfig = {
@@ -49,6 +50,7 @@ const defaultLocalConfig: LocalConfig = {
   tagConfig: defaultTagConfig,
   sortMode: SortMode.DATE_ASC,
   randomSeed: 0,
+  autoDownloadImages: false,
 }
 
 const noCache = ["navOpen", "currentImageViewStore"];
@@ -61,14 +63,13 @@ const createLocalConfig = () => {
   const localConfig = localConfigString ? JSON.parse(localConfigString ?? null) : defaultLocalConfig;
 
 
-
   for (const key of Object.keys(defaultLocalConfig)) {
     if (!localConfig[key] || noCache.includes(key)) {
       localConfig[key] = defaultLocalConfig[key];
     }
   }
 
-  const { set, subscribe, update } = writable<LocalConfig>(localConfig);
+  const {set, subscribe, update} = writable<LocalConfig>(localConfig);
 
   subscribe((value) => {
     const filteredValue = Object.fromEntries(Object.entries(value).filter(([key]) => !noCache.includes(key)));

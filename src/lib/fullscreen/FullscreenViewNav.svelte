@@ -7,7 +7,6 @@
   import AddToAlbumScreen from "../components/AddToAlbumScreen.svelte";
   import {fullscreenDialog} from "../../scripts/fullscreenDialog";
   import TagSelectInput from "../components/TagSelectInput.svelte";
-  import {fly} from "svelte/transition";
 
   const dispatch = createEventDispatcher();
 
@@ -172,7 +171,7 @@
       {/each}
     </div>
     <div class="input-field">
-      <TagSelectInput {image} on:addTag={addTag} bind:focused={tagInputFocused} bind:tagInput={tagInput}/>
+      <TagSelectInput bind:focused={tagInputFocused} bind:tagInput={tagInput} {image} on:addTag={addTag}/>
     </div>
   </div>
 
@@ -360,13 +359,16 @@
     position: relative;
   }
 
-  .context-menu button {
-    pointer-events: all;
-  }
 
-  .context-menu:not(:focus-within) .drop-down {
-    opacity: 0;
-    pointer-events: none;
+  .context-menu:not(:focus-within) {
+    .drop-down {
+      opacity: 0;
+      pointer-events: none !important;
+    }
+
+    .drop-down button {
+      pointer-events: none !important;
+    }
   }
 
   .context-menu .drop-down {
