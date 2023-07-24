@@ -122,13 +122,15 @@ export class CarrouselScrollHelper {
 
     const diff = index - get(this.index);
 
-    if (Math.abs(diff) > this._numElements / 2) {
+    if (diff == 0) return;
+
+    const targetOffset = this._getTargetOffset(index);
+
+    if (Math.abs(targetOffset) > (this._config.num_preload_images * 2 + 1)* this._element.clientWidth) {
       this._index.set(index);
       this.reset();
       return;
     }
-
-    const targetOffset = this._getTargetOffset(index);
 
     this._moveTo(targetOffset, smooth).then(()=>{
       this._index.set(index);

@@ -60,7 +60,6 @@
     });
 
     carrouselHelper.index.subscribe((index) => {
-      console.log("index", index);
       if (index != currentImageIndex) {
         currentImageIndex = index;
       }
@@ -82,7 +81,7 @@
   $: if (carrouselHelper) carrouselHelper.enabled = !zooming;
   $: renderedImages = carrouselHelper ? carrouselHelper.images : readable([])
 
-  $: console.log($renderedImages)
+  // $: console.log($renderedImages)
 
 
 </script>
