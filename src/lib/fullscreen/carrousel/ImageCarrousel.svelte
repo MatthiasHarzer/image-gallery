@@ -1,7 +1,7 @@
 <script lang="ts">
 
   import type {ReadWritable} from "../../../scripts/util/helperTypes";
-  import {writable} from "svelte/store";
+  import {readable, writable} from "svelte/store";
   import type Image from "../../../scripts/gallery/image";
   import {onMount} from "svelte";
   import ImageWrapper from "../../components/ImageWrapper.svelte";
@@ -20,19 +20,15 @@
   const LOAD_IMAGES_AHEAD = 2;
   const SINGLE_CLICK_PROGRESS_TO_NEXT_IMAGE = 0.2;
 
+  const PRELOAD_TOP_IMAGES = 2;
+
   let initialized = false;
   let zoom: number;
 
   $: zooming = zoom != 1;
 
-  $: upcomingImageIndex = (currentImageIndex + 1) % $images.length;
-  $: previousImageIndex = (currentImageIndex - 1 + $images.length) % $images.length;
 
   $: currentImage = $images[currentImageIndex];
-  $: upcomingImage = $images[upcomingImageIndex];
-  $: previousImage = $images[previousImageIndex];
-
-  $: loaded_image_indexes = Array.from({length: LOAD_IMAGES_AHEAD * 2 + 1}, (_, index) => currentImageIndex - LOAD_IMAGES_AHEAD + index)
 
 
   let carouselElement: HTMLElement;
@@ -57,12 +53,14 @@
   }
 
   onMount(() => {
-    carrouselHelper = new CarrouselScrollHelper(carouselElement, currentImageIndex, {
+    carrouselHelper = new CarrouselScrollHelper(carouselElement, currentImageIndex, $images, {
       progress_to_next_image: PROGRESS_TO_NEXT_IMAGE,
       speed_to_next_image: SPEED_TO_NEXT_IMAGE,
+      num_preload_images: PRELOAD_TOP_IMAGES,
     });
 
     carrouselHelper.index.subscribe((index) => {
+      console.log("index", index);
       if (index != currentImageIndex) {
         currentImageIndex = index;
       }
@@ -82,6 +80,9 @@
 
 
   $: if (carrouselHelper) carrouselHelper.enabled = !zooming;
+  $: renderedImages = carrouselHelper ? carrouselHelper.images : readable([])
+
+  $: console.log($renderedImages)
 
 
 </script>
@@ -89,12 +90,14 @@
 <div bind:this={carouselElement} class="main no-scroll-bar">
 
     <div class="image-list">
-        {#each $images as image, index}
-            <div class="image-container" class:active={index === currentImageIndex}>
-                <ImageWrapper loading={loaded_image_indexes.includes(index) ? "eager" : "lazy"} {image}
-                              zoomEnabled={index === currentImageIndex} bind:zoom/>
-            </div>
-        {/each}
+
+      {#each $renderedImages as image, index (image.id)}
+          <div class="image-container" class:active={index === currentImageIndex}>
+              <ImageWrapper loading="eager" {image}
+                            zoomEnabled={index === currentImageIndex} bind:zoom/>
+          </div>
+      {/each}
+
     </div>
 
 </div>

@@ -107,7 +107,7 @@ export const createScrollObserver = (element: HTMLElement = null, params: Scroll
   const get_delta = (): ScrollDelta => {
     if (!uniDirectional)
       return deltaPosition;
-
+    
     return [
       initialScrollDirection == ScrollDirection.Vertical ? 0 : deltaPosition[0],
       initialScrollDirection == ScrollDirection.Horizontal ? 0 : deltaPosition[1]

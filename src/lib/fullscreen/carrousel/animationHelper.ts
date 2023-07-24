@@ -27,14 +27,13 @@ export class AnimationHelper {
     this._currentValue.set(value);
   }
 
-  public animateTo(fromValue: number, targetValue: number, duration: number = 500) {
+  public animateTo(fromValue: number, targetValue: number, duration: number = 500): Promise<void> {
     this._currentValue.set(fromValue);
     this._targetValue = targetValue;
     if (get(this.animating) && this._animationFrameStepId != null) {
       window.cancelAnimationFrame(this._animationFrameStepId);
     }
-    this._animate(duration);
-
+    return this._animate(duration);
   }
 
   private _animate(duration: number) {
@@ -42,17 +41,24 @@ export class AnimationHelper {
     const end = start + duration;
     const startValue = get(this._currentValue);
     const diff = this._targetValue - startValue;
-    const step = () => {
-      const now = Date.now();
-      const progress = Math.min(1, (now - start) / duration);
-      const sined = Math.sin(progress * Math.PI / 2);
-      const currentValue = startValue + diff * sined;
-      this._currentValue.set(currentValue);
-      if (now < end) {
-        this._animationFrameStepId = window.requestAnimationFrame(step);
-      }
-    };
-    this._animationFrameStepId = window.requestAnimationFrame(step);
+
+    return new Promise<void>((resolve) => {
+      const step = () => {
+        const now = Date.now();
+        const progress = Math.min(1, (now - start) / duration);
+        const sined = Math.sin(progress * Math.PI / 2);
+        const currentValue = startValue + diff * sined;
+        this._currentValue.set(currentValue);
+        if (now < end) {
+          this._animationFrameStepId = window.requestAnimationFrame(step);
+        } else {
+          this._currentValue.set(this._targetValue);
+          this._animationFrameStepId = null;
+          resolve();
+        }
+      };
+      this._animationFrameStepId = window.requestAnimationFrame(step);
+    });
   }
 
 
