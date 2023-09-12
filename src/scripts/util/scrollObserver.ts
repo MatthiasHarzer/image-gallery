@@ -1,5 +1,5 @@
-import type { Readable, Writable } from "svelte/store";
-import { get, readable, writable } from "svelte/store";
+import type {Readable, Writable} from "svelte/store";
+import {get, readable, writable} from "svelte/store";
 
 /**
  * The scroll direction enum.
@@ -67,8 +67,10 @@ type ScrollEndCallback = (pos: ScrollDelta, speed: ScrollSpeed, progress: Progre
  * A scroll observer, which emits events whenever the user scrolls inside the observed element.
  */
 export type ScrollObserver = Readable<ScrollObserverEvent> & {
+  onScrollStart: (callback: (pos: Position) => void) => void;
   onScrollEnd: (callback: ScrollEndCallback) => void;
   onClick: (callback: (pos: Position, progress: Progress) => void) => void;
+  onScrollFrame: (callback: (delta: ScrollDelta) => void) => void;
 };
 
 const createEmptyScrollObserver = (): ScrollObserver => {
@@ -78,7 +80,10 @@ const createEmptyScrollObserver = (): ScrollObserver => {
     },
     onClick: () => {
 
-    }
+    },
+    onScrollFrame: () => {
+    },
+    onScrollStart: () => {},
   };
 }
 
@@ -95,22 +100,40 @@ export const createScrollObserver = (element: HTMLElement = null, params: Scroll
 
   let startPosition: ScrollSpeed = [0, 0];
   let deltaPosition: ScrollDelta = [0, 0];
+  let lastFramePosition: Position = [0, 0];
+  let frameDelta: ScrollDelta = [0, 0];
   let initialScrollDirection: ScrollDirection | null = null;
   let scrollEventStamps: ScrollEventStamp[] = [];
   let onClickCallback: (pos: Position, progress: Progress) => void = null;
+  let onScrollStartCallback: (pos: Position) => void = null;
   let pointerTouchDown = false;
   const uniDirectional = params?.uniDirectional ?? false;
   const disablePointerSupport = params?.disablePointerSupport ?? false;
   const eventStore: Writable<ScrollObserverEvent> = writable(defaultScrollEvent);
+  const frameEventStore: Writable<ScrollDelta> = writable([0, 0]);
   const clientDimensions = [element.clientWidth, element.clientHeight];
 
   const get_delta = (): ScrollDelta => {
     if (!uniDirectional)
       return deltaPosition;
-    
+
     return [
       initialScrollDirection == ScrollDirection.Vertical ? 0 : deltaPosition[0],
       initialScrollDirection == ScrollDirection.Horizontal ? 0 : deltaPosition[1]
+    ]
+  }
+
+  const get_frame_delta = (pos: Position): ScrollDelta => {
+    const delta: ScrollDelta = [
+      pos[0] - lastFramePosition[0],
+      pos[1] - lastFramePosition[1]
+    ]
+    if (!uniDirectional)
+      return delta;
+
+    return [
+      initialScrollDirection == ScrollDirection.Vertical ? 0 : delta[0],
+      initialScrollDirection == ScrollDirection.Horizontal ? 0 : delta[1]
     ]
   }
 
@@ -155,6 +178,7 @@ export const createScrollObserver = (element: HTMLElement = null, params: Scroll
       deltaX: delta_x,
       deltaY: delta_y
     });
+    frameEventStore.set(frameDelta);
 
     const speed = get_speed();
     const progress = get_progress([delta_x, delta_y]);
@@ -177,6 +201,8 @@ export const createScrollObserver = (element: HTMLElement = null, params: Scroll
   const handle_start = (pos: [number, number]) => {
     pointerTouchDown = true;
     startPosition = pos;
+    lastFramePosition = pos;
+    onScrollStartCallback && onScrollStartCallback(pos);
     update();
   }
 
@@ -198,7 +224,12 @@ export const createScrollObserver = (element: HTMLElement = null, params: Scroll
         initialScrollDirection = ScrollDirection.Vertical;
       }
     }
+
+    frameDelta = get_frame_delta(pos);
+
     update();
+
+    lastFramePosition = pos;
   }
 
   const handle_end = (_) => {
@@ -217,13 +248,13 @@ export const createScrollObserver = (element: HTMLElement = null, params: Scroll
     onClickCallback(pos, get_progress([pos[0], pos[1]]));
   }
 
-  const create_touch_handler = (callback: (pos: [number ,number]) => void) => {
+  const create_touch_handler = (callback: (pos: [number, number]) => void) => {
     return (event: TouchEvent) => {
       callback([event.touches[0].clientX, event.touches[0].clientY]);
     }
   }
 
-  const create_pointer_handler = (callback: (pos: [number ,number]) => void) => {
+  const create_pointer_handler = (callback: (pos: [number, number]) => void) => {
     return (event: PointerEvent) => {
       callback([event.clientX, event.clientY]);
     }
@@ -234,7 +265,7 @@ export const createScrollObserver = (element: HTMLElement = null, params: Scroll
   element.ontouchmove = create_touch_handler(handle_move);
   element.ontouchend = handle_end;
 
-  if (!disablePointerSupport){
+  if (!disablePointerSupport) {
     element.onpointerdown = create_pointer_handler(handle_start);
     element.onpointermove = create_pointer_handler(handle_move);
     window.onpointerup = handle_end;
@@ -251,6 +282,12 @@ export const createScrollObserver = (element: HTMLElement = null, params: Scroll
     },
     onClick: (callback: (pos: Position, progress: Progress) => void) => {
       onClickCallback = callback;
+    },
+    onScrollFrame: (callback: (delta: ScrollDelta) => void) => {
+      frameEventStore.subscribe(callback);
+    },
+    onScrollStart: (callback: (pos: Position) => void) => {
+      onScrollStartCallback = callback;
     }
   };
 }
