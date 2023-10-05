@@ -7,6 +7,7 @@
   import ImageWrapper from "../components/ImageWrapper.svelte";
   import Flickity, {} from "flickity";
   import "flickity/dist/flickity.min.css";
+  import {saveMod} from "../../scripts/util/mod";
 
   export let images: ReadWritable<Image[]> = writable([]);
 
@@ -16,13 +17,15 @@
 
   export let zooming: boolean;
 
+  const PRELOAD_IMAGES = 10;
+
   let initialized = false;
   let zoom: number;
 
   $: zooming = zoom != 1;
 
   $: currentImage = $images[currentImageIndex];
-
+  $: renderedImageIndexes = Array.from({length: PRELOAD_IMAGES * 2 + 1}, (_, i) => saveMod(currentImageIndex + i - PRELOAD_IMAGES, $images.length));
 
   let carouselElement: HTMLElement;
   let carrouselSingleClickEnabled = true;
@@ -58,7 +61,7 @@
   const applyFlickityOptions = (options: Flickity.Options, overwrite = false) => {
     if (!carouselElement) return;
     flickity && flickity.destroy();
-    if (overwrite){
+    if (overwrite) {
       _flickityOptions = {};
     }
     _flickityOptions = {..._flickityOptions, ...options};
@@ -78,12 +81,11 @@
     });
   }
 
-  $: if (carrouselSingleClickEnabled){
+  $: if (carrouselSingleClickEnabled) {
     enableFlickity();
   } else {
     disableFlickity();
   }
-
 
 
   onMount(() => {
@@ -99,12 +101,14 @@
 
 
 <div class="carousel" class:no-zoom={!carrouselSingleClickEnabled} bind:this={carouselElement}>
-    {#each $images as image, index (image.id)}
-      <div class="image-container" class:active={index === currentImageIndex}>
-        <ImageWrapper loading="lazy" {image}
+  {#each $images as image, index (image.id)}
+    <div class="image-container" class:active={index === currentImageIndex}>
+      {#if renderedImageIndexes.includes(index)}
+        <ImageWrapper loading="eager" {image}
                       zoomEnabled={index === currentImageIndex} bind:zoom/>
-      </div>
-    {/each}
+      {/if}
+    </div>
+  {/each}
 </div>
 
 <style lang="scss">
