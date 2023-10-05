@@ -13,7 +13,7 @@
 
   export let loading: string = "lazy";
 
-  let elementZoom: number;
+  let elementZoom: number = 1;
   let src = null;
   let element: HTMLElement;
   let caching = false;

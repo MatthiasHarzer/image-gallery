@@ -3,7 +3,7 @@
   import {createEventDispatcher, onMount} from "svelte";
   import type Image from "../../scripts/gallery/image";
   import {firebaseUser, firestoreManager} from "../../scripts/firebase/firebaseManager";
-  import Tag from "../../scripts/gallery/tag";
+  import type Tag from "../../scripts/gallery/tag";
   import AddToAlbumScreen from "../components/AddToAlbumScreen.svelte";
   import {fullscreenDialog} from "../../scripts/fullscreenDialog";
   import TagSelectInput from "../components/TagSelectInput.svelte";

@@ -8,8 +8,9 @@
   import type { ReadWritable } from "../../scripts/util/helperTypes";
   import { writable } from "svelte/store";
   import { route } from "../../scripts/routeManager";
-  import ImageCarrousel from "./carrousel/ImageCarrousel.svelte";
+  import ImageCarrousel from "./ImageCarrousel.svelte";
   import { localConfig } from "../../scripts/localConfig";
+  import {saveMod} from "../../scripts/util/mod";
 
   export let images: ReadWritable<CustomImage[]> = writable([]);
   export let initialImageIdx: number = 0;
@@ -52,11 +53,11 @@
 
 
   const onNext = () => {
-    index = Math.min(index + 1, $images.length - 1);
+    index = saveMod(index + 1, $images.length);
   }
 
   const onPrevious = () => {
-    index = Math.max(index - 1, 0);
+    index = saveMod(index - 1, $images.length);
   }
 
   const onClose = () => {
@@ -146,25 +147,4 @@
   .scrollable-image-wrapper::-webkit-scrollbar {
     display: none;
   }
-
-  .image-container {
-    scroll-snap-align: start;
-    flex-shrink: 0;
-
-    width: 100%;
-    height: 100%;
-    position: relative;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    background-color: #2c2c2c;
-  }
-
-  .image-container img {
-    max-width: 100%;
-    max-height: 100%;
-  }
-
 </style>
