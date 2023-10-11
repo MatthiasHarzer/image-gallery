@@ -95,7 +95,11 @@
       pageDots: false,
       wrapAround: true,
       draggable: ">1"
-    }, true)
+    }, true);
+
+    window.onresize = () => {
+      applyFlickityOptions({})
+    };
   })
 </script>
 
