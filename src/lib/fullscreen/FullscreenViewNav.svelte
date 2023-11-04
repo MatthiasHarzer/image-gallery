@@ -37,9 +37,9 @@
     window.onkeydown = (event) => {
       if (tagInput.length > 0) return;
       if (event.key === "ArrowLeft") {
-        onPrev();
+        // onPrev();
       } else if (event.key === "ArrowRight") {
-        onNext();
+        // onNext();
       } else if (event.key === "Escape") {
         onClose();
       }
