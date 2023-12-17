@@ -91,7 +91,8 @@ const getPathnameOrLocal = () => {
 
 const createRoute = (): Router => {
     const initPath = getPathnameOrLocal();
-    window.history.replaceState({}, "", initPath)
+
+    // window.history.replaceState({}, "", initPath)
     let route = Route.fromString(initPath);
 
     const {subscribe, set, update} = writable<Route>(route);
@@ -109,8 +110,30 @@ const createRoute = (): Router => {
         localStorage.setItem(localStorageKey, route.toPathWithoutImage());
     }
 
+    let firstLoad = true;
     gallery.subscribe((g) => {
+
         setRouteInternal(Route.fromString(getPathnameOrLocal()));
+
+        if (firstLoad && g.albums.length > 0) {
+            firstLoad = false;
+            const initRoute = Route.fromString(initPath);
+
+            let states = [];
+            while(initRoute.albums.length > 0) {
+                if (initRoute.fullscreenImage != null) {
+                    initRoute.fullscreenImage = null;
+                } else {
+                    states.push(initRoute.toPath());
+                    initRoute.albums.pop();
+                }
+            }
+
+            states.reverse().forEach(s => {
+                window.history.pushState({}, "", s);
+            })
+            return;
+        }
     });
 
     window.addEventListener("popstate", () => {
