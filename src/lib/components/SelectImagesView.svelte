@@ -1,5 +1,4 @@
 <script lang="ts">
-
   import ImageWrapper from "./ImageWrapper.svelte";
   import type Image from "../../scripts/gallery/image";
 
@@ -10,16 +9,14 @@
   let lastIndex = 0;
 
   const toggle = (image: Image, shift: boolean) => {
-
     if (!multiple) {
       selectedImages = [image];
       return;
     }
     const index = images.indexOf(image);
     if (selectedImages.includes(image)) {
-      selectedImages = selectedImages.filter(i => i !== image);
+      selectedImages = selectedImages.filter((i) => i !== image);
     } else {
-
       if (shift) {
         const start = Math.min(index, lastIndex);
         const end = Math.max(index, lastIndex);
@@ -31,33 +28,31 @@
       selectedImages = [...new Set(selectedImages)];
       lastIndex = images.indexOf(image);
     }
-  }
-
+  };
 </script>
 
 <div class="main">
   <div class="images">
-
     {#each images as image (image.id)}
-
-      <div role="button" class="image-container clear" class:selected={selectedImages.includes(image)}
-           on:click={e=>toggle(image, e.shiftKey)}>
+      <div
+        role="button"
+        class="image-container clear"
+        class:selected={selectedImages.includes(image)}
+        on:click={(e) => toggle(image, e.shiftKey)}
+      >
         <div class="img">
-          <ImageWrapper {image} cover={true} thumbnail={true}/>
+          <ImageWrapper {image} cover={true} thumbnail={true} />
         </div>
         <div class="image-overlay">
-            <span class="material-icons">
-              check
-            </span>
+          <span class="material-icons"> check </span>
         </div>
       </div>
-
     {/each}
   </div>
 </div>
 
 <style>
-  *{
+  * {
     user-select: none;
   }
   .main {
@@ -73,7 +68,10 @@
     height: fit-content;
     display: grid;
     grid-gap: 10px;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, min(150px, 25%)), 1fr));
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(min(100%, min(150px, 25%)), 1fr)
+    );
     grid-auto-rows: 1fr;
   }
 
@@ -83,7 +81,7 @@
     width: 100%;
     aspect-ratio: 1;
     border-radius: 0.5rem;
-    overflow: hidden
+    overflow: hidden;
   }
 
   .image-container .img {
@@ -105,11 +103,9 @@
     height: 100%;
     padding: 0;
 
-
     opacity: 0;
 
     transition: all 0.2s ease-in-out;
-
   }
 
   .image-container.selected .image-overlay {
@@ -132,5 +128,4 @@
     right: 10px;
     top: 10px;
   }
-
 </style>

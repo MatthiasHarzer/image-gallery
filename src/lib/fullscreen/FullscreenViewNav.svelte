@@ -1,11 +1,13 @@
 <script lang="ts">
-
-  import {createEventDispatcher, onMount} from "svelte";
+  import { createEventDispatcher, onMount } from "svelte";
   import type Image from "../../scripts/gallery/image";
-  import {firebaseUser, firestoreManager} from "../../scripts/firebase/firebaseManager";
+  import {
+    firebaseUser,
+    firestoreManager,
+  } from "../../scripts/firebase/firebaseManager";
   import type Tag from "../../scripts/gallery/tag";
   import AddToAlbumScreen from "../components/AddToAlbumScreen.svelte";
-  import {fullscreenDialog} from "../../scripts/fullscreenDialog";
+  import { fullscreenDialog } from "../../scripts/fullscreenDialog";
   import TagSelectInput from "../components/TagSelectInput.svelte";
 
   const dispatch = createEventDispatcher();
@@ -31,8 +33,8 @@
       event.stopPropagation();
       tagsScrollElement.scrollBy({
         left: event.deltaY < 0 ? -30 : 30,
-      })
-    }
+      });
+    };
 
     window.onkeydown = (event) => {
       if (tagInput.length > 0) return;
@@ -43,41 +45,42 @@
       } else if (event.key === "Escape") {
         onClose();
       }
-    }
-  })
+    };
+  });
 
   const onNext = () => {
     dispatch("next");
-  }
+  };
 
   const onPrev = () => {
     dispatch("prev");
-  }
+  };
 
   const onClose = () => {
     dispatch("close");
-  }
+  };
 
   const onDelete = () => {
     dispatch("delete");
-  }
+  };
 
   const toggleNav = () => {
     dispatch("toggle-nav");
-  }
+  };
 
   const onFavorite = () => {
-    firestoreManager.updateImageProps($firebaseUser, image, {favorite: !image.favorite});
-  }
+    firestoreManager.updateImageProps($firebaseUser, image, {
+      favorite: !image.favorite,
+    });
+  };
 
-
-  const addTag = async ({detail: tag}: CustomEvent<Tag>) => {
+  const addTag = async ({ detail: tag }: CustomEvent<Tag>) => {
     await firestoreManager.addTagToImage($firebaseUser, image, tag);
-  }
+  };
 
   const removeTag = (tag: Tag) => {
     firestoreManager.removeTagFromImage($firebaseUser, image, tag);
-  }
+  };
 
   const makeAlbumCover = () => {
     if ($album == null) return;
@@ -85,10 +88,11 @@
     if ($album.isFavorites) {
       firestoreManager.updateFavoriteAlbumCover($firebaseUser, image);
     } else {
-      firestoreManager.updateAlbumProps($firebaseUser, $album, {cover: image.id});
+      firestoreManager.updateAlbumProps($firebaseUser, $album, {
+        cover: image.id,
+      });
     }
-  }
-
+  };
 </script>
 
 <div class="bare-nav" class:not-shown={zooming && !navShown}>
@@ -96,10 +100,11 @@
     <span class="material-icons">arrow_back</span>
   </button>
   <button class="material toggle-nav-btn" on:click={toggleNav}>
-    <span class="material-icons-outlined">{navShown ? "visibility_off" : "info"}</span>
+    <span class="material-icons-outlined"
+      >{navShown ? "visibility_off" : "info"}</span
+    >
   </button>
 </div>
-
 
 <div class="main" class:visible={navShown}>
   <div class="top-nav-bar">
@@ -110,43 +115,49 @@
     </div>
 
     <div class="right">
-      <button class="material favorite" class:is-favorite={image?.favorite} on:click={onFavorite}>
-        <span class="material-icons-outlined">{image?.favorite ? "star" : "star_outline"}</span>
+      <button
+        class="material favorite"
+        class:is-favorite={image?.favorite}
+        on:click={onFavorite}
+      >
+        <span class="material-icons-outlined"
+          >{image?.favorite ? "star" : "star_outline"}</span
+        >
       </button>
-      <button class="material add-to-album" on:click={()=>addToAlbumOpen = true}>
+      <button
+        class="material add-to-album"
+        on:click={() => (addToAlbumOpen = true)}
+      >
         <span class="material-icons-outlined">add_to_photos</span>
       </button>
       <div class="context-menu">
-
         <button class="material toggle-nav">
-            <span class="material-icons">
-              more_vert
-            </span>
+          <span class="material-icons"> more_vert </span>
         </button>
         <div class="drop-down box-shadow">
-          <button class="material text-button drop-down-item"
-                  on:click={onDelete}>
-            <span class="name">
-              Delete
-            </span>
+          <button
+            class="material text-button drop-down-item"
+            on:click={onDelete}
+          >
+            <span class="name"> Delete </span>
           </button>
           {#if $album != null}
-            <button class="material text-button drop-down-item"
-                    on:click={makeAlbumCover}>
-            <span class="name">
-              Make album cover
-            </span>
+            <button
+              class="material text-button drop-down-item"
+              on:click={makeAlbumCover}
+            >
+              <span class="name"> Make album cover </span>
             </button>
           {/if}
         </div>
       </div>
 
       <button class="material toggle-nav-btn-fake">
-        <span class="material-icons-outlined">{navShown ? "visibility_off" : "visibility"}</span>
+        <span class="material-icons-outlined"
+          >{navShown ? "visibility_off" : "visibility"}</span
+        >
       </button>
-
     </div>
-
   </div>
 
   <div class="page-nav">
@@ -159,26 +170,29 @@
   </div>
 
   <div class="tags-nav">
-
     <div bind:this={tagsScrollElement} class="tags-list">
       {#each image?.tags ?? [] as tag (tag.id)}
         <div class="tag">
           <span class="name">{tag.name}</span>
-          <button class="remove-tag material" on:click={()=>removeTag(tag)}>
+          <button class="remove-tag material" on:click={() => removeTag(tag)}>
             <span class="material-icons-outlined">close</span>
           </button>
         </div>
       {/each}
     </div>
     <div class="input-field">
-      <TagSelectInput bind:focused={tagInputFocused} bind:tagInput={tagInput} {image} on:addTag={addTag}/>
+      <TagSelectInput
+        bind:focused={tagInputFocused}
+        bind:tagInput
+        {image}
+        on:addTag={addTag}
+      />
     </div>
   </div>
-
 </div>
 
 {#if addToAlbumOpen}
-  <AddToAlbumScreen {image} on:close={()=>addToAlbumOpen = false}/>
+  <AddToAlbumScreen {image} on:close={() => (addToAlbumOpen = false)} />
 {/if}
 
 <style lang="scss">
@@ -208,7 +222,6 @@
       left: 0;
       pointer-events: auto;
       margin: 0.5rem;
-
     }
   }
 
@@ -216,11 +229,13 @@
     top: -100px;
   }
 
-  .toggle-nav-btn-fake, .back-btn-fake {
+  .toggle-nav-btn-fake,
+  .back-btn-fake {
     visibility: hidden;
   }
 
-  button, input {
+  button,
+  input {
     pointer-events: all;
   }
 
@@ -240,7 +255,9 @@
     opacity: 0;
     visibility: hidden;
 
-    transition: visibility 0.2s, opacity 0.2s ease-in-out;
+    transition:
+      visibility 0.2s,
+      opacity 0.2s ease-in-out;
   }
 
   .main.visible {
@@ -266,7 +283,7 @@
     color: white;
     font-size: 2rem;
     padding: 0.2em;
-    margin: .5em;
+    margin: 0.5em;
     background-color: #000000;
     border: 1px solid #00000000;
     transition: all 0.2s ease-in-out;
@@ -280,7 +297,11 @@
   .top-nav-bar {
     width: 100%;
     height: 3em;
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 100%);
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.7) 0%,
+      rgba(0, 0, 0, 0) 100%
+    );
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -308,12 +329,15 @@
     color: #f1c40f;
   }
 
-
   .tags-nav {
     position: relative;
     width: 100%;
 
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.7) 100%);
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(0, 0, 0, 0.7) 100%
+    );
   }
 
   .tags-list {
@@ -358,7 +382,6 @@
   .context-menu {
     position: relative;
   }
-
 
   .context-menu:not(:focus-within) {
     .drop-down {

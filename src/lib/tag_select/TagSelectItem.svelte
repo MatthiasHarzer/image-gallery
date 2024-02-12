@@ -1,5 +1,4 @@
 <script lang="ts">
-
   import type Tag from "../../scripts/gallery/tag";
   import type { TagConfig } from "../../scripts/localConfig";
   import { createEventDispatcher } from "svelte";
@@ -12,18 +11,22 @@
   $: included = tagConfig.includedTags.includes(tag.id);
   $: excluded = tagConfig.excludedTags.includes(tag.id);
 
-  const toggle = () =>{
+  const toggle = () => {
     dispatch("toggle", tag.id);
-  }
-
+  };
 </script>
 
-<button class="main clear excluded" class:included class:excluded on:click={toggle}>
+<button
+  class="main clear excluded"
+  class:included
+  class:excluded
+  on:click={toggle}
+>
   {tag.name} <span class="count">({tag.count})</span>
 </button>
 
 <style>
-  .main{
+  .main {
     background-color: #2c2c2c;
     flex: 1 0 auto;
     display: inline-block;
@@ -38,29 +41,30 @@
     border-radius: 15px;
   }
 
-  .main.included, .main.excluded{
+  .main.included,
+  .main.excluded {
     color: #fff;
   }
 
-  .main.included{
+  .main.included {
     background-color: #2bab54;
   }
 
-  .main.excluded{
+  .main.excluded {
     background-color: #ab2b2b;
   }
 
-  .main:hover:not(.included):not(.excluded){
+  .main:hover:not(.included):not(.excluded) {
     background-color: #3c3c3c;
   }
 
-  .count{
+  .count {
     font-size: 0.8em;
     color: #8d8d8d;
   }
 
-  .main.included .count, .main.excluded .count{
+  .main.included .count,
+  .main.excluded .count {
     color: #fff;
   }
-
 </style>

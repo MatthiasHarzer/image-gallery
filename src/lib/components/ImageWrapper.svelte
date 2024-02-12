@@ -1,10 +1,9 @@
 <script lang="ts">
-
   import Zoom from "../util/svelte-zoom/Zoom.svelte";
   import LoadingSpinner from "../util/LoadingSpinner.svelte";
   import type Image from "../../scripts/gallery/image";
-  import {getSrcAndCache} from "../../scripts/util/cacheHelper";
-  import {onMount} from "svelte";
+  import { getSrcAndCache } from "../../scripts/util/cacheHelper";
+  import { onMount } from "svelte";
 
   export let image: Image;
   export let zoomEnabled: boolean = false;
@@ -35,7 +34,7 @@
     if (loading === "lazy") {
       observer.observe(element);
     }
-  })
+  });
 
   $: loaded = src !== null;
 
@@ -43,29 +42,29 @@
     onWantsToLoad();
   }
 
-
   const onWantsToLoad = async () => {
     if (loaded || caching) return;
     caching = true;
     observer?.disconnect();
     src = await getSrcAndCache(targetSrc);
-  }
-
-
+  };
 </script>
 
 <div bind:this={element} class="main">
   {#if image?.url == null || !loaded || !elementLoaded}
     <div class="loading">
-      <LoadingSpinner/>
+      <LoadingSpinner />
     </div>
   {/if}
-  <Zoom {...$$props} alt={image.name} bind:zoom={elementZoom} loading="eager"
-        on:loaded={() => elementLoaded = true}
-        {src}
-        {zoomEnabled}
+  <Zoom
+    {...$$props}
+    alt={image.name}
+    bind:zoom={elementZoom}
+    loading="eager"
+    on:loaded={() => (elementLoaded = true)}
+    {src}
+    {zoomEnabled}
   />
-
 </div>
 
 <style>

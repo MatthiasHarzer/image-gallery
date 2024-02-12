@@ -1,10 +1,9 @@
 <script lang="ts">
-
-  import {gallery} from "../../../scripts/firebase/firebaseManager";
-  import {getSrcAndCache} from "../../../scripts/util/cacheHelper";
+  import { gallery } from "../../../scripts/firebase/firebaseManager";
+  import { getSrcAndCache } from "../../../scripts/util/cacheHelper";
   import FlipSlider from "../../util/FlipSlider.svelte";
   import type Album from "../../../scripts/gallery/album";
-  import {readable} from "svelte/store";
+  import { readable } from "svelte/store";
   import type Image from "../../../scripts/gallery/image";
   import Dialog from "../Dialog.svelte";
 
@@ -13,7 +12,9 @@
   let includeSubAlbums = false;
   let matchingImages: Image[] = [];
 
-  $: albumImages = selectedAlbum ? $gallery.listener.getAlbumImageStore(selectedAlbum, includeSubAlbums) : readable([]);
+  $: albumImages = selectedAlbum
+    ? $gallery.listener.getAlbumImageStore(selectedAlbum, includeSubAlbums)
+    : readable([]);
   $: matchingImages = selectedAlbum == null ? $gallery.images : $albumImages;
 
   let downloading = false;
@@ -35,15 +36,12 @@
 
     downloading = false;
     numToDownload = null;
-  }
+  };
 </script>
 
 <Dialog on:close>
-  <h3 slot="title">
-    Pre-Download Images
-  </h3>
+  <h3 slot="title">Pre-Download Images</h3>
   <div class="dialog-content">
-
     <div class="select-album">
       <div class="album-select">
         <label for="album-select">Select Album</label>
@@ -56,10 +54,9 @@
       </div>
 
       <div class="include-sub-albums">
-
         <!--suppress XmlInvalidId -->
         <label for="include-sub-albums">Include Sub-Albums</label>
-        <FlipSlider bind:active={includeSubAlbums} id="include-sub-albums"/>
+        <FlipSlider bind:active={includeSubAlbums} id="include-sub-albums" />
       </div>
     </div>
 
@@ -71,8 +68,12 @@
     <div class="progress">
       {numDownloaded} / {numToDownload ?? matchingImages.length}
       <div class="progress-bar">
-        <div class="progress-bar-value"
-             style="width: {numDownloaded/(numToDownload ?? matchingImages.length)*100}%"></div>
+        <div
+          class="progress-bar-value"
+          style="width: {(numDownloaded /
+            (numToDownload ?? matchingImages.length)) *
+            100}%"
+        ></div>
       </div>
     </div>
   </div>
@@ -104,7 +105,7 @@
       flex-direction: row;
       justify-content: center;
 
-      label{
+      label {
         margin-right: 10px;
         display: flex;
         align-items: center;
@@ -121,7 +122,6 @@
         margin-right: 10px;
         display: flex;
         align-items: center;
-
       }
     }
   }
@@ -152,11 +152,8 @@
     }
   }
 
-
   .download-btn {
     margin-bottom: 20px;
     background-color: var(--primary-color);
   }
-
-
 </style>

@@ -1,17 +1,16 @@
 <script lang="ts">
-
-  import type {TagConfig} from "../../scripts/localConfig";
-  import {localConfig, SortMode} from "../../scripts/localConfig";
-  import {onMount} from "svelte";
-  import type {ScrollObserver} from "../../scripts/util/scrollObserver";
-  import {createScrollObserver} from "../../scripts/util/scrollObserver";
-  import {Screen} from "../../scripts/screen";
-  import {route} from "../../scripts/routeManager";
+  import type { TagConfig } from "../../scripts/localConfig";
+  import { localConfig, SortMode } from "../../scripts/localConfig";
+  import { onMount } from "svelte";
+  import type { ScrollObserver } from "../../scripts/util/scrollObserver";
+  import { createScrollObserver } from "../../scripts/util/scrollObserver";
+  import { Screen } from "../../scripts/screen";
+  import { route } from "../../scripts/routeManager";
   import FlipSlider from "../util/FlipSlider.svelte";
   import TagSelectDialog from "../tag_select/TagSelectDialog.svelte";
   import DownloadCachedImagesDialog from "./dialogs/DownloadCachedImagesDialog.svelte";
 
-  $: navOpen = $localConfig.navOpen
+  $: navOpen = $localConfig.navOpen;
 
   // $localConfig.navOpen = true;
 
@@ -25,7 +24,10 @@
   let downloadDialogOpen = false;
 
   onMount(() => {
-    scrollObserver = createScrollObserver(dragBar, {uniDirectional: true, disablePointerSupport: true});
+    scrollObserver = createScrollObserver(dragBar, {
+      uniDirectional: true,
+      disablePointerSupport: true,
+    });
 
     scrollObserver.onScrollEnd(([dx, dy], [speedX, speedY], _) => {
       const speed = Math.abs(speedX);
@@ -43,41 +45,41 @@
   // $: console.log(offset)
 
   const close = () => {
-    $localConfig.navOpen = false
-  }
+    $localConfig.navOpen = false;
+  };
 
   const enterPage = (screen: Screen) => {
     // close();
     route.setScreen(screen);
-  }
+  };
 
-  const submitTags = ({detail: tagConfig}: CustomEvent<TagConfig>) => {
+  const submitTags = ({ detail: tagConfig }: CustomEvent<TagConfig>) => {
     $localConfig.tagConfig = tagConfig;
     tagSelectOpen = false;
-  }
+  };
 
   const pages = [
     {
       name: "Gallery",
       icon: "photo",
-      screen: Screen.GALLERY
+      screen: Screen.GALLERY,
     },
     {
       name: "Albums",
       icon: "photo_library",
-      screen: Screen.ALBUMS
+      screen: Screen.ALBUMS,
     },
     {
       name: "Edit",
       icon: "edit",
-      screen: Screen.EDIT
+      screen: Screen.EDIT,
     },
     {
       name: "Tags",
       icon: "label",
-      screen: Screen.TAGS
-    }
-  ]
+      screen: Screen.TAGS,
+    },
+  ];
 
   const cycleSortMode = () => {
     const current = $localConfig.sortMode;
@@ -96,12 +98,11 @@
         $localConfig.sortMode = SortMode.DATE_ASC;
         break;
     }
-  }
+  };
 
   const shuffle = () => {
     $localConfig.randomSeed = Date.now();
-  }
-
+  };
 
   let sortModeLabel: string;
   $: {
@@ -120,60 +121,77 @@
         break;
     }
   }
-
 </script>
 
-<div class="main" class:open={navOpen} on:click|self|stopPropagation={close} style="--width: {NAV_WIDTH}px;">
+<div
+  class="main"
+  class:open={navOpen}
+  on:click|self|stopPropagation={close}
+  style="--width: {NAV_WIDTH}px;"
+>
   <div class="nav" class:no-animation={sliding} style="--offset: {offset}px;">
     <div class="button-bar">
       <button class="material close-btn" on:click={close}>
         <span class="material-icons">close</span>
       </button>
 
-      <button class="material download-btn" on:click={()=>downloadDialogOpen = true}>
+      <button
+        class="material download-btn"
+        on:click={() => (downloadDialogOpen = true)}
+      >
         <span class="material-icons">download</span>
       </button>
     </div>
 
     <div class="page-selection">
       {#each pages as page}
-        <button class="material text-button" on:click={() => enterPage(page.screen)}
-                class:active={$route.screen === page.screen}>
+        <button
+          class="material text-button"
+          on:click={() => enterPage(page.screen)}
+          class:active={$route.screen === page.screen}
+        >
           <span class="material-icons">{page.icon}</span>
           <span>{page.name}</span>
         </button>
       {/each}
     </div>
-    <hr/>
+    <hr />
 
     <div class="filters group">
       <h5 class="group-header">FILTERS</h5>
       <!--suppress XmlInvalidId -->
       <label class="full-width-item toggle-option ripple" for="fav-only">
-        <FlipSlider bind:active={$localConfig.favoritesOnly} id="fav-only"/>
+        <FlipSlider bind:active={$localConfig.favoritesOnly} id="fav-only" />
         Show favorites only
       </label>
       <!--suppress XmlInvalidId -->
       <label class="full-width-item ripple" for="tags-enabled">
-        <FlipSlider bind:active={$localConfig.tagConfig.enabled} id="tags-enabled"/>
+        <FlipSlider
+          bind:active={$localConfig.tagConfig.enabled}
+          id="tags-enabled"
+        />
         Filter by tags
       </label>
       <div class="full-width-item">
         <!--suppress HtmlWrongAttributeValue -->
-        <button class="full-width-item material text-button select-tags-btn"
-                disabled={!$localConfig.tagConfig.enabled}
-                on:click={()=>tagSelectOpen = true}
+        <button
+          class="full-width-item material text-button select-tags-btn"
+          disabled={!$localConfig.tagConfig.enabled}
+          on:click={() => (tagSelectOpen = true)}
         >
           <span class="material-icons">label</span>
           Select Tags
         </button>
       </div>
     </div>
-    <hr/>
+    <hr />
     <div class="group">
       <h5 class="group-header">SORTING</h5>
       <div class="sort-mode-button-wrapper">
-        <button class="material text-button sort-mode-btn" on:click={cycleSortMode}>
+        <button
+          class="material text-button sort-mode-btn"
+          on:click={cycleSortMode}
+        >
           <span class="material-icons">sort</span>
           {sortModeLabel}
         </button>
@@ -185,23 +203,23 @@
       </div>
     </div>
 
-
     <div bind:this={dragBar} class="drag-bar"></div>
   </div>
 </div>
 
 {#if tagSelectOpen}
-  <TagSelectDialog on:close={()=>tagSelectOpen = false}
-                   on:submit={submitTags}
-                   tagConfig={{...$localConfig.tagConfig}}/>
+  <TagSelectDialog
+    on:close={() => (tagSelectOpen = false)}
+    on:submit={submitTags}
+    tagConfig={{ ...$localConfig.tagConfig }}
+  />
 {/if}
 
 {#if downloadDialogOpen}
-  <DownloadCachedImagesDialog on:close={()=>downloadDialogOpen = false}/>
+  <DownloadCachedImagesDialog on:close={() => (downloadDialogOpen = false)} />
 {/if}
 
 <style lang="scss">
-
   .main {
     position: fixed;
     top: 0;
@@ -249,7 +267,6 @@
   }
 
   .button-bar {
-
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -269,11 +286,9 @@
   }
 
   .page-selection {
-
     position: relative;
     box-sizing: border-box;
     padding: 0 10px 0 0;
-
   }
 
   .page-selection button.material {
@@ -308,13 +323,11 @@
 
   .page-selection button.material.active {
     background-color: #646cff;
-
   }
 
   .filters {
     margin-top: 20px;
   }
-
 
   .full-width-item {
     box-sizing: border-box;
@@ -349,7 +362,6 @@
     color: #a2a2a2;
   }
 
-
   .group-header {
     color: #c5c5c5;
     font-size: 14px;
@@ -377,6 +389,4 @@
   .sort-mode-btn span {
     margin-right: 15px;
   }
-
-
 </style>

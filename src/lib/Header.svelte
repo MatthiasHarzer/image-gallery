@@ -1,17 +1,18 @@
 <script lang="ts">
-
-  import {firebaseUser, firestoreManager} from "../scripts/firebase/firebaseManager";
-  import {auth, authProvider} from "../scripts/firebase/firebase";
-  import {signInWithPopup, signOut} from "firebase/auth";
+  import {
+    firebaseUser,
+    firestoreManager,
+  } from "../scripts/firebase/firebaseManager";
+  import { auth, authProvider } from "../scripts/firebase/firebase";
+  import { signInWithPopup, signOut } from "firebase/auth";
   import UploadDialog from "./components/dialogs/UploadDialog.svelte";
-  import {localConfig} from "../scripts/localConfig";
-  import {createEventDispatcher} from "svelte";
-  import {route} from "../scripts/routeManager";
+  import { localConfig } from "../scripts/localConfig";
+  import { createEventDispatcher } from "svelte";
+  import { route } from "../scripts/routeManager";
   import type Image from "../scripts/gallery/image";
   import SelectImagesDialog from "./components/dialogs/SelectImagesDialog.svelte";
-  import {get} from "svelte/store";
+  import { get } from "svelte/store";
   import LoadingSpinner from "./util/LoadingSpinner.svelte";
-
 
   $: signedId = $firebaseUser != null;
 
@@ -25,35 +26,30 @@
       route.clear();
       window.location.reload();
     } else {
-      await signInWithPopup(auth, authProvider)
+      await signInWithPopup(auth, authProvider);
     }
-  }
+  };
 
   const upload = () => {
     uploadDialog = true;
-  }
+  };
 
   const toggleNav = () => {
     $localConfig.navOpen = !$localConfig.navOpen;
-  }
+  };
 </script>
 
 <div class="main">
   <div class="navigation">
-
     <button class="material toggle-nav" on:click={toggleNav}>
-    <span class="material-icons">
-      menu
-    </span>
+      <span class="material-icons"> menu </span>
     </button>
   </div>
   {#if signedId}
     <div class="manage-section">
       <button class="text-button material upload-btn" on:click={upload}>
         Upload
-        <span class="material-icons">
-            upload
-        </span>
+        <span class="material-icons"> upload </span>
       </button>
     </div>
   {/if}
@@ -63,13 +59,23 @@
         Sign in
       </button>
     {:else}
-      <div role="button" class="account-btn flex-center" on:click={()=> logoutBtnShown = !logoutBtnShown}>
-        <img src={$firebaseUser.photoURL} alt="profile picture" class="profile-picture"/>
-        <button class="material text-button logout-btn box-shadow" class:visible={logoutBtnShown} on:click={signInOut}>
+      <div
+        role="button"
+        class="account-btn flex-center"
+        on:click={() => (logoutBtnShown = !logoutBtnShown)}
+      >
+        <img
+          src={$firebaseUser.photoURL}
+          alt="profile picture"
+          class="profile-picture"
+        />
+        <button
+          class="material text-button logout-btn box-shadow"
+          class:visible={logoutBtnShown}
+          on:click={signInOut}
+        >
           Logout
-          <span class="material-icons">
-            logout
-          </span>
+          <span class="material-icons"> logout </span>
         </button>
       </div>
     {/if}
@@ -78,8 +84,8 @@
 
 {#if uploadDialog}
   <UploadDialog
-      targetAlbum={$route.album}
-      on:close={()=>uploadDialog = false}
+    targetAlbum={$route.album}
+    on:close={() => (uploadDialog = false)}
   />
 {/if}
 
@@ -121,7 +127,6 @@
       pointer-events: none;
       opacity: 0;
 
-
       &.open {
         opacity: 1;
         pointer-events: all;
@@ -150,7 +155,6 @@
         border-top-right-radius: 0;
       }
     }
-
   }
 
   button.text-button {
@@ -169,7 +173,6 @@
     border: 1px solid #12436b;
   }
 
-
   .account-btn {
     background-color: transparent;
     border: none;
@@ -177,7 +180,6 @@
     margin: 0 5px;
     cursor: pointer;
     position: relative;
-
 
     .logout-btn {
       position: absolute;
@@ -205,16 +207,11 @@
       margin-left: 5px;
     }
 
-
     img {
       width: 35px;
       height: 35px;
       border-radius: 50%;
       border: 5px double #646cff;
     }
-
   }
-
-
-
 </style>

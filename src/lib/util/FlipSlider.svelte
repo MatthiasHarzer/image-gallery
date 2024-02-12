@@ -1,5 +1,5 @@
 <script>
-  import {createEventDispatcher} from "svelte";
+  import { createEventDispatcher } from "svelte";
 
   const dispatch = createEventDispatcher();
 
@@ -9,14 +9,20 @@
   const toggle = () => {
     active = !active;
     dispatchToggle();
-  }
+  };
 
   const dispatchToggle = () => {
     dispatch("toggle", active);
-  }
+  };
 </script>
 
-<input hidden type="checkbox" bind:checked={active} on:change={dispatchToggle} id={id}/>
+<input
+  hidden
+  type="checkbox"
+  bind:checked={active}
+  on:change={dispatchToggle}
+  {id}
+/>
 
 <button class="slider-outer" class:active on:click={toggle}>
   <div class="body">

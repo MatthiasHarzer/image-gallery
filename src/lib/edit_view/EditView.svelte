@@ -1,6 +1,9 @@
 <script lang="ts">
-
-  import {firebaseUser, firestoreManager, gallery} from "../../scripts/firebase/firebaseManager";
+  import {
+    firebaseUser,
+    firestoreManager,
+    gallery,
+  } from "../../scripts/firebase/firebaseManager";
   import type Image from "../../scripts/gallery/image";
   import SelectImagesView from "../components/SelectImagesView.svelte";
   import FlipSlider from "../util/FlipSlider.svelte";
@@ -18,30 +21,36 @@
     }
   }
 
-  $: if (filter.album) albumImagesStore = $gallery.listener.getAlbumImageStore(filter.album, filter.includeSubAlbums);
+  $: if (filter.album)
+    albumImagesStore = $gallery.listener.getAlbumImageStore(
+      filter.album,
+      filter.includeSubAlbums,
+    );
 
   const filter = {
     album: null,
-    includeSubAlbums: false
-  }
+    includeSubAlbums: false,
+  };
 
   let tagsToAdd: Tag[] = [];
 
-  const onAddTag = ({detail: tag}: CustomEvent<Tag>) => {
+  const onAddTag = ({ detail: tag }: CustomEvent<Tag>) => {
     if (tagsToAdd.includes(tag)) return;
     tagsToAdd = [...tagsToAdd, tag];
-  }
+  };
 
   const removeTag = (tag: Tag) => {
-    tagsToAdd = tagsToAdd.filter(t => t !== tag);
-  }
+    tagsToAdd = tagsToAdd.filter((t) => t !== tag);
+  };
 
   let working = false;
   const submitAddTags = async () => {
     if (working || tagsToAdd.length <= 0) return;
     working = true;
 
-    selectedImages.forEach(i => i.tags = [...new Set([...i.tags, ...tagsToAdd])])
+    selectedImages.forEach(
+      (i) => (i.tags = [...new Set([...i.tags, ...tagsToAdd])]),
+    );
 
     await firestoreManager.updateMultiImages($firebaseUser, selectedImages);
 
@@ -49,16 +58,20 @@
 
     tagsToAdd = [];
     selectedImages = [];
-  }
+  };
 
   const submitRemoveTags = async () => {
     if (working || tagsToAdd.length <= 0) return;
     working = true;
 
-    const conf = confirm(`Are you sure you want to remove the tags ${tagsToAdd.map(t => t.name).join(", ")} from ${selectedImages.length} images?`);
+    const conf = confirm(
+      `Are you sure you want to remove the tags ${tagsToAdd.map((t) => t.name).join(", ")} from ${selectedImages.length} images?`,
+    );
     if (!conf) return;
 
-    selectedImages.forEach(i => i.tags = i.tags.filter(t => !tagsToAdd.includes(t)))
+    selectedImages.forEach(
+      (i) => (i.tags = i.tags.filter((t) => !tagsToAdd.includes(t))),
+    );
 
     await firestoreManager.updateMultiImages($firebaseUser, selectedImages);
 
@@ -66,13 +79,15 @@
 
     tagsToAdd = [];
     selectedImages = [];
-  }
+  };
 
   const submitDelete = async () => {
     if (working || selectedImages.length <= 0) return;
     working = true;
 
-    const conf = confirm(`Are you sure you want to delete ${selectedImages.length} images?`);
+    const conf = confirm(
+      `Are you sure you want to delete ${selectedImages.length} images?`,
+    );
     if (!conf) return;
 
     await firestoreManager.multiDeleteImages($firebaseUser, selectedImages);
@@ -81,15 +96,15 @@
 
     tagsToAdd = [];
     selectedImages = [];
-  }
+  };
 
-  const toggleSelectAll = ({detail: selected}: CustomEvent<boolean>) => {
+  const toggleSelectAll = ({ detail: selected }: CustomEvent<boolean>) => {
     if (selected) {
       selectedImages = [...images];
     } else {
       selectedImages = [];
     }
-  }
+  };
 
   let selectedImages: Image[] = [];
   let actionAreaCollapsed = false;
@@ -118,24 +133,36 @@
         </select>
       </div>
       <div class="item include-sub-albums">
-        <FlipSlider bind:active={filter.includeSubAlbums} id="include-sub-album"/>
+        <FlipSlider
+          bind:active={filter.includeSubAlbums}
+          id="include-sub-album"
+        />
         <!--suppress XmlInvalidId -->
         <label for="include-sub-album">Include Sub Albums</label>
       </div>
       <div class="item select-all">
-        <FlipSlider id="select-all" on:toggle={toggleSelectAll}/>
+        <FlipSlider id="select-all" on:toggle={toggleSelectAll} />
         <!--suppress XmlInvalidId -->
         <label for="select-all">Select All</label>
       </div>
     </div>
-    <SelectImagesView bind:selectedImages {images} multiple={true}/>
+    <SelectImagesView bind:selectedImages {images} multiple={true} />
   </div>
-  <div class="action-area" class:collapsed={actionAreaCollapsed}
-       style="--height: {maxActionPanelHeight}px;">
-    <div class="action-area-header" on:click={() => actionAreaCollapsed = false}>
+  <div
+    class="action-area"
+    class:collapsed={actionAreaCollapsed}
+    style="--height: {maxActionPanelHeight}px;"
+  >
+    <div
+      class="action-area-header"
+      on:click={() => (actionAreaCollapsed = false)}
+    >
       <h3>{selectedImages.length} images selected</h3>
-      <button class="material expand-collapse-btn"
-              on:click|stopPropagation={()=>actionAreaCollapsed = !actionAreaCollapsed}>
+      <button
+        class="material expand-collapse-btn"
+        on:click|stopPropagation={() =>
+          (actionAreaCollapsed = !actionAreaCollapsed)}
+      >
         <span class="material-icons">
           {actionAreaCollapsed ? "expand_more" : "expand_less"}
         </span>
@@ -147,31 +174,34 @@
         {#each tagsToAdd as tag}
           <span class="tag">
             {tag.name}
-            <button class="material remove-tag-btn" on:click={()=>removeTag(tag)}>
-              <span class="material-icons">
-                close
-              </span>
+            <button
+              class="material remove-tag-btn"
+              on:click={() => removeTag(tag)}
+            >
+              <span class="material-icons"> close </span>
             </button>
           </span>
         {/each}
       </div>
       <div class="add-tag">
-        <TagSelectInput on:addTag={onAddTag} presentTags={tagsToAdd}/>
+        <TagSelectInput on:addTag={onAddTag} presentTags={tagsToAdd} />
       </div>
     </div>
 
     <div class="button-area">
       <div class="add-remove-tags-submit">
-        <button class="material text-button submit-add-tags-btn" on:click={submitAddTags}>
-        <span class="material-icons">
-          add
-        </span>
+        <button
+          class="material text-button submit-add-tags-btn"
+          on:click={submitAddTags}
+        >
+          <span class="material-icons"> add </span>
           <span>Add Selected Tags</span>
         </button>
-        <button class="material text-button submit-remove-tags-btn" on:click={submitRemoveTags}>
-        <span class="material-icons">
-          remove
-        </span>
+        <button
+          class="material text-button submit-remove-tags-btn"
+          on:click={submitRemoveTags}
+        >
+          <span class="material-icons"> remove </span>
           <span>Remove Selected Tags</span>
         </button>
       </div>
@@ -180,15 +210,13 @@
         <span>Delete</span>
       </button>
     </div>
-
   </div>
-
 </div>
 
 {#if working}
   <div class="loading-dialog blur-background">
     <div class="loading-spinner">
-      <LoadingSpinner/>
+      <LoadingSpinner />
     </div>
   </div>
 {/if}
@@ -249,7 +277,7 @@
       justify-content: space-between;
       align-items: center;
 
-      button{
+      button {
         display: flex;
         flex-direction: row;
         justify-content: center;
@@ -270,7 +298,6 @@
         justify-content: center;
         align-items: center;
 
-
         .submit-add-tags-btn {
           background-color: #646cff;
         }
@@ -280,7 +307,7 @@
         }
       }
 
-      .delete-btn:hover{
+      .delete-btn:hover {
         background-color: #de3c3c;
       }
     }
@@ -340,6 +367,4 @@
       }
     }
   }
-
-
 </style>

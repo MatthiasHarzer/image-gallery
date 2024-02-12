@@ -1,6 +1,5 @@
 <script lang="ts">
-
-  import {createEventDispatcher} from "svelte";
+  import { createEventDispatcher } from "svelte";
 
   const dispatch = createEventDispatcher();
 
@@ -8,21 +7,20 @@
 
   const close = () => {
     dispatch("close");
-  }
+  };
 
   const closeIfClickOnBackground = (event: MouseEvent) => {
     if (event.target === event.currentTarget) {
       close();
     }
-  }
-
+  };
 </script>
 
 <div class="blur-background" on:click={closeIfClickOnBackground}>
   <div class="dialog no-scroll-bar">
     <div class="dialog-header">
       <div class="actions left">
-        <slot name="left-action"></slot>
+        <slot name="left-action" />
       </div>
       <slot name="title">
         <h3>
@@ -30,23 +28,19 @@
         </h3>
       </slot>
       <div class="actions right">
-
-      <button class="material" on:click={close}>
-        <span class="material-icons">close</span>
-      </button>
+        <button class="material" on:click={close}>
+          <span class="material-icons">close</span>
+        </button>
       </div>
     </div>
     <div class="dialog-body discrete-scrollbar">
-      <slot></slot>
+      <slot />
     </div>
   </div>
 </div>
 
-
 <style lang="scss">
-
-
-  .actions{
+  .actions {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -54,10 +48,10 @@
     position: absolute;
     top: 5px;
 
-    &.left{
+    &.left {
       left: 10px;
     }
-    &.right{
+    &.right {
       right: 10px;
     }
   }
@@ -67,7 +61,7 @@
     flex: 0;
   }
 
-  .dialog-body{
+  .dialog-body {
     flex: 1;
     overflow: hidden auto;
     position: relative;
@@ -78,5 +72,4 @@
     align-items: center;
     margin-bottom: 10px;
   }
-
 </style>

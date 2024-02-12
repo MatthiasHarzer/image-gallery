@@ -1,5 +1,4 @@
 <script lang="ts">
-
   import type Album from "../../scripts/gallery/album";
   import AlbumCard from "./AlbumCard.svelte";
   import { createEventDispatcher } from "svelte";
@@ -14,25 +13,29 @@
 
   const onNewOrEditAlbum = (album: Album | null = null) => {
     dispatch("newOrEdit", album);
-  }
+  };
 
   const onOpen = (album: Album) => {
     dispatch("open", album);
-  }
+  };
 
   $: albumStore = $gallery.listener.getAlbumStore(album);
-  $: images = album?.id != null ? $gallery.listener.getAlbumImageStore(album, $localConfig.includeSubAlbum)
+  $: images =
+    album?.id != null
+      ? $gallery.listener.getAlbumImageStore(
+          album,
+          $localConfig.includeSubAlbum,
+        )
       : $gallery.listener.galleryImageStore;
-
 </script>
 
 <div class="main">
   <div class="album-list">
     {#each album.children as album (album.id)}
       <AlbumCard
-          album={album}
-          on:edit={()=>onNewOrEditAlbum(album)}
-          on:open={()=>onOpen(album)}
+        {album}
+        on:edit={() => onNewOrEditAlbum(album)}
+        on:open={() => onOpen(album)}
       />
     {/each}
   </div>
@@ -40,22 +43,20 @@
     <div class="options-bar">
       {#if album.id !== null && album.children.length !== 0}
         <div class="include-sub-albums">
-          <FlipSlider bind:active={$localConfig.includeSubAlbum} id="include-sub-albums"/>
+          <FlipSlider
+            bind:active={$localConfig.includeSubAlbum}
+            id="include-sub-albums"
+          />
           <!--suppress XmlInvalidId -->
           <label for="include-sub-albums">Include Sub Albums</label>
         </div>
       {/if}
     </div>
-    <ImagesView
-        images={images}
-        album={albumStore}
-    />
+    <ImagesView {images} album={albumStore} />
   </div>
-
 </div>
 
 <style>
-
   .album-list {
     /*padding-top: 3rem;*/
     display: flex;
@@ -85,5 +86,4 @@
     cursor: pointer;
     user-select: none;
   }
-
 </style>

@@ -1,12 +1,10 @@
 <script lang="ts">
-
   import type Tag from "../../scripts/gallery/tag";
-  import {createEventDispatcher} from "svelte";
+  import { createEventDispatcher } from "svelte";
 
   export let tag: Tag;
 
   const dispatch = createEventDispatcher();
-
 </script>
 
 <div class="tag-item box-shadow">
@@ -16,19 +14,17 @@
   </div>
 
   <div class="actions">
-    <button class="material edit" on:click={()=>dispatch("edit", tag)}>
+    <button class="material edit" on:click={() => dispatch("edit", tag)}>
       <span class="material-icons">edit</span>
     </button>
-    <button class="material delete" on:click={()=>dispatch("delete", tag)}>
+    <button class="material delete" on:click={() => dispatch("delete", tag)}>
       <span class="material-icons">delete</span>
     </button>
   </div>
 </div>
 
 <style lang="scss">
-
   .tag-item {
-
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -43,18 +39,19 @@
 
     height: 44px;
 
-    .tag{
+    .tag {
       flex: 0 1 auto;
       white-space: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;
     }
 
-    &.focused, &:hover {
-      background-color: #646cff;;
+    &.focused,
+    &:hover {
+      background-color: #646cff;
     }
 
-    .count{
+    .count {
       font-size: 0.8rem;
       color: #ccc;
       margin-left: 3px;
@@ -66,5 +63,4 @@
       //gap: 0.1rem;
     }
   }
-
 </style>

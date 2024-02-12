@@ -1,7 +1,10 @@
 <script lang="ts">
-
-  import {createEventDispatcher} from "svelte";
-  import {firebaseUser, firestoreManager, gallery} from "../../scripts/firebase/firebaseManager";
+  import { createEventDispatcher } from "svelte";
+  import {
+    firebaseUser,
+    firestoreManager,
+    gallery,
+  } from "../../scripts/firebase/firebaseManager";
   import Tag from "../../scripts/gallery/tag";
   import type Image from "../../scripts/gallery/image";
 
@@ -18,16 +21,23 @@
   let availableTags: Tag[] = [];
   let activeIndex: number = -1;
 
-  $: if (image != null) availableTags = $gallery?.tags.filter(tag => !image.tags.some(t => t.id === tag.id))
-  else availableTags = $gallery?.tags.filter(tag => !presentTags.some(t => t.id === tag.id));
+  $: if (image != null)
+    availableTags = $gallery?.tags.filter(
+      (tag) => !image.tags.some((t) => t.id === tag.id),
+    );
+  else
+    availableTags = $gallery?.tags.filter(
+      (tag) => !presentTags.some((t) => t.id === tag.id),
+    );
   $: availableTags.sort((a, b) => a.name.localeCompare(b.name));
-  $: matchingTags = tagInput.length != 0 || focused
-      ? availableTags.filter(tag => tag.name.toLowerCase().includes(tagInput.toLowerCase()))
+  $: matchingTags =
+    tagInput.length != 0 || focused
+      ? availableTags.filter((tag) =>
+          tag.name.toLowerCase().includes(tagInput.toLowerCase()),
+        )
       : [];
 
-
   const onTagEnter = async () => {
-
     if (activeIndex >= 0 && activeIndex < matchingTags.length) {
       addTag(matchingTags[activeIndex]);
       return;
@@ -37,24 +47,25 @@
 
     if (tagInput.length === 0) return;
 
-    const existingTag = $gallery.tags.find(tag => tag.name.toLowerCase() === tagInput.toLowerCase());
+    const existingTag = $gallery.tags.find(
+      (tag) => tag.name.toLowerCase() === tagInput.toLowerCase(),
+    );
 
     let tag: Tag;
 
     if (existingTag) {
-      if (image && image.tags.some(tag => tag.id === existingTag.id)) return;
+      if (image && image.tags.some((tag) => tag.id === existingTag.id)) return;
       tag = existingTag;
     } else {
       const doc = await firestoreManager.createTag($firebaseUser, {
         name: tagInput,
-        description: ""
-      })
+        description: "",
+      });
       tag = new Tag(doc.id, tagInput, "");
     }
 
     addTag(tag);
-
-  }
+  };
 
   const addTag = (tag: Tag) => {
     dispatch("addTag", tag);
@@ -64,7 +75,7 @@
     // setTimeout(() => {
     //   inputElement && inputElement.focus();
     // }, 100);
-  }
+  };
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "ArrowDown") {
@@ -80,50 +91,57 @@
       activeIndex = -1;
     }
 
-    elmnts[activeIndex]?.scrollIntoView({block: "nearest", behavior: "smooth"});
-  }
+    elmnts[activeIndex]?.scrollIntoView({
+      block: "nearest",
+      behavior: "smooth",
+    });
+  };
 
   let elmnts = [];
   let inputElement: HTMLInputElement;
   let to;
 </script>
 
-
 <div class="main">
   {#if matchingTags.length > 0}
     <div class="suggestion-box box-shadow discrete-scrollbar">
       {#each matchingTags as tag, i}
-        <button bind:this={elmnts[i]} class="suggestion material text-button" class:active={i === activeIndex}
-                on:mousedown|preventDefault={() => addTag(tag)}>
+        <button
+          bind:this={elmnts[i]}
+          class="suggestion material text-button"
+          class:active={i === activeIndex}
+          on:mousedown|preventDefault={() => addTag(tag)}
+        >
           <span>{tag.name}</span>
         </button>
       {/each}
     </div>
   {/if}
 
-  <input bind:this={inputElement} bind:value={tagInput}
-         id="tag"
-         on:blur={() => to = setTimeout(() => focused = false, 200)}
-         on:focus={() => {
-             to && clearTimeout(to);
-             focused = true;
-           }
-         }
-         on:keydown={handleKeyDown}
-         on:keyup={e => {if(e.key === "Enter") onTagEnter()}}
-         placeholder="Enter tag..."
-         type="text"
+  <input
+    bind:this={inputElement}
+    bind:value={tagInput}
+    id="tag"
+    on:blur={() => (to = setTimeout(() => (focused = false), 200))}
+    on:focus={() => {
+      to && clearTimeout(to);
+      focused = true;
+    }}
+    on:keydown={handleKeyDown}
+    on:keyup={(e) => {
+      if (e.key === "Enter") onTagEnter();
+    }}
+    placeholder="Enter tag..."
+    type="text"
   />
   <label for="tag">
     <button class="material no-effect" on:click={onTagEnter}>
       <span class="material-icons">add</span>
     </button>
   </label>
-
 </div>
 
 <style lang="scss">
-
   .main {
     position: relative;
     display: flex;
@@ -182,13 +200,13 @@
 
     max-height: 70vh;
 
-
     overflow-y: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
 
-    button.active, button:hover {
+    button.active,
+    button:hover {
       background-color: var(--primary-color-accent);
     }
   }
@@ -211,14 +229,12 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     transition: background-color 0.15s;
-
   }
 
   button.suggestion span {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-
   }
 
   button.suggestion:not(:last-child) {
@@ -233,5 +249,4 @@
   button.suggestion:first-child {
     border-radius: 0.5em 0.5em 0 0;
   }
-
 </style>

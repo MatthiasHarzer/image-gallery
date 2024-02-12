@@ -1,7 +1,6 @@
 <script lang="ts">
-
   import type Album from "../../scripts/gallery/album";
-  import {createEventDispatcher} from "svelte";
+  import { createEventDispatcher } from "svelte";
   import ImageWrapper from "../components/ImageWrapper.svelte";
 
   const dispatch = createEventDispatcher();
@@ -13,38 +12,54 @@
 
   const openEdit = () => {
     dispatch("edit", album);
-  }
+  };
 
   const openAlbum = () => {
     dispatch("open", album);
-  }
+  };
 
-  $: cover = album?.cover ?? (album?.images?.length > 0 ? album?.images[0] : null);
+  $: cover =
+    album?.cover ?? (album?.images?.length > 0 ? album?.images[0] : null);
 </script>
 
 <div class="main" on:click|stopPropagation={openAlbum}>
   {#if cover}
     <div class="cover" bind:clientHeight={totalHeight}>
-      <ImageWrapper loading="lazy" image={cover} cover={true} thumbnail={true}/>
+      <ImageWrapper
+        loading="lazy"
+        image={cover}
+        cover={true}
+        thumbnail={true}
+      />
     </div>
-    <div class="cover blur flex-center" style="--titleHeight: {titleHeight}px; --fullHeight: {totalHeight}px;">
+    <div
+      class="cover blur flex-center"
+      style="--titleHeight: {titleHeight}px; --fullHeight: {totalHeight}px;"
+    >
       <div class="cropped-img">
         <div class="blurred-img">
-          <ImageWrapper loading="lazy" image={cover} cover={true} thumbnail={true}/>
+          <ImageWrapper
+            loading="lazy"
+            image={cover}
+            cover={true}
+            thumbnail={true}
+          />
         </div>
       </div>
     </div>
   {/if}
   <h1 bind:clientHeight={titleHeight}>{album.name}</h1>
 
-  <button class="material edit-btn" class:hidden={!album?.valid} on:click|stopPropagation={openEdit}>
+  <button
+    class="material edit-btn"
+    class:hidden={!album?.valid}
+    on:click|stopPropagation={openEdit}
+  >
     <span class="material-icons">edit</span>
   </button>
-
 </div>
 
 <style lang="scss">
-
   .main {
     display: flex;
     flex-direction: column;
@@ -72,7 +87,6 @@
     &.blur {
       z-index: -1;
 
-
       .cropped-img {
         position: absolute;
         width: 100%;
@@ -80,7 +94,7 @@
         object-fit: cover;
         overflow: hidden;
 
-        .blurred-img{
+        .blurred-img {
           position: absolute;
           top: calc(-1 * var(--fullHeight) / 2 + var(--titleHeight) / 2);
           left: 0;
@@ -92,7 +106,6 @@
       }
     }
   }
-
 
   .main h1 {
     font-size: 1.5rem;
@@ -117,6 +130,4 @@
     justify-content: center;
     cursor: pointer;
   }
-
-
 </style>

@@ -1,8 +1,10 @@
 <script lang="ts">
-
-  import {createEventDispatcher, onMount} from "svelte";
-  import {firestoreManager, gallery} from "../../../scripts/firebase/firebaseManager";
-  import {firebaseUser} from "../../../scripts/firebase/firebaseManager.js";
+  import { createEventDispatcher, onMount } from "svelte";
+  import {
+    firestoreManager,
+    gallery,
+  } from "../../../scripts/firebase/firebaseManager";
+  import { firebaseUser } from "../../../scripts/firebase/firebaseManager.js";
   import type Album from "../../../scripts/gallery/album";
   import Dialog from "../Dialog.svelte";
 
@@ -14,15 +16,15 @@
 
   onMount(() => {
     selectedAlbum = targetAlbum;
-  })
+  });
 
   const close = () => {
     if (uploading) return;
-    dispatch('close');
-  }
+    dispatch("close");
+  };
 
   let dragAndDropElement: HTMLElement;
-  let filesToUpload: File[] = []
+  let filesToUpload: File[] = [];
   let dragAndDropActive = false;
   let uploading = false;
   let uploadProgress = 0;
@@ -30,55 +32,56 @@
 
   const upload = (files: FileList) => {
     if (uploading) return;
-    filesToUpload = [...filesToUpload, ...Array.from(files)]
-  }
+    filesToUpload = [...filesToUpload, ...Array.from(files)];
+  };
 
   const startUpload = async () => {
     uploading = true;
 
-    await firestoreManager.uploadImages($firebaseUser, filesToUpload, (progress) => {
-      uploadProgress = progress;
-    }, selectedAlbum);
+    await firestoreManager.uploadImages(
+      $firebaseUser,
+      filesToUpload,
+      (progress) => {
+        uploadProgress = progress;
+      },
+      selectedAlbum,
+    );
 
     finishedUploading = true;
     uploading = false;
     setTimeout(() => {
       close();
     }, 1000);
-  }
+  };
 
   onMount(() => {
-    dragAndDropElement.addEventListener('dragover', (e) => {
+    dragAndDropElement.addEventListener("dragover", (e) => {
       e.preventDefault();
       e.stopPropagation();
     });
-    dragAndDropElement.addEventListener('dragenter', (e) => {
+    dragAndDropElement.addEventListener("dragenter", (e) => {
       e.preventDefault();
       e.stopPropagation();
       dragAndDropActive = true;
     });
-    dragAndDropElement.addEventListener('dragleave', (e) => {
+    dragAndDropElement.addEventListener("dragleave", (e) => {
       e.preventDefault();
       e.stopPropagation();
       dragAndDropActive = false;
     });
-    dragAndDropElement.addEventListener('drop', (e) => {
+    dragAndDropElement.addEventListener("drop", (e) => {
       e.preventDefault();
       e.stopPropagation();
       dragAndDropActive = false;
       upload(e.dataTransfer.files);
     });
-  })
+  });
 
   $: availableAlbums = $gallery.albums;
-
-
 </script>
 
 <Dialog on:close>
-  <h3 slot="title">
-    Upload images
-  </h3>
+  <h3 slot="title">Upload images</h3>
 
   <div bind:this={dragAndDropElement} class="dialog-content">
     {#if finishedUploading}
@@ -95,17 +98,27 @@
         Drag and drop files here or click to upload
       {/if}
     </label>
-    <input accept="image/*" hidden id="upload" multiple on:change={e => upload(e.target.files)} type="file"/>
+    <input
+      accept="image/*"
+      hidden
+      id="upload"
+      multiple
+      on:change={(e) => upload(e.target.files)}
+      type="file"
+    />
 
     <div class="selected-files">
       {filesToUpload.length} files selected
       <div class="preview">
         {#each filesToUpload as file (file.name)}
           <div class="preview-item">
-            <img loading="lazy" src={URL.createObjectURL(file)} alt=""/>
+            <img loading="lazy" src={URL.createObjectURL(file)} alt="" />
             <div class="preview-item-actions">
-              <button class="clear"
-                      on:click={() => filesToUpload = filesToUpload.filter(f => f !== file)}>
+              <button
+                class="clear"
+                on:click={() =>
+                  (filesToUpload = filesToUpload.filter((f) => f !== file))}
+              >
                 <span class="material-icons">delete</span>
               </button>
             </div>
@@ -117,7 +130,7 @@
     <div class="album-select flex-center">
       <label for="album-select">Target Album</label>
       <!--suppress HtmlWrongAttributeValue -->
-      <select bind:value={selectedAlbum} disabled={uploading} id="album-select" >
+      <select bind:value={selectedAlbum} disabled={uploading} id="album-select">
         <option value={null}>None</option>
         {#each availableAlbums as album (album.id)}
           <option value={album}>{album.name}</option>
@@ -139,14 +152,11 @@
         </button>
       </div>
     {/if}
-
   </div>
-
 </Dialog>
 
 <style lang="scss">
-
-  .dialog-content{
+  .dialog-content {
     max-width: 90%;
   }
 
@@ -158,10 +168,9 @@
     }
 
     select {
-      margin:0
+      margin: 0;
     }
   }
-
 
   .drag-and-drop-area {
     border: 1px dashed #ccc;
@@ -191,7 +200,6 @@
 
     width: 100px;
     height: 100px;
-
   }
 
   .preview-item img {
@@ -231,7 +239,6 @@
     text-align: right;
     display: flex;
     justify-content: flex-end;
-
   }
 
   .upload-button-area button {
@@ -254,5 +261,4 @@
     margin-left: 1rem;
     margin-top: 0;
   }
-
 </style>

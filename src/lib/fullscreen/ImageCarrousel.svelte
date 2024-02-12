@@ -1,13 +1,12 @@
 <script lang="ts">
-
-  import type {ReadWritable} from "../../scripts/util/helperTypes";
-  import {writable} from "svelte/store";
+  import type { ReadWritable } from "../../scripts/util/helperTypes";
+  import { writable } from "svelte/store";
   import type Image from "../../scripts/gallery/image";
-  import {onMount} from "svelte";
+  import { onMount } from "svelte";
   import ImageWrapper from "../components/ImageWrapper.svelte";
-  import Flickity, {} from "flickity";
+  import Flickity from "flickity";
   import "flickity/dist/flickity.min.css";
-  import {saveMod} from "../../scripts/util/mod";
+  import { saveMod } from "../../scripts/util/mod";
 
   export let images: ReadWritable<Image[]> = writable([]);
 
@@ -25,7 +24,10 @@
   $: zooming = zoom != 1;
 
   $: currentImage = $images[currentImageIndex];
-  $: renderedImageIndexes = Array.from({length: PRELOAD_IMAGES * 2 + 1}, (_, i) => saveMod(currentImageIndex + i - PRELOAD_IMAGES, $images.length));
+  $: renderedImageIndexes = Array.from(
+    { length: PRELOAD_IMAGES * 2 + 1 },
+    (_, i) => saveMod(currentImageIndex + i - PRELOAD_IMAGES, $images.length),
+  );
 
   let carouselElement: HTMLElement;
   let carrouselSingleClickEnabled = true;
@@ -42,44 +44,45 @@
     }, 300);
   }
 
-
   $: if (currentImageIndex != null && flickity != undefined) {
     flickity && flickity.select(currentImageIndex, false, !initialized);
     initialized = true;
   }
 
-
   const buildFlickity = (options: Flickity.Options) => {
     if (!carouselElement) return;
     flickity = new Flickity(carouselElement, options);
-    flickity.on('change', (index: number) => {
+    flickity.on("change", (index: number) => {
       if (index != currentImageIndex) {
         currentImageIndex = index;
       }
     });
-  }
-  const applyFlickityOptions = (options: Flickity.Options, overwrite = false) => {
+  };
+  const applyFlickityOptions = (
+    options: Flickity.Options,
+    overwrite = false,
+  ) => {
     if (!carouselElement) return;
     flickity && flickity.destroy();
     if (overwrite) {
       _flickityOptions = {};
     }
-    _flickityOptions = {..._flickityOptions, ...options};
+    _flickityOptions = { ..._flickityOptions, ...options };
     _flickityOptions.initialIndex = currentImageIndex;
     buildFlickity(_flickityOptions);
-  }
+  };
 
   const enableFlickity = () => {
     applyFlickityOptions({
-      draggable: ">1"
+      draggable: ">1",
     });
-  }
+  };
 
   const disableFlickity = () => {
     applyFlickityOptions({
-      draggable: false
+      draggable: false,
     });
-  }
+  };
 
   $: if (carrouselSingleClickEnabled) {
     enableFlickity();
@@ -87,36 +90,44 @@
     disableFlickity();
   }
 
-
   onMount(() => {
-    applyFlickityOptions({
-      cellAlign: 'center',
-      prevNextButtons: false,
-      pageDots: false,
-      wrapAround: true,
-      draggable: ">1"
-    }, true);
+    applyFlickityOptions(
+      {
+        cellAlign: "center",
+        prevNextButtons: false,
+        pageDots: false,
+        wrapAround: true,
+        draggable: ">1",
+      },
+      true,
+    );
 
     window.onresize = () => {
-      applyFlickityOptions({})
+      applyFlickityOptions({});
     };
-  })
+  });
 </script>
 
-
-<div class="carousel" class:no-zoom={!carrouselSingleClickEnabled} bind:this={carouselElement}>
+<div
+  class="carousel"
+  class:no-zoom={!carrouselSingleClickEnabled}
+  bind:this={carouselElement}
+>
   {#each $images as image, index (image.id)}
     <div class="image-container" class:active={index === currentImageIndex}>
       {#if renderedImageIndexes.includes(index)}
-        <ImageWrapper loading="eager" {image}
-                      zoomEnabled={index === currentImageIndex} bind:zoom/>
+        <ImageWrapper
+          loading="eager"
+          {image}
+          zoomEnabled={index === currentImageIndex}
+          bind:zoom
+        />
       {/if}
     </div>
   {/each}
 </div>
 
 <style lang="scss">
-
   .carousel {
     position: relative;
     width: 100%;
@@ -127,7 +138,5 @@
     width: 100%;
     height: 100%;
     margin: 0 2px;
-
   }
-
 </style>
