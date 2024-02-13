@@ -35,13 +35,14 @@
   };
 
   const toggleNav = () => {
+    console.log("toggling nav");
     $localConfig.navOpen = !$localConfig.navOpen;
   };
 </script>
 
 <div class="main">
   <div class="navigation">
-    <button class="material toggle-nav" on:click={toggleNav}>
+    <button class="material toggle-nav" on:click|stopPropagation={toggleNav}>
       <span class="material-icons"> menu </span>
     </button>
   </div>

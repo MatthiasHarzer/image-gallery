@@ -1,7 +1,7 @@
-import {Screen} from "./screen";
-import {readable, writable} from "svelte/store";
-import type {Readable} from "svelte/store";
-import type {Writable} from "svelte/store";
+import { Screen } from "./screen";
+import { readable, writable } from "svelte/store";
+import type { Readable } from "svelte/store";
+import type { Writable } from "svelte/store";
 import type Image from "./gallery/image";
 
 export interface TagConfig {
@@ -16,7 +16,7 @@ export const defaultTagConfig: TagConfig = {
   includedTags: [],
   excludedTags: [],
   matchAll: false,
-}
+};
 
 export enum SortMode {
   DATE_ASC = "DATE_ASC",
@@ -32,7 +32,7 @@ interface LocalConfig {
   includeSubAlbum: boolean;
   showFullscreenNav: boolean;
   favoritesOnly: boolean;
-  currentImageViewStore: Writable<Readable<Image[]>>
+  currentImageViewStore: Writable<Readable<Image[]>>;
   tagConfig: TagConfig;
   sortMode: SortMode;
   randomSeed: number;
@@ -51,28 +51,35 @@ const defaultLocalConfig: LocalConfig = {
   sortMode: SortMode.DATE_ASC,
   randomSeed: 0,
   autoDownloadImages: false,
-}
+};
 
 const noCache = ["navOpen", "currentImageViewStore"];
 
 const localConfigKey = "localConfig";
 
 const createLocalConfig = () => {
-
   const localConfigString = localStorage.getItem(localConfigKey);
-  const localConfig = localConfigString ? JSON.parse(localConfigString ?? null) : defaultLocalConfig;
-
+  const localConfig: LocalConfig = localConfigString
+    ? (JSON.parse(localConfigString ?? {}) as LocalConfig)
+    : defaultLocalConfig;
 
   for (const key of Object.keys(defaultLocalConfig)) {
+    // eslint-disable-next-line
+    // @ts-ignore
     if (!localConfig[key] || noCache.includes(key)) {
+      // eslint-disable-next-line
+      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       localConfig[key] = defaultLocalConfig[key];
     }
   }
 
-  const {set, subscribe, update} = writable<LocalConfig>(localConfig);
+  const { set, subscribe, update } = writable<LocalConfig>(localConfig);
 
   subscribe((value) => {
-    const filteredValue = Object.fromEntries(Object.entries(value).filter(([key]) => !noCache.includes(key)));
+    const filteredValue = Object.fromEntries(
+      Object.entries(value).filter(([key]) => !noCache.includes(key)),
+    );
     localStorage.setItem(localConfigKey, JSON.stringify(filteredValue));
   });
 
@@ -80,7 +87,7 @@ const createLocalConfig = () => {
     subscribe,
     set,
     update,
-  }
-}
+  };
+};
 
 export const localConfig: Writable<LocalConfig> = createLocalConfig();

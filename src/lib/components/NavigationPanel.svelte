@@ -9,39 +9,44 @@
   import FlipSlider from "../util/FlipSlider.svelte";
   import TagSelectDialog from "../tag_select/TagSelectDialog.svelte";
   import DownloadCachedImagesDialog from "./dialogs/DownloadCachedImagesDialog.svelte";
+  import CustomSelect from "./CustomSelect.svelte";
 
   $: navOpen = $localConfig.navOpen;
-
-  // $localConfig.navOpen = true;
 
   const SPEED_TO_OPEN_CLOSE = 0.8;
   const DISTANCE_TO_OPEN_CLOSE = 100;
   const NAV_WIDTH = 300;
 
-  let dragBar: HTMLElement;
   let scrollObserver: ScrollObserver;
   let tagSelectOpen = false;
   let downloadDialogOpen = false;
 
   onMount(() => {
-    scrollObserver = createScrollObserver(dragBar, {
+    scrollObserver = createScrollObserver(document.body, {
       uniDirectional: true,
       disablePointerSupport: true,
     });
 
-    scrollObserver.onScrollEnd(([dx, dy], [speedX, speedY], _) => {
-      const speed = Math.abs(speedX);
-      const distance = Math.abs(dx);
-
-      if (speed > SPEED_TO_OPEN_CLOSE || distance > DISTANCE_TO_OPEN_CLOSE) {
-        $localConfig.navOpen = !navOpen;
+    scrollObserver.onScrollEnd(([dx], [speedX], _) => {
+      if (speedX > SPEED_TO_OPEN_CLOSE || dx > DISTANCE_TO_OPEN_CLOSE) {
+        $localConfig.navOpen = true;
+      } else if (
+        speedX < -SPEED_TO_OPEN_CLOSE ||
+        dx < -DISTANCE_TO_OPEN_CLOSE
+      ) {
+        $localConfig.navOpen = false;
       }
     });
   });
 
-  $: offset = Math.min($scrollObserver?.deltaX || 0, NAV_WIDTH);
-  $: sliding = $scrollObserver?.direction != null;
+  $: offset = navOpen
+    ? Math.min(($scrollObserver?.deltaX ?? 0) + NAV_WIDTH, NAV_WIDTH)
+    : Math.min($scrollObserver?.deltaX ?? 0, NAV_WIDTH);
 
+  $: sliding = $scrollObserver?.direction != null;
+  $: noTouch = $scrollObserver?.deltaY !== 0;
+
+  // $: if (scrollObserver) console.log($scrollObserver);
   // $: console.log(offset)
 
   const close = () => {
@@ -104,6 +109,25 @@
     $localConfig.randomSeed = Date.now();
   };
 
+  const sortModeOptions = [
+    {
+      name: "Sort by date (asc)",
+      value: SortMode.DATE_ASC,
+    },
+    {
+      name: "Sort by date (desc)",
+      value: SortMode.DATE_DESC,
+    },
+    {
+      name: "Random",
+      value: SortMode.RANDOM,
+    },
+    {
+      name: "Auto",
+      value: SortMode.AUTO,
+    },
+  ];
+
   let sortModeLabel: string;
   $: {
     switch ($localConfig.sortMode) {
@@ -127,9 +151,13 @@
   class="main"
   class:open={navOpen}
   on:click|self|stopPropagation={close}
-  style="--width: {NAV_WIDTH}px;"
+  style="--width: {NAV_WIDTH}px;--offset: {offset}px;"
+  role="button"
+  tabindex="0"
+  on:keydown={close}
 >
-  <div class="nav" class:no-animation={sliding} style="--offset: {offset}px;">
+  <div class="background" style="--opacity: {offset / NAV_WIDTH};"></div>
+  <div class="nav" class:no-animation={sliding}>
     <div class="button-bar">
       <button class="material close-btn" on:click={close}>
         <span class="material-icons">close</span>
@@ -188,13 +216,18 @@
     <div class="group">
       <h5 class="group-header">SORTING</h5>
       <div class="sort-mode-button-wrapper">
-        <button
-          class="material text-button sort-mode-btn"
-          on:click={cycleSortMode}
-        >
-          <span class="material-icons">sort</span>
-          {sortModeLabel}
-        </button>
+        <CustomSelect
+          options={sortModeOptions}
+          bind:value={$localConfig.sortMode}
+        />
+
+        <!--        <button-->
+        <!--          class="material text-button sort-mode-btn"-->
+        <!--          on:click={cycleSortMode}-->
+        <!--        >-->
+        <!--          <span class="material-icons">sort</span>-->
+        <!--          {sortModeLabel}-->
+        <!--        </button>-->
         {#if $localConfig.sortMode === SortMode.RANDOM}
           <button class="material" on:click={shuffle}>
             <span class="material-icons">shuffle</span>
@@ -202,8 +235,6 @@
         {/if}
       </div>
     </div>
-
-    <div bind:this={dragBar} class="drag-bar"></div>
   </div>
 </div>
 
@@ -226,15 +257,28 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: transparent;
+    //background-color: transparent;
     display: flex;
     justify-content: center;
     align-items: center;
     pointer-events: none;
+    background-color: rgba(0, 0, 0, calc((var(--offset) / var(--width)) * 0.5));
+
+    .background {
+      pointer-events: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      opacity: var(--opacity);
+      transition: opacity 0.1s linear;
+    }
   }
 
   .open {
-    background-color: rgba(0, 0, 0, 0.5);
+    //background-color: rgba(0, 0, 0, 0.5);
     pointer-events: all;
   }
 
@@ -253,17 +297,20 @@
     transition: none;
   }
 
-  .open .nav {
-    left: var(--offset);
-  }
-
-  .nav .drag-bar {
+  .drag-bar {
     position: absolute;
     top: 0;
-    right: -17px;
-    width: 17px;
-    height: 100%;
+    right: 0;
+    pointer-events: all;
+    //transform: translateX(100%);
+    //right: -17px;
+    width: 100vw;
+    height: 100vh;
     background-color: transparent;
+
+    &.no-touch {
+      pointer-events: none;
+    }
   }
 
   .button-bar {
