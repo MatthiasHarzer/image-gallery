@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TagConfig } from "../../scripts/localConfig";
+  import { localConfig, type TagConfig } from "../../scripts/localConfig";
   import { defaultTagConfig } from "../../scripts/localConfig";
   import { createEventDispatcher } from "svelte";
   import { gallery } from "../../scripts/firebase/firebaseManager";
@@ -7,10 +7,14 @@
   import FlipSlider from "../util/FlipSlider.svelte";
   import { applyFiltersWithConfig } from "../../scripts/filters";
   import Dialog from "../components/Dialog.svelte";
+  import { route } from "../../scripts/routeManager";
+  import { isNotNull } from "../../scripts/util/inlineShorthand";
 
   const dispatch = createEventDispatcher();
 
   export let tagConfig: TagConfig = defaultTagConfig;
+
+  let search = "";
 
   const close = () => {
     dispatch("close");
@@ -45,15 +49,44 @@
     tagConfig,
     favoritesOnly: false,
   }).length;
+
+  $: selectedTags = [
+    ...$localConfig.tagConfig.excludedTags,
+    ...$localConfig.tagConfig.includedTags,
+  ];
+
+  $: relevantTags = route.currentAlbum()?.getTags() ?? $gallery.tags;
+  $: tags = [
+    ...new Set([
+      ...relevantTags,
+      ...selectedTags.map((id) => $gallery.getTagById(id)).filter(isNotNull),
+    ]),
+  ];
+  $: filterdTags = tags.filter((tag) =>
+    tag.name.toLowerCase().includes(search.toLowerCase()),
+  );
 </script>
 
 <Dialog on:close>
   <h3 slot="title">Select Tags</h3>
 
   <div class="dialog-content">
+    <div>
+      <input
+        type="text"
+        class="dark-text-input"
+        bind:value={search}
+        placeholder="Search tags"
+      />
+    </div>
     <div class="tags-list">
-      {#each $gallery.tags as tag}
-        <TagSelectItem {tag} {tagConfig} on:toggle={toggle} />
+      {#each filterdTags as tag}
+        <TagSelectItem
+          {tag}
+          {tagConfig}
+          on:toggle={toggle}
+          noMatchInAlbum={relevantTags.indexOf(tag) === -1}
+        />
       {/each}
     </div>
     <label class="match-all" id="match-all-tags">
@@ -64,13 +97,14 @@
       {numMatchingImages} matching images
     </span>
     <button class="material text-button submit-btn" on:click={submit}>
-      Close
+      Submit
     </button>
   </div>
 </Dialog>
 
 <style>
   .dialog-content {
+    width: 90%;
   }
 
   .tags-list {
@@ -80,6 +114,7 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1.5rem;
+    /*width: 100%;*/
   }
 
   .match-all {

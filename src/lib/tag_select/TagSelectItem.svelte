@@ -7,6 +7,7 @@
 
   export let tag: Tag;
   export let tagConfig: TagConfig;
+  export let noMatchInAlbum: boolean = false;
 
   $: included = tagConfig.includedTags.includes(tag.id);
   $: excluded = tagConfig.excludedTags.includes(tag.id);
@@ -20,6 +21,7 @@
   class="main clear excluded"
   class:included
   class:excluded
+  class:no-match-in-album={noMatchInAlbum}
   on:click={toggle}
 >
   {tag.name} <span class="count">({tag.count})</span>
@@ -39,6 +41,8 @@
     cursor: pointer;
     border: 1px solid #8d8d8d;
     border-radius: 15px;
+    /*max-width: 250px;*/
+    /*width: 0;*/
   }
 
   .main.included,
@@ -52,6 +56,11 @@
 
   .main.excluded {
     background-color: #ab2b2b;
+  }
+
+  .main.no-match-in-album {
+    filter: grayscale(70%);
+    opacity: 0.5;
   }
 
   .main:hover:not(.included):not(.excluded) {

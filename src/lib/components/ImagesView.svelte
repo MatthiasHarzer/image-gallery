@@ -9,6 +9,7 @@
   import { localConfig } from "../../scripts/localConfig";
   import { applyFilters } from "../../scripts/filters";
   import { getIfHasCachedOrUncachedOtherwise } from "../../scripts/util/cacheHelper";
+  import { gallery } from "../../scripts/firebase/firebaseManager";
 
   export let images: ReadWritable<Image[]> = writable([]);
   export let album: ReadWritable<Album> = null;
@@ -21,6 +22,7 @@
   // Store goes brrrr
   $: $localConfig.currentImageViewStore.set(applyFilters(images, album));
   $: imageViewStore = $localConfig.currentImageViewStore;
+  $: relevantTags = route.currentAlbum()?.getTags();
   $: filteredImages = $imageViewStore;
 
   let loadKey = 0;

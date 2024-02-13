@@ -1,5 +1,6 @@
 <script lang="ts">
-  import isMobile from "is-mobile";
+  import isMobile from "../../scripts/util/isMobile";
+  import { onMount } from "svelte";
 
   interface Item {
     name: string;
@@ -26,10 +27,30 @@
   };
 
   $: contentHeight = itemHeight * options.length;
+
+  onMount(() => {
+    const hideIfClickedOutside = (e: MouseEvent) => {
+      if (expanded) {
+        const target = e.target as HTMLElement;
+        if (
+          !target.closest(".drop-down-options") &&
+          !target.closest(".drop-down-button")
+        ) {
+          expanded = false;
+        }
+      }
+    };
+
+    document.addEventListener("click", hideIfClickedOutside);
+
+    return () => {
+      document.removeEventListener("click", hideIfClickedOutside);
+    };
+  });
 </script>
 
 <div class="main" class:expanded class:animate-icon={animateIcon}>
-  {#if isMobile()}
+  {#if isMobile}
     <select id="select" name="select" bind:value class="drop-down-button">
       {#each options as option (option.value)}
         <option value={option.value}>{option.name}</option>

@@ -13,8 +13,7 @@ export default class Album implements Entry {
     public cover: Image | null,
     public autoTags: Tag[] = [],
     public forceSort: boolean = false,
-  ) {
-  }
+  ) {}
 
   public get valid(): boolean {
     return this.id != null && this.id !== "favorites";
@@ -48,6 +47,17 @@ export default class Album implements Entry {
     return this;
   }
 
+  public getTags(): Tag[] {
+    const albums = [this, ...this.getAllSubAlbums()];
+
+    const tags = albums.reduce((acc, album) => {
+      acc.push(...album.images.flatMap((i) => i.tags));
+      return acc;
+    }, [] as Tag[]);
+
+    return [...new Set(tags)];
+  }
+
   public copy(): Album {
     return new Album(
       this.id,
@@ -69,13 +79,13 @@ export default class Album implements Entry {
    * @returns {Album[]} All sub albums of this album.
    */
   public getAllSubAlbums(): Album[] {
-    const  albums: Album[] = [];
+    const albums: Album[] = [];
 
     let children = [...this.children];
     const known = new Set<string>(this.id);
 
     while (children.length > 0) {
-      let child = children.pop();
+      const child = children.pop();
 
       if (child === undefined || known.has(child.id)) continue;
 

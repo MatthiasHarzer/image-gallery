@@ -19,8 +19,7 @@ const createFirebaseUser = (): Readable<User | null> => {
       set(user);
     });
   });
-}
-
+};
 
 export const firebaseUser: Readable<User | null> = createFirebaseUser();
 
@@ -29,17 +28,22 @@ interface AdvancedGallery extends Gallery {
 }
 
 class AdvancedGallery {
-
   private constructor(
     public albums: Album[],
     public images: Image[],
     public tags: Tag[],
     public listener: FirestoreGalleryListener,
     public albumsWithFavorites: Album[],
-  ) {
+  ) {}
+
+  public getTagById(id: string): Tag | null {
+    return this.tags.find((t) => t.id === id) ?? null;
   }
 
-  public static fromGallery(gallery: Gallery, listener: FirestoreGalleryListener): AdvancedGallery {
+  public static fromGallery(
+    gallery: Gallery,
+    listener: FirestoreGalleryListener,
+  ): AdvancedGallery {
     return new AdvancedGallery(
       gallery.albums,
       gallery.images,
@@ -52,9 +56,7 @@ class AdvancedGallery {
   public static empty(): AdvancedGallery {
     return new AdvancedGallery([], [], [], null, []);
   }
-
 }
-
 
 const createGallery = () => {
   let gallerySub;
@@ -75,6 +77,6 @@ const createGallery = () => {
       });
     });
   });
-}
+};
 
 export const gallery: Readable<AdvancedGallery> = createGallery();

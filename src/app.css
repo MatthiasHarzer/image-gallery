@@ -442,6 +442,19 @@ select{
     background-color: var(--dark-greyed);
     width: 100%;
 }
+.dark-text-input{
+    margin: 0;
+    color: white;
+    background-color: var(--dark-greyed);
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    padding: 5px;
+    border-radius: 5px;
+    /*outline: none;*/
+
+
+}
 
 .scroll-select-item {
     display: flex;
