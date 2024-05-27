@@ -5,7 +5,9 @@
         "plugin:svelte/prettier"
     ],
     "rules": {
-        "svelte/valid-compile": ["error", { "ignoreWarnings": false }]
+        "svelte/valid-compile": ["error", { "ignoreWarnings": false }],
+        "@typescript-eslint/ban-ts-comment": "off",
+        "@typescript-eslint/no-explicit-any": "off"
     },
     "overrides": [
         {

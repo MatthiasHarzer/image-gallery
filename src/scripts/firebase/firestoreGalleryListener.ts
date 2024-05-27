@@ -1,25 +1,30 @@
-import type {User} from "firebase/auth";
+import type { User } from "firebase/auth";
 import Gallery from "../gallery/gallery";
-import {onSnapshot, orderBy, query, QuerySnapshot} from "firebase/firestore";
+import { onSnapshot, orderBy, query, QuerySnapshot } from "firebase/firestore";
 
-import {ALBUMS_REF, IMAGES_REF, TAGS_REF, USER_REF} from "./firebasePathConfig";
-import type {AlbumData} from "../gallery/album";
+import {
+  ALBUMS_REF,
+  IMAGES_REF,
+  TAGS_REF,
+  USER_REF,
+} from "./firebasePathConfig";
+import type { AlbumData } from "../gallery/album";
 import Album from "../gallery/album";
-import type {ImageData} from "../gallery/image";
+import type { ImageData } from "../gallery/image";
 import Image from "../gallery/image";
-import type {TagData} from "../gallery/tag";
+import type { TagData } from "../gallery/tag";
 import Tag from "../gallery/tag";
-import type {Readable} from "svelte/store";
-import {readable} from "svelte/store";
+import type { Readable } from "svelte/store";
+import { readable } from "svelte/store";
 
 type Unsubscriber = () => void;
 
-const dataWithId = (doc: { id: any, data(): any }): any => {
+const dataWithId = (doc: { id: any; data(): any }): any => {
   return {
     ...doc.data(),
-    id: doc.id
-  }
-}
+    id: doc.id,
+  };
+};
 
 class GallerySkeleton {
   constructor(
@@ -27,8 +32,7 @@ class GallerySkeleton {
     public images: ImageData[],
     public albums: AlbumData[],
     public favoritesCover?: string,
-  ) {
-  }
+  ) {}
 }
 
 enum GallerySkeletonKey {
@@ -60,13 +64,19 @@ export default class FirestoreGalleryListener {
     const imageQuery = query(imagesRef, orderBy("timestamp", "desc"));
 
     this.subscriptions = [
-      onSnapshot(imageQuery, this.createSnapshotResolver(GallerySkeletonKey.IMAGES)),
-      onSnapshot(albumsRef, this.createSnapshotResolver(GallerySkeletonKey.ALBUMS)),
+      onSnapshot(
+        imageQuery,
+        this.createSnapshotResolver(GallerySkeletonKey.IMAGES),
+      ),
+      onSnapshot(
+        albumsRef,
+        this.createSnapshotResolver(GallerySkeletonKey.ALBUMS),
+      ),
       onSnapshot(tagsRef, this.createSnapshotResolver(GallerySkeletonKey.TAGS)),
     ];
 
     onSnapshot(USER_REF(user), async (snapshot) => {
-      const {favoritesCover} = snapshot.data();
+      const { favoritesCover } = snapshot.data();
 
       this.skeleton.favoritesCover = favoritesCover;
       await this.syncGallery();
@@ -82,20 +92,25 @@ export default class FirestoreGalleryListener {
   }
 
   public get ready(): boolean {
-    return Object.values(GallerySkeletonKey).every((key) => this.fetched.has(key));
+    return Object.values(GallerySkeletonKey).every((key) =>
+      this.fetched.has(key),
+    );
   }
 
-  public getAlbumImageStore(album: Album, includeSubAlbum: boolean = false): Readable<Image[]> {
-
+  public getAlbumImageStore(
+    album: Album,
+    includeSubAlbum: boolean = false,
+  ): Readable<Image[]> {
     const albumIds = [
       album.id,
-      ...(includeSubAlbum ? album.getAllSubAlbums().map((a) => a.id) : [])
+      ...(includeSubAlbum ? album.getAllSubAlbums().map((a) => a.id) : []),
     ];
-
 
     return readable([], (set) => {
       return this.listen((gallery) => {
-        const images = gallery.albumsWithFavorites.filter((i) => albumIds.includes(i.id)).flatMap((a) => a.images);
+        const images = gallery.albumsWithFavorites
+          .filter((i) => albumIds.includes(i.id))
+          .flatMap((a) => a.images);
         set([...new Set(images)]);
       });
     });
@@ -104,7 +119,7 @@ export default class FirestoreGalleryListener {
   public getAlbumStore(album: Album): Readable<Album> {
     return readable(null, (set) => {
       return this.listen((gallery) => {
-        set(gallery.albumsWithFavorites.find(a => a.id === album.id));
+        set(gallery.albumsWithFavorites.find((a) => a.id === album.id));
       });
     });
   }
@@ -119,7 +134,7 @@ export default class FirestoreGalleryListener {
     this.ready && callback(this.gallery);
     return () => {
       this.callbacks = this.callbacks.filter((cb) => cb !== callback);
-    }
+    };
   }
 
   public unsubscribeAll(): void {
@@ -128,14 +143,14 @@ export default class FirestoreGalleryListener {
   }
 
   private getAllSubAlbums(parent: Album): Album[] {
-    let albums: Album[] = [];
+    const albums: Album[] = [];
 
     let children = [...parent.children];
-    let known = new Set<string>();
+    const known = new Set<string>();
     known.add(parent.id);
 
     while (children.length > 0) {
-      let child = children.pop();
+      const child = children.pop();
 
       if (child === undefined || known.has(child.id)) continue;
 
@@ -148,16 +163,18 @@ export default class FirestoreGalleryListener {
     return albums;
   }
 
-  private createSnapshotResolver(key: GallerySkeletonKey): (snapshot: QuerySnapshot) => Promise<void> {
+  private createSnapshotResolver(
+    key: GallerySkeletonKey,
+  ): (snapshot: QuerySnapshot) => Promise<void> {
     return async (snapshot: QuerySnapshot) => {
       this.fetched.add(key);
-      this.skeleton[key] = snapshot.docs.map((doc) => dataWithId(doc) as any);
+      this.skeleton[key] = snapshot.docs.map((doc) => dataWithId(doc));
       await this.syncGallery();
-    }
+    };
   }
 
   private getCachedOrInitImage(image: Image): Image {
-    let existing = this.cachedImages.find((i) => i.id === image.id);
+    const existing = this.cachedImages.find((i) => i.id === image.id);
     if (existing === undefined) {
       this.cachedImages.push(image);
       return image;
@@ -167,7 +184,7 @@ export default class FirestoreGalleryListener {
   }
 
   private getCachedOrInitAlbum(album: Album): Album {
-    let existing = this.cachedAlbums.find((a) => a.id === album.id);
+    const existing = this.cachedAlbums.find((a) => a.id === album.id);
     if (existing === undefined) {
       this.cachedAlbums.push(album);
       return album;
@@ -177,7 +194,7 @@ export default class FirestoreGalleryListener {
   }
 
   private getCachedOrInitTag(tag: Tag): Tag {
-    let existing = this.cachedTags.find((t) => t.id === tag.id);
+    const existing = this.cachedTags.find((t) => t.id === tag.id);
     if (existing === undefined) {
       this.cachedTags.push(tag);
       return tag;
@@ -190,27 +207,59 @@ export default class FirestoreGalleryListener {
    * Builds the gallery from the skeleton and calls the callbacks
    */
   private async syncGallery(): Promise<void> {
-    const {tags: tagsData, images: imagesData, albums: albumsData} = this.skeleton;
+    const {
+      tags: tagsData,
+      images: imagesData,
+      albums: albumsData,
+    } = this.skeleton;
 
-    const tags = tagsData.map((tagData) => this.getCachedOrInitTag(new Tag(tagData.id, tagData.name, tagData.description)));
+    const tags = tagsData.map((tagData) =>
+      this.getCachedOrInitTag(
+        new Tag(tagData.id, tagData.name, tagData.description),
+      ),
+    );
 
-    imagesData.forEach((imageData) => {
-      const tagsForImage = tags.filter((tag) => imageData.tags.includes(tag.id));
-        tagsForImage.forEach((tag)=>tag.count++)
+    const validImagesData = imagesData.filter(
+      ({ url }) => url !== undefined && url.length > 0,
+    );
+
+    validImagesData.forEach((imageData) => {
+      const tagsForImage = tags.filter((tag) =>
+        imageData.tags.includes(tag.id),
+      );
+      tagsForImage.forEach((tag) => tag.count++);
     });
     tags.sort((a, b) => b.count - a.count);
 
-    const images = imagesData.map((imageData) => {
-      const tagsForImage = tags.filter((tag) => imageData.tags.includes(tag.id));
+    const images = validImagesData.map((imageData) => {
+      const tagsForImage = tags.filter((tag) =>
+        imageData.tags.includes(tag.id),
+      );
 
-      return this.getCachedOrInitImage(new Image(imageData.id, imageData.name, imageData.description, imageData.url, tagsForImage, imageData.state,
-        imageData.width, imageData.height, imageData.timestamp, imageData.favorite ?? false));
+      return this.getCachedOrInitImage(
+        new Image(
+          imageData.id,
+          imageData.name,
+          imageData.description,
+          imageData.url,
+          tagsForImage,
+          imageData.state,
+          imageData.width,
+          imageData.height,
+          imageData.timestamp,
+          imageData.favorite ?? false,
+        ),
+      );
     });
 
-
     const albums = albumsData.map((albumData) => {
-      const imagesForAlbum = images.filter((image) => albumData.images.includes(image.id));
-      imagesForAlbum.sort((a, b) => albumData.images.indexOf(a.id) - albumData.images.indexOf(b.id));
+      const imagesForAlbum = images.filter((image) =>
+        albumData.images.includes(image.id),
+      );
+      imagesForAlbum.sort(
+        (a, b) =>
+          albumData.images.indexOf(a.id) - albumData.images.indexOf(b.id),
+      );
       const cover = images.find((image) => image.id === albumData.cover);
 
       let autoTags = [];
@@ -219,7 +268,18 @@ export default class FirestoreGalleryListener {
       }
 
       return this.getCachedOrInitAlbum(
-        new Album(albumData.id, albumData.name, albumData.description, imagesForAlbum, [], null, cover, autoTags, albumData.forceSort ?? false));
+        new Album(
+          albumData.id,
+          albumData.name,
+          albumData.description,
+          imagesForAlbum,
+          [],
+          null,
+          cover,
+          autoTags,
+          albumData.forceSort ?? false,
+        ),
+      );
     });
 
     // Add children and parent
@@ -238,9 +298,20 @@ export default class FirestoreGalleryListener {
     let favoriteAlbum = null;
 
     if (favoriteImages.length > 0) {
-      const cover = images.find((image) => image.id === this.skeleton.favoritesCover) ?? favoriteImages[0];
-      favoriteAlbum = this.getCachedOrInitAlbum(new Album("favorites", "Favorites", "Your favorite images", favoriteImages, [], null, cover));
-
+      const cover =
+        images.find((image) => image.id === this.skeleton.favoritesCover) ??
+        favoriteImages[0];
+      favoriteAlbum = this.getCachedOrInitAlbum(
+        new Album(
+          "favorites",
+          "Favorites",
+          "Your favorite images",
+          favoriteImages,
+          [],
+          null,
+          cover,
+        ),
+      );
     }
 
     this.gallery = new Gallery(images, albums, tags, favoriteAlbum);
